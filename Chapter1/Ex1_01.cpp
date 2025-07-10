@@ -6,6 +6,7 @@ int main()
     std::cout << "The answer to life, the universe, and everything is "
               << answer
               << std::endl;
+    std::cout << "ni hao ma?" << std::endl;
     std::cin.get(); // 解决独立CMD运行时窗口一闪而过的问题
 
     return 0;
