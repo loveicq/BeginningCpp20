@@ -2,3 +2,21 @@
 1.个人学习C++的小屋,使用教材为《C++20入门实践(第6版)》。  
 2.操作系统为windows10_x64,编辑器为vscode1.101.2版,编译器为mingw15.1.0。  
 ⏰gogoup!
+
+2025年7月23日  
+`红色背景` ==荧光色背景==（部分平台）  
+==Ex1_01.cpp==
+```
+#include <iostream> //书中import <iostream>;语句在mingw15.1.0中会报错,需改用旧方法包含头文件
+
+int main()
+{
+    int answer{42};
+    std::cout << "The answer to life, the universe, and everything is "
+              << answer
+              << std::endl;
+    std::cin.get(); // 解决独立CMD运行时窗口一闪而过的问题
+
+    return 0;
+}
+```
