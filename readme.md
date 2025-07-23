@@ -3,9 +3,9 @@
 2.操作系统为windows10_x64,编辑器为vscode1.101.2版,编译器为mingw15.1.0。  
 ⏰gogoup!
 
-2025年7月23日  
-`红色背景` ==荧光色背景==（部分平台）  
-<span style="color:green"> Ex1_01.cpp </span>
+**2025年7月23日**  
+
+> *Ex1_01.cpp*  
 ```
 #include <iostream> //书中import <iostream>;语句在mingw15.1.0中会报错,需改用旧方法包含头文件
 
