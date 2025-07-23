@@ -7,7 +7,7 @@
 
 > *Ex1_01.cpp*  
 ```c++
-#include <iostream> //书中import <iostream>;语句在mingw15.1.0中会报错,需改用旧方法包含头文件
+#include <iostream>  //书中import <iostream>语句在mingw15.1.0中会报错,需改用旧方法包含头文件
 
 int main()
 {
