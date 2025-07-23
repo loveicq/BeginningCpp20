@@ -22,7 +22,7 @@ int main()
     return 0;
 }
 ```
->🤞<font color=#FFB108>知识点:不同方式变量初始化的差别</font>  
+>🤞<span style=color:#DAF7A6>知识点:不同方式变量初始化的差别</span>  
 
 |特性|int a = 10; (拷贝初始化)|int a{10}; (列表初始化)|
 |:---|:---|---|
