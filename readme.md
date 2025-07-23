@@ -22,3 +22,7 @@ int main()
     return 0;
 }
 ```
+
+- [x] 完成 Markdown 学习
+- [ ] 上传文件到 Gitee
+- [ ] 创建第一个仓库
