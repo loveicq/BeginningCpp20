@@ -1,10 +1,11 @@
 # C++20学习日志
-1.个人学习C++的小屋,使用教材为《C++20入门实践(第6版)》。  
-2.操作系统为windows10_x64,编辑器为vscode1.101.2版,编译器为mingw15.1.0。  
+
+1. 个人学习C++的小屋,使用教材为《C++20入门实践(第6版)》。  
+2. 操作系统为windows10_x64,编辑器为vscode1.101.2版,编译器为mingw15.1.0。  
 ⏰gogoup!
 
 **2025年7月23日**  
-
+---
 > *Ex1_01.cpp*  
 ```c++
 #include <iostream>  
@@ -16,7 +17,7 @@ int main()
     std::cout << "The answer to life, the universe, and everything is "
               << answer
               << std::endl;
-    std::cin.get(); // 解决独立CMD运行时窗口一闪而过的问题
+    std::cin.get(); //解决调试时CMD窗口一闪而过的问题
 
     return 0;
 }
