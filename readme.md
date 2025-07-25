@@ -233,4 +233,32 @@ int main()
 ```
 ## 第2章 基本数据类型
 #### 2.1.1 定义整形变量
-🈯`定义:`包含初始值的花括号称为初始化列表
+🈯定义:包含初始值的花括号称为`列表初始化`。  
+
+```c++
+int a = 4;       // 拷贝初始化（copy initialization）
+int b(4);        // 直接初始化（direct initialization），书中称为函数初始化，不准确。不过此种初始化方式容易和函数定义混淆。
+int c{4};        // 列表初始化（list initialization，C++11 引入）
+int d = {4};     // 拷贝列表初始化（结合拷贝和列表语法）
+```
+实践只要使用列表初始化即可,其它方法熟悉,方便阅读其他代码。  
+列表初始化允许使用表达式,但表达式应提前定义。  
+int类型一般为4字节,存储范围为-2147483648～+2147483647。  
+初始化列表能够避免缩窄转换和以相同方式初始化所有变量，常被称为`统一初始化`。  
+```c++
+//Ex2_01.cpp
+
+#include <iostream>
+int main()
+{
+    int apple_count{15};
+    int orange_count{5};
+    int fruit_total{apple_count + orange_count};
+
+    std::cout << "The value of apple_count is " << apple_count << std::endl;
+    std::cout << "The value of orange_count is " << orange_count << std::endl;
+    std::cout << "The value of fruit_count is " << fruit_total << std::endl;
+    std::cin.get();
+    return 0;
+}
+```
