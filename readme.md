@@ -4,6 +4,7 @@
 2. 操作系统为windows10_x64,编辑器为vscode1.101.2版,编译器为mingw15.1.0。  
 ⏰gogoup!  
 ## 第1章 基本概念  
+![第1章导图](https://tc.z.wiki/autoupload/f/TCGPJbbsy8Ycjb3iVqtXI-dF-yTE5il903mGv8fj_W-yl5f0KlZfm6UsKj-HyTuv/20250725/kXm1/1073X883/Chapter1.png)
 ### 1.3 C++程序概念  
 #### 1.3.1 源文件  
 ```c++
@@ -218,7 +219,7 @@ int main()
 #import <iostream> //少分号
 Int main //I要小写,同时函数名少括号
 {
-    std:cout << "Hola Mundo!" << std:endl //两个std:都少一个:
+    std:cout << "Hola Mundo!" << std:endl //两个std:都少一个":",而且语句结尾少";"
 }
 ```
 ```c++
@@ -230,3 +231,4 @@ int main()
     return 0;
 }
 ```
+## 第2章 基本数据类型
