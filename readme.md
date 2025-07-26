@@ -24,6 +24,8 @@
     - [2.2.4 二进制的整形字面量](#224-二进制的整形字面量)
   - [2.3 整数的计算](#23-整数的计算)
   - [2.4 赋值运算](#24-赋值运算)
+  - [2.5 sizeof运算符](#25-sizeof运算符)
+  - [2.6 整数的递增和递减](#26-整数的递增和递减)
 
 
 # 前言
@@ -398,4 +400,55 @@ int main()
 
     cin.get();
     return 0;
+}
 ```
+**OP=赋值运算符**  
+y += 1;
+| 操作  | 运算符 |   操作   | 运算符 |
+| :---: | :----: | :------: | :----: |
+|  加   |   +=   |  按位与  |   &=   |
+|  减   |   -=   |  按位或  |  \|=   |
+|  乘   |   *=   | 按位异或 |   ^=   |
+|  除   |   /=   | 向左移位 |  <<=   |
+| 取模  |   %=   | 向右移位 |  >>=   |
+
+## 2.5 sizeof运算符
+使用`sizeof`运算符可以得到某类型、变量或表达式结果所占用的字节数。  
+
+```c++
+// 测试sizeof运算符
+#include <iostream>
+int main()
+{
+    int height{74};
+
+    std::cout << "height变量占用" << sizeof height << "字节。" << std::endl;
+    std::cout << "\"short\"数据类型占用" << sizeof(short) << "字节。" << std::endl;
+    std::cout << "\"int\"数据类型占用" << sizeof(int) << "字节。" << std::endl;
+    std::cout << "\"long long\"数据类型占用" << sizeof(long long) << "字节。" << std::endl;
+    std::cout << "\"float\"数据类型占用" << sizeof(float) << "字节。" << std::endl;
+    std::cout << "\"double\"数据类型占用" << sizeof(double) << "字节。" << std::endl;
+    std::cout << "表达式\"height*height/2\"结果占用" << sizeof(height * height / 2) << "字节。" << std::endl;
+    std::cin.get();
+
+    return 0;
+}
+```
+
+## 2.6 整数的递增和递减
+- 一元运算符：递增`++`和递减`--`，前缀时优先级高于其它二元运算符。如：  
+total = --count + 6;等效于下面两句：  
+--count；  
+total = count + 6;
+
+```c++
+count = count + 1;  
+count += 1;  
+++count;  
+```
+
+- 在使用++的后缀形式时,先在表达式中使用变量的值进行计算,再递增该变量的值.即后缀时优先级低于其它二元运算符。如：  
+total = count-- + 6;等效于下面两句：    
+total = count + 6;  
+--count;
+- 一个语句只能对变量修改一次。类似`total = ++count * 3 + count ++ * 5;`这样赋值，其值是不能确定的。
