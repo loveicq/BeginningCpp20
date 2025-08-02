@@ -30,6 +30,7 @@
   - [2.8 浮点字面量](#28-浮点字面量)
   - [2.9 浮点数的计算](#29-浮点数的计算)
     - [2.91 数学常量](#291-数学常量)
+    - [2.9.2 数学函数](#292-数学函数)
 
 
 # 前言
@@ -516,3 +517,38 @@ C++20提供了一个number模块
 - 如果需要float常量，应该使用std::number::pi_v\<float\>形式的表达式
 - 如果需要long long常量，应该使用std::number::sqrt2_v\<long long\>形式的表达式
 - 使用`预定义常量`要优于`自定义常量`
+
+### 2.9.2 数学函数
+- 使用标准头文件<cmath>
+- 包含abs()、ceil()、floor()、exp()、log()（在计算机中表示以e为底的对数）、log10()、pow()、sqrt()、round()、lround()、llround()、cos()、sin()、tan()、acos()、asin()、atan()等数学函数
+- 不能保证可将C头文件作为模块导入（import），而需要使用包含指令（#include）
+
+```cpp
+// Ex2_03.cpp
+// Sizing a pond for happy fish
+//书中案例程序把英寸转换成英尺,纯属是多余的步骤
+#include <iostream>
+#include <cmath>
+#include <numbers> //取π值
+
+int main()
+{
+    const double fish_factor{2.0 / 6};
+
+    double fish_count{};
+    double fish_length{};
+
+    std::cout << "Enter the number of fish you want to keep: ";
+    std::cin >> fish_count;
+    std::cout << "Enter the average fish length in inches: ";
+    std::cin >> fish_length;
+    std::cout << std::endl;
+
+    const double pond_area{fish_count * fish_length * fish_factor};
+    const double pond_diameter{2.0 * std::sqrt(pond_area / std::numbers::pi)};
+
+    std::cout << "Pond diameter required for " << fish_count << " fish is "
+              << pond_diameter << " feet." << std::endl;
+    return 0;
+}
+```
