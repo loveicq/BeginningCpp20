@@ -526,7 +526,7 @@ C++20提供了一个number模块
 ```cpp
 // Ex2_03.cpp
 // Sizing a pond for happy fish
-//书中案例程序把英寸转换成英尺,纯属是多余的步骤
+//书中案例程序把英寸转换成英尺,纯属是多余的步骤,还绕几圈,不便于理解
 #include <iostream>
 #include <cmath>
 #include <numbers> //取π值
@@ -545,7 +545,7 @@ int main()
     std::cout << std::endl;
 
     const double pond_area{fish_count * fish_length * fish_factor};
-    const double pond_diameter{2.0 * std::sqrt(pond_area / std::numbers::pi)};
+    const double pond_diameter{2.0 * std::sqrt(pond_area / std::numbers::pi)}; //pond_area=pi*(pond_diameter/2)²
 
     std::cout << "Pond diameter required for " << fish_count << " fish is "
               << pond_diameter << " feet." << std::endl;
