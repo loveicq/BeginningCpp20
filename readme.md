@@ -545,7 +545,8 @@ int main()
     std::cout << std::endl;
 
     const double pond_area{fish_count * fish_length * fish_factor};
-    const double pond_diameter{2.0 * std::sqrt(pond_area / std::numbers::pi)}; //pond_area=pi*(pond_diameter/2)²
+    const double pond_diameter{2.0 * std::sqrt(pond_area / std::numbers::pi)}; 
+    //pond_area=pi*(pond_diameter/2)²
 
     std::cout << "Pond diameter required for " << fish_count << " fish is "
               << pond_diameter << " feet." << std::endl;
