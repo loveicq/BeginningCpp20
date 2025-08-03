@@ -31,6 +31,10 @@
   - [2.9 浮点数的计算](#29-浮点数的计算)
     - [2.91 数学常量](#291-数学常量)
     - [2.9.2 数学函数](#292-数学函数)
+    - [2.9.3 无效的浮点效果](#293-无效的浮点效果)
+    - [2.9.4 缺点](#294-缺点)
+  - [2.10 混合的表达式和类型转换](#210-混合的表达式和类型转换)
+  - [2.11 显式类型转换](#211-显式类型转换)
 
 
 # 前言
@@ -550,6 +554,103 @@ int main()
 
     std::cout << "Pond diameter required for " << fish_count << " fish is "
               << pond_diameter << " feet." << std::endl;
+    return 0;
+}
+```
+### 2.9.3 无效的浮点效果
+|      操作       |   结果    |        操作         | 结果  |
+| :-------------: | :-------: | :-----------------: | :---: |
+|    ±value/0     | ±infinity |         0/0         |  NaN  |
+| ±infinity±value | ±infinity | ±infinity/±infinity |  NaN  |
+| ±infinity*value | ±infinity |  infinity-infinity  |  NaN  |
+| ±infinity/value | ±infinity |     infinity*0      |  NaN  |
+- NaN:not a number; infinity:无穷
+- 要验证数字是否inf或nan,应该使用`<cmath>`中的std::isinf()和std::()函数。
+
+```cpp
+// 本程序测试2.9.3节无限大、无限小数值和0的运算结果
+#include <iostream>
+int main()
+{
+    double a{1.5}, b{}, c{};
+    double result{a / b};
+    std::cout << a << "/" << b << "=" << result << std::endl;
+    std::cout << result << "+" << a << "=" << result + a << std::endl;
+    result = b / c;
+    std::cout << b << "/" << c << "=" << result << std::endl;
+
+    return 0;
+}
+```
+`程序运行结果为：1.5/0=inf；  inf+1.5=inf；  0/0=nan `
+
+### 2.9.4 缺点
+- 一些小数值没有准确转换为二进制浮点数值。在计算过程中，很容易把一些小错误放大为大错误。
+- 计算两个非常接近的数值之差会丧失精度。称为灾难性抵消。
+- 处理范围相关几个数量级的数值会导致错误。如两个数相差10<sup>8</sup>倍，它们相加，较大值不会有变化。
+
+## 2.10 混合的表达式和类型转换
+- 隐式转换  
+转换时会把低的转换成高的，排序如下：  
+1.long double&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.unsigned long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.long  
+2.double&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.unsigned int  
+3.float&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.unsigned long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.int  
+- 隐式转换可能会产生预料不到的结果
+    - 下溢
+    ```cpp
+    unsigned int x{20u};
+    int y{30};
+    std::cout<<x-y<<std::endl;
+    ```
+    得出结果不是-10，而是4294967286
+    - 上溢
+    ```cpp
+    unsigned char x{253};
+    int y{5};
+    std::cout<<x+y<<std::endl;
+    ```
+    得出结果不是258，而是2(258%256)
+- 等号右边的表达式生成的值的类型不同于等号左边的变量类型时，编译器也会插入一个转换操作（缩窄转换）
+    ```cpp
+    int y{};
+    double z{5.0};
+    y=z;    //z转换成int类型再赋值给y
+    ```
+
+## 2.11 显式类型转换
+- static_cast<转换后类型>(待转换的数值),如上节:y=static_cast\<int\>(z);
+- 将浮点数强制转换为整数会进行截断，即丢弃浮点数的整个小数部分
+- round()、lround()和llround()函数会将浮点数四舍五入到最接近的整数，大多情况下比强制转换更合适。
+- 一般情况下，很少需要显式类型转换，特别是在数据为基本类型时。如果必须在代码中包含大量的显式强制转换，则通常表明应为变量选择更合适的类型。
+
+```cpp
+// Ex2_04.cpp
+// Using explicit type conversions
+#include <iostream>
+int main()
+{
+    using namespace std;
+    const unsigned feet_per_yard{3};
+    const unsigned inches_per_foot{12};
+    const unsigned inches_per_yard{feet_per_yard * inches_per_foot};
+    double length{};
+    unsigned int yards{};
+    unsigned int feet{};
+    unsigned int inches{};
+
+    cout << "Enter a length in yards as a decimal: ";
+    cin >> length;
+
+    yards = static_cast<unsigned int>(length);
+    feet = static_cast<unsigned int>((length - yards) * feet_per_yard);
+    // 总英寸数与inches_per_foot取模（除以12取余数）即是英寸数，在此例中，英寸数总是小于12
+    inches = static_cast<unsigned int>(length * inches_per_yard) % inches_per_foot;
+
+    cout << length << " yards converts to "
+         << yards << " yards "
+         << feet << " feet "
+         << inches << " inches." << endl;
+
     return 0;
 }
 ```
