@@ -684,7 +684,7 @@ int main()
 
     cout << "鱼塘需要的半径是: "
          << setprecision(2) // 主要测试这个格式化字符串函数,保留两位小数
-         << pond_radius << " 平方英尺。\n";
+         << pond_radius << " 英尺。\n";
 
     return 0;
 }
