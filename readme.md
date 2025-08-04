@@ -689,8 +689,87 @@ int main()
     return 0;
 }
 ```
-- 使用\<format\>模块(C++20才有这个模块)
-    - 使用std::format()格式化字符串  
+1. 使用\<format\>模块(C++20才有这个模块)
+2. 使用std::format()格式化字符串  
     `std::cout<<std::format("pond radius required for {} fish is {} feet.\n",fish_count,pond_radius);`  
-    - 格式说明符  
-    
+3. 格式说明符  
+    - {:.2}点后面的数字指定总有效位数,包含小数点前和后的数字
+    - {:.2f}加了f就是指定小数位数
+    - 要调试失败的std::format()表达式,可以用try-catch块。实践中win10+vscode+gcc 15.1.0中这个try-catch块不能实现书中的错误诊断效果，还在语法检查阶段就报错了（如下例所示）。
+```cpp
+// 测试std::format()错误调试的try-catch块
+#include <iostream>
+#include <format>
+#include <numbers>
+#include <cmath>
+
+int main()
+{
+    using namespace std;
+
+    const double fish_factor{2.0 / 6};
+    int fish_count{};
+    double fish_length{};
+
+    cout << "请输入鱼总数(条): ";
+    cin >> fish_count;
+    cout << "请输入鱼的平均长度(英寸): ";
+    cin >> fish_length;
+    cout << endl;
+
+    double pond_area{fish_count * fish_length * fish_factor};
+    double pond_radius{sqrt(pond_area / numbers::pi)};
+    // cout << std::format(" 养 {:.2} 条鱼的池塘半径需要 {:.2f} 英尺。\n", fish_count, pond_radius);
+
+    try
+    {
+        cout << format(" 养 {:.2} 条鱼的池塘半径需要 {:.2f} 英尺。\n", fish_count, pond_radius);
+    }
+    catch (const format_error &error)
+    {
+        cout << error.what() << '\n';
+    }
+
+    return 0;
+}
+```
+![try_catch测试](https://tc.z.wiki/autoupload/f/9lpqiNvEAS8uNqygSEXEG7KXl_QqVl-bpSwqP4fJO68/20250804/EJRf/1444X363/try_catch.png)
+
+4. `[[fill]align][sign][#][0][width][.precision][type]`,可选的格式化选项
+    - fill：填充字符,默认是空格,必须在align前面，指定空白处的填充字符
+    - align：对齐方式,默认是右对齐
+      - <：左对齐
+      - \>：右对齐
+      - ^：居中对齐
+    - sign：符号控制,默认是显示正负号，仅用于数值类型
+      - +：强制显示正负号（+3.14, -42）
+      - -：仅负数显示符号（默认，3.14, -42）
+      - 空格：正数前加空格，负数前加负号（" 3.14", "-42"）
+    - #：替代形式，仅用于数值类型
+      - 整数：为二进制（0b）、八进制（0）、十六进制（0x）添加前缀
+      - 浮点数：强制显示小数点（即使无小数部分）
+    - 0：零填充，仅用于数值类型。如果是整数,则用0填充;如果是浮点数,则显示小数点
+    - width：字段宽度
+      - 指定输出的最小字符数，不足则用填充字符补齐
+      - 若实际内容长于width，则按实际长度输出（不截断）
+    - .precision：精度，依类型而异
+      - 浮点数：指定小数部分的位数（四舍五入）
+      - 字符串：指定最大输出长度（截断超出部分）
+      - 整数：无效（使用会导致编译错误）
+    - type：数据类型，决定如何解析参数
+      - 浮点数类型：
+        - f：固定点表示（如3.14）
+        - e/E：科学计数法（如3.14e+00）
+        - g/G：自动选择f或e（默认）
+      - 整数类型：
+        - d/i：十进制
+        - b：二进制
+        - o：八进制
+        - x/X：十六进制（小写/大写）
+      - 其他类型：
+        - s：字符串
+        - c：字符
+        - p：指针地址
+        - 布尔值：true/false
+
+
