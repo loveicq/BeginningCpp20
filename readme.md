@@ -899,4 +899,13 @@ int main()
 上面程序的运行结果如下，注意浮点数min()和lowest()的区别：  
 <img src="https://z.wiki/u/hRSubG">  
 
+确定基本类型的其他属性  
+- 返回二进制数字的位数：  
+  `std::numeric_limits<type_name>::digits;`
+- 获得infinity的浮点值(正无穷大)：  
+  `float positive_infinity=std::numeric_limits<float>::infinity();`
+- 获得infinity的浮点值（负无穷大，注意有个‘-’号）：  
+  `double negative_infinity=-std::numeric_limits<double>::infinity();`
+- 获得NaN的浮点值：  
+  `long double not_a_number=std::numeric_limits<long double>::quiet_NaN()`
 
