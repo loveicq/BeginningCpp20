@@ -860,7 +860,7 @@ int main()
 - 参数索引可以不连续
 
 ## 2.13 确定数值的上下限
-使用`numeric_limits<data type>::min()`、`numeric_limits<data type>::lowest()`和`numeric_limits<data type>::max()`读取基本数据类型的上下限。
+使用`numeric_limits<type_name>::min()`、`numeric_limits<type_name>::lowest()`和`numeric_limits<type_name>::max()`读取基本数据类型的上下限。
 ```cpp
 // Ex2_07.cpp
 // Finding maximum and minimum values for data types
