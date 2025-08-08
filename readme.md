@@ -863,7 +863,7 @@ int main()
 使用`numeric_limits<data type>::min()`、`numeric_limits<data type>::lowest()`和`numeric_limits<data type>::max()`读取基本数据类型的上下限。
 ```cpp
 // Ex2_07.cpp
-//  Finding maximum and minimum values for data types
+// Finding maximum and minimum values for data types
 #include <iostream>
 #include <format>
 #include <limits>
