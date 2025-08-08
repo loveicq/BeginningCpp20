@@ -3,7 +3,6 @@
 #include <iostream>
 #include <format>
 using std::cout;
-using std::endl;
 using std::format;
 
 int main()
