@@ -15,7 +15,7 @@ int main()
                    pi, pi, pi, pi);
     cout << format("default: {},binary:{:b},hex.:{:x}\n", 314, 314, 314);
     cout << format("default: {},decimal:{:d},hex.:{:x}\n", 'c', 'c', 'c'); // 字符'c'的ascii码为99
-    cout << format("alternative hex.: {:#x},binary:{:#b},HEX.:{:#X}\n",
+    cout << format("alternative hex.: {:#x},binary:{:#b},HEX.:{:#X}\n",    // 在g++15.1.0中“{:#X}”也是小写
                    314, 314, 314);
     cout << format("forced sign: {:+},space sign:{: }\n", 314, 314);
     cout << format("all together: {:*<+10.4f},{:+#09x}\n", pi, 314);

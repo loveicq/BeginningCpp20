@@ -820,7 +820,7 @@ int main()
                    pi, pi, pi, pi);
     cout << format("default: {},binary:{:b},hex.:{:x}\n", 314, 314, 314);
     cout << format("default: {},decimal:{:d},hex.:{:x}\n", 'c', 'c', 'c'); // 字符'c'的ascii码为99
-    cout << format("alternative hex.: {:#x},binary:{:#b},HEX.:{:#X}\n",
+    cout << format("alternative hex.: {:#x},binary:{:#b},HEX.:{:#X}\n",//在g++15.1.0中“{:#X}”也是小写
                    314, 314, 314);
     cout << format("forced sign: {:+},space sign:{: }\n", 314, 314);
     cout << format("all together: {:*<+10.4f},{:+#09x}\n", pi, 314);
@@ -830,3 +830,30 @@ int main()
 ```
 上面的程序运行结果如下：
 <img src=https://z.wiki/u/9HwRnn>
+
+✅8. 参数索引  
+```cpp
+// 测试format（参数索引）
+#include <iostream>
+#include <format>
+using std::cout;
+using std::endl;
+using std::format;
+
+int main()
+{
+    unsigned fish_count{20};
+    double pond_radius{8.74039};
+
+    cout << format("{1:.2f} feet is the radius required for a pond with {0} fishes.",
+                   fish_count, pond_radius)
+         << endl;
+    cout << format("Default: {0}, binary: {0:#b}, hex.: {0:#x}", 314) << endl;
+
+    return 0;
+}
+```
+‼注意：
+- 参数索引从0开始
+- 参数索引可以重复使用
+- 参数索引可以不连续
