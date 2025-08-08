@@ -659,7 +659,7 @@ int main()
 C风格：`(转换后类型)待转换的数值`，这是C语言遗留下来的，现在应该使用C++风格的强制转换
 
 ## 2.12 格式化字符串
-- 使用\<iomanip\>模块
+✅1. 使用\<iomanip\>模块
 ```cpp
     // 格式化字符串setprecision()测试
 #include <iostream>
@@ -689,10 +689,10 @@ int main()
     return 0;
 }
 ```
-1. 使用\<format\>模块(C++20才有这个模块)
-2. 使用std::format()格式化字符串  
+✅2. 使用\<format\>模块(C++20才有这个模块)  
+✅3. 使用std::format()格式化字符串  
     `std::cout<<std::format("pond radius required for {} fish is {} feet.\n",fish_count,pond_radius);`  
-3. 格式说明符  
+✅4. 格式说明符  
     - {:.2}点后面的数字指定总有效位数,包含小数点前和后的数字
     - {:.2f}加了f就是指定小数位数
     - 要调试失败的std::format()表达式,可以用try-catch块。实践中win10+vscode+gcc 15.1.0中这个try-catch块不能实现书中的错误诊断效果，还在语法检查阶段就报错了（如下例所示）。
@@ -735,7 +735,7 @@ int main()
 ```
 ![try_catch测试](https://tc.z.wiki/autoupload/f/9lpqiNvEAS8uNqygSEXEG7KXl_QqVl-bpSwqP4fJO68/20250804/EJRf/1444X363/try_catch.png)
 
-4. `[[fill]align][sign][#][0][width][.precision][type]`,可选的格式化选项
+5. `[[fill]align][sign][#][0][width][.precision][type]`,可选的格式化选项
     - fill：填充字符,默认是空格,必须在align前面，指定空白处的填充字符
     - align：对齐方式,默认是右对齐
       - <：左对齐
@@ -772,4 +772,30 @@ int main()
         - p：指针地址
         - 布尔值：true/false
 
+✅6. 格式化表格式数据  
+主要介绍width\alignment\fill\0等格式化选项，详细解释见上一点。  
 
+```cpp
+// Ex2_05.cpp
+//  The width,alignment,fill,and 0 formatting options of format()
+#include <iostream>
+#include <format>
+using std::cout;
+using std::endl;
+using std::format;
+
+int main()
+{
+    // Default alignment:right for numbers,left otherwise
+    cout << format("{:7}|{:7}|{:7}|{:7}|{:7}\n", 1, -0.2, "str", 'c', true);
+    // left and right alignment + custom fill character
+    cout << format("{:*<7}|{:*<7}|{:*>7}|{:*>7}|{:*>7}\n", 1, -0.2, "str", 'c', true);
+    // centered alignment +0 formatting option for numbers
+    cout << format("{:0^7}|{:0^7}|{:^7}|{:^7}|{:^7}\n", 1, -0.2, "str", 'c', true);
+
+    return 0;
+}
+```
+上面的程序运行结果如下：
+
+![Ex2_05](https://z.wiki/u/Bpci4K)
