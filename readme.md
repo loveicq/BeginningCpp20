@@ -36,6 +36,7 @@
   - [2.10 混合的表达式和类型转换](#210-混合的表达式和类型转换)
   - [2.11 显式类型转换](#211-显式类型转换)
   - [2.12 格式化字符串](#212-格式化字符串)
+  - [2.13 确定数值的上下限](#213-确定数值的上下限)
 
 
 # 前言
@@ -853,7 +854,49 @@ int main()
     return 0;
 }
 ```
-‼注意：
+👉注意：
 - 参数索引从0开始
 - 参数索引可以重复使用
 - 参数索引可以不连续
+
+## 2.13 确定数值的上下限
+使用`numeric_limits<data type>::min()`、`numeric_limits<data type>::lowest()`和`numeric_limits<data type>::max()`读取基本数据类型的上下限。
+```cpp
+// Ex2_07.cpp
+//  Finding maximum and minimum values for data types
+#include <iostream>
+#include <format>
+#include <limits>
+using std::cout;
+using std::endl;
+using std::format;
+using std::numeric_limits;
+
+int main()
+{
+    cout << format("The range for type short is from {} to {}\n",
+                   numeric_limits<short>::min(), numeric_limits<short>::max())
+         << format("The range for type unsigned int is from {} to {}\n",
+                   numeric_limits<unsigned int>::min(), numeric_limits<unsigned int>::max())
+         << format("The range for type long is from {} to {}\n",
+                   numeric_limits<long>::min(), numeric_limits<long>::max())
+         << format("The range for type float is from {} to {}\n",
+                   numeric_limits<float>::min(), numeric_limits<float>::max())
+         << format("The range for type float is from {} to {}\n",
+                   numeric_limits<float>::lowest(), numeric_limits<float>::max())
+         << format("The range for type double is from {} to {}\n",
+                   numeric_limits<double>::min(), numeric_limits<double>::max())
+         << format("The range for type double is from {} to {}\n",
+                   numeric_limits<double>::lowest(), numeric_limits<double>::max())
+         << format("The range for type long double is from {} to {}\n",
+                   numeric_limits<long double>::min(), numeric_limits<long double>::max())
+         << format("The range for type long double is from {} to {}\n",
+                   numeric_limits<long double>::lowest(), numeric_limits<long double>::max());
+
+    return 0;
+}
+```
+上面程序的运行结果如下，注意浮点数min()和lowest()的区别：  
+<img src="https://z.wiki/u/hRSubG">  
+
+
