@@ -798,4 +798,5 @@ int main()
 ```
 上面的程序运行结果如下：
 
-![Ex2_05](https://z.wiki/u/Bpci4K)
+<img src=https://z.wiki/u/J78qrS style="width:618;height:117;box-shadow:0 2px 8px #0001">
+
