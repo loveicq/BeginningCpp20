@@ -37,6 +37,7 @@
   - [2.11 显式类型转换](#211-显式类型转换)
   - [2.12 格式化字符串](#212-格式化字符串)
   - [2.13 确定数值的上下限](#213-确定数值的上下限)
+  - [2.14 使用字符变量](#214-使用字符变量)
 
 
 # 前言
@@ -908,4 +909,45 @@ int main()
   `double negative_infinity=-std::numeric_limits<double>::infinity();`
 - 获得NaN的浮点值：  
   `long double not_a_number=std::numeric_limits<long double>::quiet_NaN()`
+
+## 2.14 使用字符变量
+```cpp
+// 使用字符变量
+#include <iostream>
+#include <format>
+
+int main()
+{
+    using std::cout;
+    using std::endl;
+    using std::format;
+
+    char ch{'A'}; // 字面量字符
+    cout << format("ch = {}\n", ch);
+    /*
+    下面语句char letter{ch+2};会先把ch隐式转换成int,完成计算,
+    再把int转换成char,所以编译器会有窄化转换的提醒（narrowing conversion）。
+    采用其它方式则不会有窄化转换提醒了，如：
+    1.char letter{ static_cast<char>(ch + 2) };
+    2.char letter(ch + 2);
+    3.char letter = ch + 2;
+    */
+    char letter{ch + 2};
+    cout << "letter = " << letter << endl;
+    ++ch;
+    cout << format("ch = {}\n", ch);
+    ch += 3;
+    cout << format("ch is '{0}' which is code {0:#x}\n", ch);
+    ch = 33; // 十进制字符
+    cout << "ch = " << ch << endl;
+    ch = '\x46'; // 十六进制字符
+    cout << format("ch = {}\n", ch);
+    ch = '\77'; // 八进制字符
+    cout << "ch = " << ch << endl;
+
+    return 0;
+}
+```
+上面程序运行结果如下：  
+<img src=https://z.wiki/u/Nn3lyH>
 
