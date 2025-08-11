@@ -38,6 +38,7 @@
   - [2.12 格式化字符串](#212-格式化字符串)
   - [2.13 确定数值的上下限](#213-确定数值的上下限)
   - [2.14 使用字符变量](#214-使用字符变量)
+  - [2.17 练习](#217-练习)
 
 
 # 前言
@@ -911,6 +912,7 @@ int main()
   `long double not_a_number=std::numeric_limits<long double>::quiet_NaN()`
 
 ## 2.14 使用字符变量
+1. **ascii字符**
 ```cpp
 // 使用字符变量
 #include <iostream>
@@ -951,3 +953,111 @@ int main()
 上面程序运行结果如下：  
 <img src=https://z.wiki/u/Nn3lyH>
 
+2. **unicode字符**  
+宽字符字面量采用'L'开头
+- `wchar_t z {L'Z'};`
+- `wchar_t cc {L'\x00E7'}`
+- 推荐使用以下几种类型:
+  - char8_t  utf8[]  = u8"UTF-8文本";   // 明确UTF-8
+  - char16_t utf16[] = u"UTF-16文本";   // 明确UTF-16
+  - char32_t utf32[] = U"UTF-32文本";   // 明确UTF-32
+- 标准库提供了标准输入流(wcin)和输出流(wcout)来读写wchar_t类型的字符,但没有提供处理char8_t、char16_t和char32_t字符数据的方式
+- 在控制台中用cin()输入宽字符,可能是GBK编码,而不是UTF-8编码,会导致在控制台中输出乱码
+
+| 前缀  |   类型   | 编码方案 | 字节/字符 | 引入标准 |
+| :---: | :------: | :------: | :-------: | :------: |
+|  无   |   char   | 窄字符集 |     1     |  C++98   |
+|   L   | wchar_t  | 平台相关 |   2或4    |  C++98   |
+|  u8   | char8_t  |  UTF-8   |    1-4    |  C++20   |
+|   u   | char16_t |  UTF-16  |    2/4    |  C++11   |
+|   U   | char32_t |  UTF-32  |     4     |  C++11   |
+
+## 2.17 练习
+1. 第1题
+```cpp
+// 第2章第1题
+#include <iostream>
+#include <format>
+
+int main()
+{
+
+    using namespace std;
+
+    unsigned inches{};
+    unsigned feet{};
+    unsigned inchesRemainder{};
+
+    cout << "请输入整数值英寸数:";
+    cin >> inches;
+    feet = inches / 12;
+    inchesRemainder = inches % 12;
+    cout << format("{}英寸共有{}英尺{}英寸。\n", inches, feet, inchesRemainder);
+
+    return 0;
+}
+```
+2. 第2题
+```cpp
+// 第2题
+#include <iostream>
+#include <numbers>
+
+int main()
+{
+    using namespace std;
+
+    double radius{};
+    double area{};
+
+    cout << "请输入半径:";
+    cin >> radius;
+    area = numbers::pi * radius * radius;
+    cout << "圆面积是" << area << "。" << endl;
+
+    return 0;
+}
+```
+3. 第3题
+  - 此题比较复杂,涉及三角函数知识,角度和弧度转换
+  - 数学模块应用
+  - 有些地方常量比变量更合理
+```cpp
+// 第3题
+#include <iostream>
+#include <cmath>
+#include <numbers>
+
+int main()
+{
+    using namespace std;
+
+    const double inchesPerFoot{12.0};
+    const double piDegrees{180.0};
+
+    double feet{};
+    double inches{};
+    cout << "请分别输入你与树之间的距离是几英尺和几英寸(用空格隔开):";
+    cin >> feet >> inches;
+    const double distance{feet + inches / inchesPerFoot};
+
+    double angle{}, angleToRadian{};
+    cout << "请输入树顶的仰角（单位：度）:";
+    cin >> angle;
+    angleToRadian = angle * (numbers::pi / piDegrees); // 角度转换为弧度
+
+    double eyeHeight{};
+    cout << "请输入地面到眼睛的高度(英寸):";
+    cin >> eyeHeight;
+    eyeHeight /= inchesPerFoot;
+
+    const double height{eyeHeight + distance * tan(angleToRadian)};                                   // 按公式计算树高度，这个三角函数要用弧度
+    const unsigned heightFeet{static_cast<unsigned>(height)};                                         // 显式转换成无符号整数(英尺数)
+    const unsigned heightInches{static_cast<unsigned>(round(inchesPerFoot * (height - heightFeet)))}; //(浮点数-整数)的余数乘12就是英寸数
+
+    cout << "树的高度是" << heightFeet << "英尺"
+         << heightInches << "英寸。" << endl;
+
+    return 0;
+}
+```
