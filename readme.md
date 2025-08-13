@@ -1171,7 +1171,7 @@ int main()
 
     // 以下定义常量必须使用constexpr关键字,不能用const,不然会报错.原因是format()要求格式字符串必须为编译时常量.
     constexpr auto WIDTH60{"{:^60}\n"};
-    constexpr auto HORIZON{"------------------------------------------------------------"};
+    const auto HORIZON{"------------------------------------------------------------"};
     constexpr auto HEADER_ALIGN_CENTER{"{:^19}|{:^19}|{:^20}\n"};
     constexpr auto DECIMAL_PRECISION_5{"{:<19}|{:<19}|{:.5f}...\n"};
     constexpr auto DECIMAL_PRECISION_3{"{:<19}|{:<19}|{:.3f}...\n"};
