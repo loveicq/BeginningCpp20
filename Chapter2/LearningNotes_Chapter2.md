@@ -947,5 +947,5 @@ int main()
     return 0;
 }
 ```
-上面练习第7题程序运行结果如下:
+上面练习第7题程序运行结果如下:  
 <img src=https://z.wiki/u/kINCSA>
