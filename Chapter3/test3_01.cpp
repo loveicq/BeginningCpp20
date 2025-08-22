@@ -1,3 +1,4 @@
+// 按位移动不带符号的整数示例
 #include <iostream>
 
 using namespace std;
