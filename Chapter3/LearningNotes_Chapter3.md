@@ -225,6 +225,63 @@ int main()
     return 0;
 }
 ```
-- &可以用来关闭位或选择位
-- |可以用来打开位
-- ^可以用来切换位
+- 设置位: value |= (1 << n);  
+- 清除位: value &= ~(1 << n);  
+- 翻转位: value ^= (1 << n);  
+- 检查位: bit = value & (1 << n);
+
+## 3.3 变量的生存期
+- 变量的生存期
+  - 局部变量.代码块中声明的非静态变量,在代码块结尾处消失.
+  - 静态变量.static定义的变量,程序结束时消失.
+  - 运行期间分配内存的变量.释放内存或销毁时消失.
+  - thread_local声明的变量.
+- 变量的作用域
+  - 作用域是可以使用变量名访问的程序代码区域.
+
+## 3.4 全局变量
+- 没有初始化的全局变量,默认情况下被初始化为0
+- 没有初始化的局部变量,默认情况下被初始化为垃圾值
+- 如果有同名的全局变量和局部变量,变量名代表局部变量,如果要采用全局变量,需使用作用域解析运算符::限定它
+- 如果把所有变量都声明为全局变量,会增加修改变量时出错的可能性,也会影响程序调试,同时增加内存消耗.
+```cpp
+#include <iostream>
+long count1{999L};
+double count2{3.14};
+int count3;
+
+int main()
+{
+    using namespace std;
+
+    int count1{10};
+    int count3{50};
+    cout << "Value of outer count1 = " << count1 << endl;
+    cout << "Value of global count1 = " << ::count1 << endl;
+    cout << "Value of global count2 = " << count2 << endl;
+
+    {
+        int count1{20};
+        int count2{30};
+        cout << "\nValue of inner count1 = " << count1 << endl;
+        cout << "Value of global count1 = " << ::count1 << endl;
+        cout << "Value of inner count2 = " << count2 << endl;
+        cout << "Value of global count2 = " << ::count2 << endl;
+
+        count1 = ::count1 + 3;
+        ++::count1;
+        cout << "\nValue of inner count1 = " << count1 << endl;
+        cout << "Value of global count1 = " << ::count1 << endl;
+        count3 += count2;
+        int count4{};
+    }
+    // cout<<count4<<endl;//此句显示"未定义标识符"
+    cout << "\nValue of outer count1 = " << count1 << endl
+         << "Value of outer count3 = " << count3 << endl; // 上面花括号也属于main()范围,所以count3是局部变量
+    cout << "Value of global count3 = " << ::count3 << endl;
+
+    cout << "Value of global count2 = " << count2 << endl; // count2局部变量定义在上面花括号内,作用域在右花括号处即结束了,所以此处是全局变量的count2.
+
+    return 0;
+}
+```
