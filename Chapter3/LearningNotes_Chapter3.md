@@ -273,9 +273,9 @@ int main()
         cout << "\nValue of inner count1 = " << count1 << endl;
         cout << "Value of global count1 = " << ::count1 << endl;
         count3 += count2;
-        int count4{};
+        int count4{};//调试时提示"unused variable 'count4' [-Wunused-variable]"错误
     }
-    // cout<<count4<<endl;//此句显示"未定义标识符"
+    // cout<<count4<<endl;//此句在编辑器显示"未定义标识符"错误
     cout << "\nValue of outer count1 = " << count1 << endl
          << "Value of outer count3 = " << count3 << endl; // 上面花括号也属于main()范围,所以count3是局部变量
     cout << "Value of global count3 = " << ::count3 << endl;
@@ -285,3 +285,67 @@ int main()
     return 0;
 }
 ```
+
+## 3.5 枚举数据类型
+1. 定义枚举类型
+    - 传统枚举类型:`enum color{red,green,blue};`
+    - 有作用域的枚举类型(C++11起):`enum class color{red,green,blue};`
+2. 定义变量
+    - 传统枚举变量:`color myColor=red;`
+    - 有作用域的枚举变量:`color myColor{color::red};`
+3. 输出枚举变量的值
+    - 输出传统枚举变量值(直接输出):`cout<<myColor<<endl;`
+    - 输出有作用域的枚举变量值(显式转换输出):`cout<<static_cast<int>(myColor)<<endl;`
+4. 枚举成员的值
+    - 第一个枚举成员的值默认是0,后面成员比前面成员的值大1
+    - 枚举成员可以赋任何整数值
+    - 枚举成员不一定有唯一值,不同成员可以赋同一个值
+    - 枚举成员的值必须是编译期间的常量(字面量、以前定义的枚举成员、const变量)
+    - 枚举成员可以是包含默认类型int在内的任何整数类型，也可以给所有的枚举成员显式赋值,用冒号隔开：  
+`enum class Punctuation:char{Comma = ',',Exclamation = '!',Question = '?'};`
+
+```cpp
+#include <iostream>
+#include <format>
+
+int main()
+{
+    using namespace std;
+
+    enum class Day
+    {
+        Monday,
+        Tuesday,
+        Wednesday,
+        Thursday,
+        Friday,
+        Saturday,
+        Sunday
+    };
+    Day yesterday{Day::Monday}, today{Day::Tuesday}, tomorrow{Day::Wednesday};
+    const Day poets_day{Day::Friday};
+    enum class Punctuation : char
+    {
+        Comma = ',',
+        Exclamation = '!',
+        Question = '?'
+    };
+    Punctuation ch{Punctuation::Comma};
+    cout << format("yesterday's value is {}{} but poets_day's is {}{}\n",
+                   static_cast<int>(yesterday), static_cast<char>(ch),
+                   static_cast<int>(poets_day), static_cast<char>(Punctuation::Exclamation));
+
+    today = Day::Thursday;      // assign new...
+    ch = Punctuation::Question; //...enumerator values
+    tomorrow = poets_day;
+
+    cout << format("Is today's value({}) the same as poets_day({}){}\n",
+                   static_cast<int>(today), static_cast<int>(tomorrow), static_cast<char>(ch));
+    // ch = tomorrow;     /*不能将 "Day" 类型的值分配到 "Punctuation" 类型的实体C/C++(513)*/
+    // tomorrow = Friday; /*未定义标识符 "Friday"C/C++(20)*/
+    // today = 6;         /*不能将 "int" 类型的值分配到 "Day" 类型的实体C/C++(513)*/
+
+    return 0;
+}
+```
+5. 可通过using enum声明绕过枚举类型名称指定为作用域,如`using enum Day`
