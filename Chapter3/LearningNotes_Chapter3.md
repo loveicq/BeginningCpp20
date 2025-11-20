@@ -355,3 +355,10 @@ int main()
 `using BigOnes = unsigned long long`  
 `using PhoneBook = std::map<std::shared_ptr<Contact>,std::string>`  
 应有节制地使用类型别名
+
+## 3.7 本章小结
+ - 不需要记住所有的运算符的优先级和相关性,但在编写代码时需要考虑它们.如果不确定优先级就总是使用括号
+ - 按位运算符作用也很重要
+ - 理解局部变量(书中称自动变量)和全局变量,理解静态变量(static),理解变量生存期和作用域的概念
+ - 枚举类型适合于表示固定的值集,尤其是有名称的值集
+ - using关键字的用途
