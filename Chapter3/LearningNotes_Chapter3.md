@@ -349,3 +349,9 @@ int main()
 }
 ```
 5. 可通过using enum声明绕过枚举类型名称指定为作用域,如`using enum Day`
+
+## 3.6 数据类型的别名
+使用using关键字指定类型别名  
+`using BigOnes = unsigned long long`  
+`using PhoneBook = std::map<std::shared_ptr<Contact>,std::string>`  
+应有节制地使用类型别名
