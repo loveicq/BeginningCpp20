@@ -461,7 +461,7 @@ int main()
 ```
 ![try_catch测试](https://tc.z.wiki/autoupload/f/9lpqiNvEAS8uNqygSEXEG7KXl_QqVl-bpSwqP4fJO68/20250804/EJRf/1444X363/try_catch.png)
 
-5. `[[fill]align][sign][#][0][width][.precision][type]`,可选的格式化选项
+5. `[fill][align][sign][#][0][width][.precision][type]`,可选的格式化选项
     - fill：填充字符,默认是空格,必须在align前面，指定空白处的填充字符
     - align：对齐方式,默认是右对齐
       - <：左对齐
