@@ -1,3 +1,4 @@
+// 第5题
 #include <iostream>
 #include <format>
 #define formatString "{:^4}的三原色为:红:{:^3},绿:{:^3},蓝:{:^3}\n"

@@ -366,5 +366,200 @@ int main()
 ## 3.8 练习
 1. 第1题
 ```
-// 
+//第1题
+#include <iostream>
+#include <format>
+
+int main()
+{
+    int originalInteger{};
+    std::cout << "请输入一个整数:";
+    std::cin >> originalInteger;
+    const auto NOTInteger{static_cast<unsigned>(~originalInteger)};
+    std::cout << std::format("{:#034b}|{:#034b}|{:#034b}\n",
+                             originalInteger, NOTInteger,
+                             NOTInteger + 1);
+    std::cout << std::format("{:^34}|{:^34}|{:^34}\n",
+                             originalInteger, ~originalInteger, ~originalInteger + 1);
+
+    return 0;
+}
+```
+2.第2题
+```
+// 第2题
+#include <iostream>
+#include <numbers>
+
+int main()
+{
+    using namespace std;
+
+    double radius{};
+    double area{};
+
+    cout << "请输入半径:";
+    cin >> radius;
+    area = numbers::pi * radius * radius;
+    cout << "圆面积是" << area << "。" << endl;
+
+    return 0;
+}
+```
+3.第3题
+```
+// 第3题
+#include <iostream>
+
+int main()
+{
+    auto k{430u};
+    auto j{(k >> 4) & ~(~0u << 3)};
+    std::cout << j << std::endl;
+
+    return 0;
+}
+```
+4.第4题
+```
+// 第4题
+#include <iostream>
+#include <format>
+#include <string>
+
+// 函数：将整数格式化为二进制，每8位一组
+std::string binary_with_separator(unsigned int value, int group_size = 8)
+{
+    const int total_bits = sizeof(value) * 8;
+    std::string result;
+
+    for (int i = total_bits - 1; i >= 0; i--)
+    {
+        result += (value >> i) & 1 ? '1' : '0';
+
+        // 每 group_size 位添加分隔符（但不在开头和结尾）
+        if (i > 0 && i % group_size == 0)
+        {
+            result += ' ';
+        }
+    }
+
+    return result;
+}
+
+int main()
+{
+    unsigned packed{};
+    unsigned char ch{};
+
+    std::cout << std::format("{:16}", "请输入第1个字母:");
+    std::cin >> ch;
+    packed |= ch;
+    packed <<= 8;
+
+    std::cout << std::format("{:16}", "请输入第2个字母:");
+    std::cin >> ch;
+    packed |= ch;
+    packed <<= 8;
+
+    std::cout << std::format("{:16}", "请输入第3个字母:");
+    std::cin >> ch;
+    packed |= ch;
+    packed <<= 8;
+
+    std::cout << std::format("{:16}", "请输入第4个字母:");
+    std::cin >> ch;
+    packed |= ch;
+
+    std::cout << "  这个字符串的二进制码是:0b" << binary_with_separator(packed, 8) << std::endl;
+    std::cout << std::format("这个字符串的十六进制码是:{:#0x}\n", packed);
+
+    unsigned int mask{0xff};
+
+    std::cout << "      这个字符串反序输出:";
+
+    ch = static_cast<char>(packed & mask);
+    std::cout << ch;
+    ch = static_cast<char>(packed >> 8 & mask);
+    std::cout << ch;
+    ch = static_cast<char>(packed >> 16 & mask);
+    std::cout << ch;
+    ch = static_cast<char>(packed >> 24 & mask);
+    std::cout << ch << std::endl;
+
+    return 0;
+}
+```
+5.第5题
+```
+//第5题
+#include <iostream>
+#include <format>
+#define formatString "{:^4}的三原色为:红:{:^3},绿:{:^3},蓝:{:^3}\n"
+
+int main()
+{
+    enum class Color : unsigned
+    {
+        Red = 0xff0000u,
+        Green = 0x00ff00u,
+        Yellow = 0xffff00u,
+        Purple = 0xff00ffu,
+        Blue = 0x0000ffu,
+        Black = 0x000000u,
+        White = 0xffffffu
+    };
+
+    Color yellow{Color::Yellow};
+    Color purple{Color::Purple};
+    Color green{Color::Green};
+
+    std::cout << std::format(formatString,
+         "黄色",
+         (static_cast<unsigned>(yellow) & static_cast<unsigned>(Color::Red)) >> 16,
+         (static_cast<unsigned>(yellow) & static_cast<unsigned>(Color::Green)) >> 8,
+         static_cast<unsigned>(yellow) & static_cast<unsigned>(Color::Blue));
+
+    std::cout << std::format(formatString,
+         "紫色",
+         (static_cast<unsigned>(purple) & static_cast<unsigned>(Color::Red)) >> 16,
+         (static_cast<unsigned>(purple) & static_cast<unsigned>(Color::Green)) >> 8,
+         static_cast<unsigned>(purple) & static_cast<unsigned>(Color::Blue));
+
+    std::cout << std::format(formatString,
+         "绿色",
+         (static_cast<unsigned>(green) & static_cast<unsigned>(Color::Red)) >> 16,
+         (static_cast<unsigned>(green) & static_cast<unsigned>(Color::Green)) >> 8,
+         static_cast<unsigned>(green) & static_cast<unsigned>(Color::Blue));
+
+    return 0;
+}
+```
+6.第6题
+```
+// 第6题
+/*
+异或^规律:
+1.任何数与自己异或结果为0,即a^a=0;
+2.任何数与0异或结果为自己,即a^0=a;
+3.异或运算满足结合律和交换律,即a^b^c=a^(b^c),a^b=b^a;
+*/
+
+#include <iostream>
+
+int main()
+{
+    int a{5};
+    int b{10};
+
+    std::cout << "交换前a = " << a << " , b = " << b << std::endl;
+
+    a = a ^ b;
+    b = a ^ b; // a展开,算式为b=(a^b)^b=a^0=a
+    a = a ^ b; // a和b展开,算式为a=(a^b) ^ [(a^b)^b]=(a^a)^(b^b)^b=0^0^b=0^b=b
+
+    std::cout << "交换后a = " << a << " , b = " << b << std::endl;
+
+    return 0;
+}
 ```
