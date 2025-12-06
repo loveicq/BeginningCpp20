@@ -365,7 +365,7 @@ int main()
 
 ## 3.8 练习
 1. 第1题
-```
+```cpp
 //第1题
 #include <iostream>
 #include <format>
@@ -386,7 +386,7 @@ int main()
 }
 ```
 2.第2题
-```
+```cpp
 // 第2题
 #include <iostream>
 #include <numbers>
@@ -407,7 +407,7 @@ int main()
 }
 ```
 3.第3题
-```
+```cpp
 // 第3题
 #include <iostream>
 
@@ -421,7 +421,7 @@ int main()
 }
 ```
 4.第4题
-```
+```cpp
 // 第4题
 #include <iostream>
 #include <format>
@@ -491,7 +491,7 @@ int main()
 }
 ```
 5.第5题
-```
+```cpp
 //第5题
 #include <iostream>
 #include <format>
@@ -536,7 +536,7 @@ int main()
 }
 ```
 6.第6题
-```
+```cpp
 // 第6题
 /*
 异或^规律:
