@@ -25,12 +25,6 @@ int main()
     std::cout << std::format("表达式 '{} < {}' 的值为{}.\n", first, second, first < second);
     std::cout << std::format("表达式 '{} == {}' 的值为{}.\n", first, second, first == second);
     */
-=======
-    std::cout << "test\n";
-    std::cout << "test\n";
-    std::cout << "test\n";
-    std::cout << "test\n";
->>>>>>> fcd7d43af3b83ae26ffc0fdce32f64a1748e02ee
 
     return 0;
 }
