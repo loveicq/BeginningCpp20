@@ -8,7 +8,10 @@ int main()
     std::cin >> value;
 
     if (value)
+    {
         std::cout << "你输入的是一个非0数字。" << std::endl;
+        return 0;
+    }
     if (value < 50)
         std::cout << "输入无效！你输入的数字小于50！" << std::endl;
     if (value > 100)

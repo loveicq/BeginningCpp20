@@ -74,4 +74,115 @@ int main()
    - `std::is_neq()` 不相等
    - `std::is_lteq()` 小于或等于
    - `std::is_gteq()` 大于或等于
+## 4.2 if语句
+- 简单的if语句可以写在一行上
+- 0会转换为`false`，其他非0值会转换为`true`
+  
+```cpp
+#include <iostream>
 
+int main()
+{
+    std::cout << "请输入一个50-100之间的整数：";
+
+    int value{};
+    std::cin >> value;
+
+    if (value)
+    {
+        std::cout << "你输入的是一个非0数字。" << std::endl;
+        return 0;
+    }
+    if (value < 50)
+        std::cout << "输入无效！你输入的数字小于50！" << std::endl;
+    if (value > 100)
+        std::cout << "输入无效！你输入的数字大于100！" << std::endl;
+
+    std::cout << "你输入的数字是" << value << "。" << std::endl;
+
+    return 0;
+}
+```
+### 4.2.1 嵌套的if语句
+```cpp
+#include <iostream>
+
+int main()
+{
+    std::cout << "请输入一个字母:";
+
+    char letter{};
+    std::cin >> letter;
+
+    if (letter >= 'A')
+    {
+        if (letter <= 'Z')
+        {
+            std::cout << "你输入的是大写字母。\n";
+            return 0;
+        }
+    }
+
+    if (letter >= 'a') // 此处少一对花括号，也是可以的。
+        if (letter <= 'z')
+        {
+            std::cout << "你输入的是小写字母。\n";
+            return 0;
+        }
+
+    std::cout << "你输入的不是字母。\n";
+
+    return 0;
+}
+```
+### 4.2.2 字符分类和转换
+`<cctype>`头文件提供的字符分类函数
+| 函数        | 所执行的动作                                                                                                 |
+| :---------- | :----------------------------------------------------------------------------------------------------------- |
+| isupper(c)  | 测试c是否是大写字母                                                                                          |
+| islower(c)  | 测试c是否是小写字母                                                                                          |
+| isalpha(c)  | 测试c是否是大写字母或小写字母（如果区域字母表包含其他字符，那么还要测试c是否既不是大写字母，也不是小写字母） |
+| isdigit(c)  | 测试c是否是数字                                                                                              |
+| isxdigit(c) | 测试c是否是十六进制数字，‘0’~‘9’、‘a’~‘f’或‘A’~‘F’                                                           |
+| isalnum(c)  | 测试c是否是字母字符                                                                                          |
+| isspace(c)  | 测试c是否是空白                                                                                              |
+| isblank(c)  | 测试c是否是空格字符                                                                                          |
+| ispunct(c)  | 测试c是否是标点符号_{}[]#()<>%:;.?*+-/^&                                                                     | ~!=,\'" |
+| isprint(c)  | 测试c是否是可打印字符                                                                                        |
+| iscntrl(c)  | 测试c是否是不可打印字符，即控制字符                                                                          |
+| isgraph(c)  | 测试c是否是图形字符，即除了空格之外的可打印字符                                                              |
+
+`cctype`头文件提供的字符转换函数
+| 函数       | 说明                                               |
+| :--------- | :------------------------------------------------- |
+| tolower(c) | 如果c是大写字母，就返回该字母的小写形式，否则返回c |
+| toupper(c) | 如果c是小写字母，就返回该字母的大写形式，否则返回c |
+
+```cpp
+#include <iostream>
+#include <cctype>
+
+int main()
+{
+    std::cout << "请输入一个字母：";
+
+    char letter;
+    std::cin >> letter;
+
+    if (std::isupper(letter))
+    {
+        std::cout << "你输入的是大写字母。\n";
+        return 0;
+    }
+
+    if (std::islower(letter))
+    {
+        std::cout << "你输入的是小写字母。\n";
+        return 0;
+    }
+
+    std::cout << "你输入的不是字母。\n";
+
+    return 0;
+}
+```
