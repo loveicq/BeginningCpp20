@@ -2,7 +2,6 @@
 
 int main()
 {
-<<<<<<< HEAD
     char first{};
     char second{};
 
