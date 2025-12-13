@@ -1,5 +1,8 @@
 #include <iostream>
+#include <cctype>
+
 int main()
 {
-    std::cout << "test";
+
+    return 0;
 }
