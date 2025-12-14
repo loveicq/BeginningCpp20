@@ -186,5 +186,72 @@ int main()
     return 0;
 }
 ```
+## 4.3 if_else语句
+```cpp
+// Ex4_05.cpp
+// 使用if-else语句
+#include <iostream>
+int main()
+{
+    long number{};
+    std::cout << "请输入一个小于20亿的整数:";
+    std::cin >> number;
 
-yafasdfydfadsf大规模
+    if (number % 2)
+    {
+        std::cout << "你输入的是奇数." << std::endl;
+    }
+    else
+    {
+        std::cout << "你输入的是偶数." << std::endl;
+    }
+}
+```
+### 4.3.1 嵌套的if-else语句
+else悬挂问题:if-else语句潜在造成的混淆  
+- 使用花括号使代码更清晰,有时候甚至是不可或缺的
+- 正确的缩进格式使代码更易读
+- else总是属于前面最接近的那if
+### 4.3.2 理解嵌套的if语句
+```cpp
+#include <iostream>
+
+int main()
+{
+    char coffee{};
+    char donuts{};
+    char tea{};
+
+    std::cout << "是否有咖啡?<y/n>:";
+    std::cin >> coffee;
+
+    std::cout << "是否有甜甜圈?<y/n>:";
+    std::cin >> donuts;
+
+    std::cout << "是否有茶叶?<y/n>:";
+    std::cin >> tea;
+
+    if (coffee == 'y')
+    {
+        if (donuts == 'y')
+        {
+            std::cout << "我们有咖啡和甜甜圈." << std::endl;
+        }
+        else
+        {
+            std::cout << "我们有咖啡,但是没有甜甜圈." << std::endl;
+        }
+    }
+    else
+    {
+        if (tea == 'y')
+        {
+            std::cout << "我们没有咖啡,但是我们有茶,而甜甜圈……" << std::endl;
+        }
+        else
+        {
+            std::cout << "没有茶和咖啡，但是甜甜圈……" << std::endl;
+        }
+    }
+}
+```
