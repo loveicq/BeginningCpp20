@@ -277,3 +277,54 @@ if(foo)
 if(!bar)
 if(!xyzzy)
 ```
+### 4.4.4 组合逻辑运算符
+```cpp
+#include <iostream>
+
+int main()
+{
+    int age{};
+    int income{};
+    int balance{};
+
+    std::cout << "请输入你的年龄:";
+    std::cin >> age;
+    std::cout << "请输入你的年收入:";
+    std::cin >> income;
+    std::cout << "请输入你的银行存款:";
+    std::cin >> balance;
+
+    if (age >= 21 && (income > 25'000 || balance > 100'000))
+    {
+        int loan{};
+        if (2 * income < balance / 2)
+        {
+            loan = 2 * income;
+        }
+        else
+        {
+            loan = balance / 2;
+        }
+        std::cout << "\n你可以贷" << loan << "美元." << std::endl;
+    }
+    else
+    {
+        std::cout << "\n很抱歉,你没有贷款资格." << std::endl;
+    }
+}
+```
+
+👉组合逻辑运算符时,应该总是添加小括号来提高代码的清晰度：  
+- (age < 30 && income > 25'000) || (age >= 30 && balance > 100'000);  
+- age < 30 && income > 25'000 || age >= 30 && balance > 100'000;
+### 4.4.5 对整数操作数应用逻辑运算符
+
+if(value)  
+    &nbsp;&nbsp; std::cout<<"你输入了一个非零值。"<<std::endl;  
+if(!value)  
+    &nbsp;&nbsp; std::cout<<"你输入了一个零值。"<<std::endl;  
+if(value && value)  
+    &nbsp;&nbsp; std::cout<<"两个都是非零数值。"<<std::endl;  
+👉逻辑运算符的每个数值操作数首先转换为bool类型，0转换为false，其它数值转换为true。
+
+
