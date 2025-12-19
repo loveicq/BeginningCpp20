@@ -379,3 +379,142 @@ int main()
 在三个选项之间进行选择：  
 `std::cout<<(a < b ? "a is less than b." : 
 (a == b ? "a is equal to b." : "a is greater than b."));`
+## 4.6 switch语句
+- 每个case值都必须是唯一的,但不必按一定的顺序
+- default标签可以放到普通case标签之间的任意位置
+- 如果没有default标签,且没有选中任何case值,switch语句就什么也不做
+- 最后一个case(default)后面加上break语句是良好的习惯
+```c++
+#include <iostream>
+
+int main()
+{
+    std::cout << "Your electronic recipe book is at your service.\n"
+              << "You can choose from the following delicious dishes:\n"
+              << "1. Boiled eggs\n"
+              << "2. Fried eggs\n"
+              << "3. Scrambled eggs\n"
+              << "4. Coddled eggs\n\n"
+              << "Enter your selection number: ";
+    int choice{};
+    std::cin >> choice;
+
+    switch (choice)
+    {
+    case 1:
+        std::cout << "Boil some eggs." << std::endl;
+        break;
+    case 2:
+        std::cout << "Fry some eggs." << std::endl;
+        break;
+    case 3:
+        std::cout << "Scramble some eggs." << std::endl;
+        break;
+    case 4:
+        std::cout << "Coddle some eggs." << std::endl;
+        break;
+    default:
+        std::cout << "You entered a wrong number - try raw eggs." << std::endl;
+        break;
+    }
+}
+```
+- 每个case值都必须是编译时常量
+- 几个case值可以共享相同的操作
+```c++
+#include <iostream>
+#include <cctype>
+
+int main()
+{
+    char letter{};
+    std::cout << "Enter a letter: ";
+    std::cin >> letter;
+
+    if (std::isalpha(letter))
+    {
+        switch (std::tolower(letter))
+        {
+        case 'a':
+        case 'e':
+        case 'i':
+        case 'o':
+        case 'u':
+            std::cout << "You entered a vowel." << std::endl;
+            break;
+        default:
+            std::cout << "You entered a consonant." << std::endl;
+            break;
+        }
+    }
+    else
+    {
+        std::cout << "You did not enter a letter." << std::endl;
+    }
+}
+```
+```c++
+#include <iostream>
+#include <cctype>
+
+int main()
+{
+    char letter{};
+    std::cout << "Enter a letter: ";
+    std::cin >> letter;
+
+    if (std::isalpha(letter))
+    {
+        switch (std::tolower(letter))
+        {
+        case 'a':
+        case 'e':
+        case 'i':
+        case 'o':
+        case 'u':
+            std::cout << "You entered a vowel." << std::endl;
+            return 0;
+        }
+        std::cout << "You entered a consonant." << std::endl;
+    }
+    else
+    {
+        std::cout << "You did not enter a letter." << std::endl;
+    }
+}
+```
+👉贯穿  
+- case后面没有跟break,即会贯穿到下一个case
+- 大多数时候贯穿代表存在bug
+- 但是贯穿并不一定总是意味着存在错误
+```c++
+#include <iostream>
+
+int main()
+{
+    std::cout << "Enter a number: ";
+    int ticket_number{};
+    std::cin >> ticket_number;
+
+    switch (ticket_number)
+    {
+    case 147:
+        std::cout << "You win first prize!" << std::endl;
+        break;
+    case 387:
+    case 123:
+        std::cout << "You win second prize!" << std::endl;
+        break;
+    case 929:
+        std::cout << "You win a special bonus prize!" << std::endl;
+        [[fallthrough]]; // 此语句告诉编译器和阅读代码的人,我故意使用了贯穿行为.
+    case 29:
+    case 78:
+        std::cout << "You win third prize!" << std::endl;
+        break;
+    default:
+        std::cout << "Sorry, you lose!" << std::endl;
+        break;
+    }
+}
+```
