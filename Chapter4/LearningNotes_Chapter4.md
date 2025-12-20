@@ -483,7 +483,7 @@ int main()
     }
 }
 ```
-👉贯穿  
+**贯穿**  
 - case后面没有跟break,即会贯穿到下一个case
 - 大多数时候贯穿代表存在bug
 - 但是贯穿并不一定总是意味着存在错误
@@ -515,6 +515,108 @@ int main()
     default:
         std::cout << "Sorry, you lose!" << std::endl;
         break;
+    }
+}
+```
+## 4.7 语句块和变量作用域
+```c++
+//错误示例
+#include <iostream>
+
+int main()
+{
+    int test{3};
+    switch (test)
+    {
+        int i{1}; // switch正常执行必须是case语句,执行不到这一句
+    case 1:
+        int j{2};
+        std::cout << test + j << std::endl;
+        break;
+        int k{3}; // 已经break了,这一句也永远不会执行
+    case 3:
+    { // 注意,case语句后有大括号,m的作用域仅限于此大括号内,初始化是合法的
+        int m{4};
+        std::cout << test + m << std::endl;
+        break;
+    }
+    default:
+        int n{5};
+        std::cout << test + n << std::endl;
+        break;
+    }
+    std::cout << j << std::endl;//使用作用域外变量
+    std::cout << n << std::endl;//使用作用域外变量
+}
+```
+- 整个switch是一个作用域
+- C++标准有一条重要规则:不能跳过一个带有显式初始化的变量的声明点,因switch会跳转,所以一般不能在switch语句块内定义并初始化变量,除非再用大括号包起来(创建新作用域)  
+
+👉switch内使用新变量的解决办法
+1. 使用大括号创建作用域,如:`case 1:{int x=5;...;break;}`
+2. 分开声明和赋值,如:`case 1:int x;x=5;...;break;`
+3. 使用复合语句,如:`case 1:if(true) {int x=5;...;}...;break;`
+
+**初始化语句**  
+👉注意!以下两个初始化语句都是在C++17以后才支持的语法
+1. if (initialization; condition)...  
+    `if (auto lower { static_cast <char> (std::tolower(input)) }; lower >= 'a' && lower <= 'z')`
+2. switch (initialization; condition) {...}
+
+## 4.8 本章小结
+## 4.9 练习
+1. 第1题
+```c++
+#include <iostream>
+
+int main()
+{
+    int a{}, b{};
+
+    std::cout << "输入整数a:";
+    std::cin >> a;
+    std::cout << "输入整数b:";
+    std::cin >> b;
+
+    if (a == b)
+        std::cout << "a等于b" << std::endl;
+    else
+        std::cout << "a不等于b" << std::endl;
+}
+```
+2. 第2题
+```c++
+#include <iostream>
+#include <format>
+
+int main()
+{
+    int a{}, b{};
+
+    std::cout << "输入整数a:";
+    std::cin >> a;
+    std::cout << "输入整数b:";
+    std::cin >> b;
+
+    if (a <= 0 || b <= 0)
+    {
+        std::cout << "a和b必须是正整数!" << std::endl;
+        return 1;
+    }
+
+    if (a < b)
+    {
+        if (b % a == 0)
+            std::cout << std::format("{}是{}的整数倍.\n", b, a);
+        else
+            std::cout << std::format("{}不是{}的整数倍.\n", b, a);
+    }
+    else
+    {
+        if (a % b == 0)
+            std::cout << std::format("{}是{}的整数倍.\n", a, b);
+        else
+            std::cout << std::format("{}不是{}的整数倍.\n", a, b);
     }
 }
 ```
