@@ -935,7 +935,7 @@ int main()
 
         // 计算5美分数量
         const auto nickels{amountInCents / nickel};
-        auto pennies = amountInCents % nickel;
+        const auto pennies = amountInCents % nickel;
 
         // 输出换算结果,并且体现单数和复数的语法
         std::cout << std::endl
