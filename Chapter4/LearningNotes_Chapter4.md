@@ -784,3 +784,172 @@ int main()
     }
 }
 ```
+5. 第5题
+```c++
+#include <iostream>
+
+int main()
+{
+    int mice;
+    int whiteMouse;
+    int brownMouse;
+
+    std::cout << "How many white mice do you have? : ";
+    std::cin >> whiteMouse;
+    std::cout << "How many brown mice do you have? : ";
+    std::cin >> brownMouse;
+
+    if (whiteMouse < 0 || brownMouse < 0)
+    {
+        std::cout << "One cannot have a negative amount of mice..." << std::endl;
+        return 1;
+    }
+
+    mice = whiteMouse + brownMouse;
+
+    std::cout << "You have " << mice << (mice == 1 || mice == 0 ? " mouse." : " mice.") << std::endl;
+
+    if (mice == 1)
+    {
+        std::cout << "It is a " << (brownMouse ? "brown " : "white ") << "mouse." << std::endl;
+        return 0;
+    }
+
+    if (brownMouse)
+    {
+        std::cout << "Of these mice, "
+                  << brownMouse
+                  << (brownMouse == 1 ? " is a brown" : " are brown")
+                  << (brownMouse == 1 ? " mouse." : " mice.")
+                  << std::endl;
+    }
+    else
+        std::cout << "There is no brown mouse." << std::endl;
+}
+```
+6. 第6题
+```c++
+#include <iostream>
+
+int main()
+{
+    int num{};
+    std::cout << "Input a integer: ";
+    std::cin >> num;
+
+    std::cout << "The number is "
+              << (num <= 20 ? "not greater than 20." :
+               (num > 20 && num <= 30 ? " greater than 20 and not greater than 30." :
+                (num > 30 && num <= 100 ? " greater than 30 and not greater than 100." :
+                 "greater than 100.")))
+              << std::endl;
+}
+```
+7. 第7题
+```c++
+#include <iostream>
+#include <format>
+#include <cctype>
+
+int main()
+{
+    char letter{};
+    std::cout << "Enter a letter: ";
+    std::cin >> letter;
+
+    // 如果字符不是字母则退出程序
+    if (!std::isalpha(letter))
+    {
+        std::cout << "That's not a letter!" << std::endl;
+        return 1;
+    }
+
+    // 判断字符是不是元音字母
+    const auto lowerCaseLetter{std::tolower(letter)};
+    std::cout << "'" << letter << "' is a ";
+    switch (lowerCaseLetter)
+    {
+    case 'a':
+    case 'e':
+    case 'i':
+    case 'o':
+    case 'u':
+        std::cout << "vowel.";
+        break;
+    default:
+        std::cout << "consonant.";
+        break;
+    }
+    std::cout << std::endl;
+
+    // 判断字符是小写还是大写,并输出信息
+    std::cout << "'" << letter << "' is "
+              << (std::islower(letter) ? "lowercase." : "uppercase.")
+              << std::endl;
+
+    // 输出字符编码的二进制值
+    std::cout << "The binary code for '" << static_cast<char>(lowerCaseLetter) << "' is 0b"
+              << ((lowerCaseLetter & 0b1 << 7) ? 1 : 0)
+              << ((lowerCaseLetter & 0b1 << 6) ? 1 : 0)
+              << ((lowerCaseLetter & 0b1 << 5) ? 1 : 0)
+              << ((lowerCaseLetter & 0b1 << 4) ? 1 : 0)
+              << "'"
+              << ((lowerCaseLetter & 0b1 << 3) ? 1 : 0)
+              << ((lowerCaseLetter & 0b1 << 2) ? 1 : 0)
+              << ((lowerCaseLetter & 0b1 << 1) ? 1 : 0)
+              << ((lowerCaseLetter & 0b1 << 0) ? 1 : 0)
+              << "."
+              << std::endl;
+
+    // 用format格式化输出二进制数值
+    std::cout << "Use the format() to represent the letter in binary is " << std::format("{:#010b}.", lowerCaseLetter) << std::endl;
+}
+```
+8. 第8题
+```c++
+#include <iostream>
+
+int main()
+{
+    const unsigned quarter{25};
+    const unsigned dime{10};
+    const unsigned nickel{5};
+    double amountInDollars{0.0};
+
+    std::cout << std::endl
+              << "Please enter a cash amount between 0 and 10 dollars:$";
+    std::cin >> amountInDollars;
+
+    if (amountInDollars >= 0.0 && amountInDollars <= 10.0) // 如果在0-10美元之间则执行
+    {
+        // 美元换算成美分
+        auto amountInCents{static_cast<unsigned>(amountInDollars * 100.0 + 0.5)};
+
+        // 计算25美分数量
+        const auto quarters{amountInCents / quarter};
+        amountInCents %= quarter;
+
+        // 计算10美分数量
+        const auto dimes{amountInCents / dime};
+        amountInCents %= dime;
+
+        // 计算5美分数量
+        const auto nickels{amountInCents / nickel};
+        auto pennies = amountInCents % nickel;
+
+        // 输出换算结果,并且体现单数和复数的语法
+        std::cout << std::endl
+                  << "The dollar value $" << amountInDollars << " can be broken down into:" << std::endl
+                  << quarters << "quarter" << (quarters > 1 ? "s" : "") << "," << std::endl
+                  << dimes << "dime" << (dimes > 1 ? "s" : "") << "," << std::endl
+                  << nickels << "nickel" << (nickels > 1 ? "s" : "") << "," << std::endl
+                  << pennies << "penn" << (pennies > 1 ? "ies" : "y") << "." << std::endl;
+    }
+    else
+    {
+        // 如果不在0-10美元之间,则提醒错误,退出程序
+        std::cout << std::endl
+                  << "You didn't enter an amount between $0 and $10." << std::endl;
+    }
+}
+```
