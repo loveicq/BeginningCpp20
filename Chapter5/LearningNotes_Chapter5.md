@@ -49,3 +49,42 @@ int main()
     std::cout << count << " people are below average height." << std::endl;
 }
 ```
+## 5.5 用初始化列表定义数组的大小(此大小指元素个数,非内存占用大小)
+在数组的定义中提供一个或多个初始值,就可以忽略数组的大小.元素的个数就是初始值的个数.例如:  
+`int values[]{2,3,4};`等价于`int values[3]{2,3,4};`
+## 5.6 确定数组的大小(此大小指元素个数,非内存占用大小)
+1. 使用标准库的<array>模块中提供的std::size()函数  
+  `int values[]{2,3,5,7,11,13,17,19,23,29};`  
+  `std::size(values)`可得到数组的大小为10.
+2. std::size()函数不只用于数组,还可以用来获得标准库定义的任何元素集合的大小,如std::vector<>和std::array<>容器
+3. 使用sizeof运算符确定数组元素个数的方法:用数组的大小除以单个元素的大小即可.
+```c++
+#include <iostream>
+#include <iterator> //为了可移植,应显式包含此头文件,而不是包含<array>,或者不包含(虽然在GCC15.1.0中不包含也可以编译通过)
+
+int main()
+{
+    int values[]{2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+
+    std::cout << "There are " << std::size(values) << " elements in the array." << std::endl;
+
+    auto sum{0};
+    const size_t old_school_size = sizeof(values) / sizeof(values[0]);
+    for (size_t i{}; i < old_school_size; ++i)
+    {
+        sum += values[i];
+    }
+    std::cout << "The array have " << old_school_size << " elements.\n"
+              << "The sum of the array elements is " << sum << "." << std::endl;
+}
+```
+4. C++17以后,应该用std::size()函数,而不是用sizeof()运算符
+5. for循环可以在第三个循环控制表达式中累加元素的和  
+  `auto sum{0};`  
+  `for (size_t {}; i<std::size(values); sum += values[i++]);`  
+  注意:  
+     1. 上式中必须使用后缀++递增i,如果使用前缀++就会先递增i,计算结果将出错!
+     2. 上式中行尾的单个分号是循环体的空语句!本例能够采用这种形式,是因为所有的计算都在循环控制表达式中完成了.
+     3. 不推荐上式此种"简洁而聪明"的代码（在第三个控制表达式中计算）,而应该选择传统的、清晰的代码
+## 5.7 用浮点数控制for循环
+
