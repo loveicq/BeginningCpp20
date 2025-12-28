@@ -87,4 +87,102 @@ int main()
      2. 上式中行尾的单个分号是循环体的空语句!本例能够采用这种形式,是因为所有的计算都在循环控制表达式中完成了.
      3. 不推荐上式此种"简洁而聪明"的代码（在第三个控制表达式中计算）,而应该选择传统的、清晰的代码
 ## 5.7 用浮点数控制for循环
+1. 使用浮点变量控制for循环时要小心小数部分的值可能不能用二进制浮点数准确地表示.
+```c++
+#include <iostream>
+#include <format>
+#include <numbers>
 
+int main()
+{
+    const size_t values_per_line{3};
+    size_t values_current_line{};
+    for (double radius{0.2}; radius <= 3.0; radius += 0.2)
+    {
+        const auto area = std::numbers::pi * radius * radius;
+        std::cout << std::format("radius = {:4.2f}, area = {:5.2f}; ", radius, area);
+        if (++values_current_line == values_per_line)
+        {
+            std::cout << std::endl;
+            values_current_line = 0;
+        }
+    }
+    std::cout << std::endl;
+}
+```
+2. 上面程序可学习的点:  
+   - 使用values_per_line和values_current_line变量控制每行的数值数量,输出三句即输入回车,同时values_current_line归零
+   - 不会再改变的变量,用const定义成常量
+   - auto的使用
+   - 注意++values_current_line的++放在不同位置,每行输出的值集数可能不同
+   - format时,精准控制输出数值的宽度,同时注意使用空格保持输出数值的可读性
+   - 🧨循环判断radius <= 3.0,但radius到2.8时就停止了,原因是下一轮radius结果比3.0略大,这是浮点数的二进制表示误差问题.如果非得使用浮点数进行判断,最经常和保险的做法是用容差判断.  
+```c++
+#include <iostream>
+#include <format>
+#include <numbers>
+
+int main()
+{
+    const size_t values_per_line{3};
+    size_t values_current_line{};
+
+    //radius < 3.0 + 0.001; 容差判断
+    for (double radius = 0.2; radius < 3.0 + 0.001; radius += 0.2)
+    {
+        const auto area = std::numbers::pi * radius * radius;
+        std::cout << std::format("radius = {:4.2f}, area = {:5.2f}; ", radius, area);
+        if (++values_current_line == values_per_line)
+        {
+            std::cout << std::endl;
+            values_current_line = 0;
+        }
+    }
+    std::cout << std::endl;
+}
+```
+3. 任何数字,只要其分数部分的分母是奇数,就不能准确地表示为二进制浮点数(不能被2整除)
+## 5.8 使用更复杂的for循环控制表达式
+在第一个for循环控制表达式中定义并初始化多个给定类型的变量,变量之间用逗号隔开
+```c++
+#include <iostream>
+#include <format>
+
+int main()
+{
+    unsigned limit{};
+    std::cout << "This program calculates n! and the sum of the integers "
+              << "up to n for values 1 to limit.\n";
+    std::cout << "What upper limit for n would you like? Input a integer:";
+    std::cin >> limit;
+
+    constexpr auto table_format = "{:>8} {:>8} {:>20}\n"; 
+    //书中使用const auto编译错误,因为format()第一个参数要求必须是编译时常量,
+    //而编译器不认为const是编译时常量.constexpr是强制编译时常量.
+
+    std::cout << std::format(table_format, "integer", "sum", "factorial");
+
+    for (unsigned long long n{1}, sum{}, factorial{1}; n <= limit; ++n)
+    {
+        sum += n;
+        factorial *= n;
+        std::cout << std::format(table_format, n, sum, factorial);
+    }
+}
+```
+**逗号运算符**  
+- 逗号运算符是一个二元运算符,运算结果是其右操作数的结果
+- 逗号运算符是左相关的,在所有的运算符中优先级最低
+```c++
+#include <iostream>
+
+int main()
+{
+    auto i{1};
+    auto value1{1};
+    auto value2{1};
+    auto value3{1};
+
+    std::cout << "运算结果是:" << (value1 += ++i, value2 += ++i, value3 += ++i) << std::endl;
+}
+```
