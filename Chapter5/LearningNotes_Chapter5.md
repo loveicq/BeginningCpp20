@@ -186,3 +186,67 @@ int main()
     std::cout << "运算结果是:" << (value1 += ++i, value2 += ++i, value3 += ++i) << std::endl;
 }
 ```
+## 5.9 基于范围的for循环(C++20)
+1. 基于范围的for循环的一般形式如下:  
+    `for([initialization;] range_declaration : range_expression)`  
+    `loop statement or block`  
+    range_declaration标识了一个变量,它会被依次赋予范围中的每个值,在每次迭代时都会赋予一个新值.  
+    例:  
+    int values[]{2,3,5,7,11,13,17,19,23,29};  
+    int total{};  
+    for(int x:values)  
+        total+=x;
+2. auto关键字在基于范围的for循环中很常见.  
+    for(auto x:values)  
+        total+=x;
+3. for循环内的x变量是局部变量,在循环外部不存在.不能通过修改x的值来修改values数组的元素.
+## 5.10 while循环
+```c++
+#include <iostream>
+#include <format>
+
+int main()
+{
+    unsigned limit{};
+
+    std::cout << "This program calculates n! and the sum of the integers "
+              << "up to n for values 1 to limit.\n";
+    std::cout << "What upper limit for n would you like? Input a ingeter less than 21: ";
+    std::cin >> limit;
+
+    constexpr auto table_format = "{:<8} {:<8} {:<20}\n";
+
+    std::cout << std::format(table_format, "integer", "sum", "factorial");
+
+    unsigned n{};
+    unsigned sum{};
+    unsigned long long factorial{1ULL};
+
+    while (++n <= limit)
+    {
+        sum += n;
+        factorial *= n;
+        std::cout << std::format(table_format, n, sum, factorial);
+    }
+}
+```
+**for与while转换**
+1. for
+```c++
+for (initialization; condition; iteration)
+{
+    body;
+}
+```
+2. while
+```c++
+{
+    initialization;  
+    while (condition)  
+    {
+        body;  
+        iteration;  
+    }  
+ }
+ ```
+ ## 5.11 do-while循环
