@@ -250,3 +250,93 @@ for (initialization; condition; iteration)
  }
  ```
  ## 5.11 do-while循环
+```c++
+#include <iostream>
+#include <cctype>
+
+int main()
+{
+    char reply{};
+    int count{};
+    double temperature{};
+    double total{};
+
+    do
+    {
+        std::cout << "Enter a temperature reading: ";
+        std::cin >> temperature;
+
+        total += temperature;
+        ++count;
+
+        std::cout << "Do you want to enter another?(y/n): ";
+        std::cin >> reply;
+
+    } while (std::tolower(reply) == 'y');
+
+    std::cout << "The average temperature is " << total / count << std::endl;
+}
+```
+📌do-while语句有分号,但普通while循环的while()后面不应该加上分号.
+## 5.12 嵌套的循环
+```C++
+#include <iostream>
+#include <format>
+#include <cctype>
+
+int main()
+{
+    size_t table{};
+    const size_t table_min{2};
+    const size_t table_max{12};
+    char reply{};
+
+    do
+    {
+        std::cout << std::format("What size table would you like ({} to {})? ", table_min, table_max);
+        std::cin >> table;
+        std::cout << std::endl;
+
+        if (table < table_min || table > table_max)
+        {
+            std::cout << "Invalid table size entered.Program terminated." << std::endl;
+            return 1;
+        }
+
+        std::cout << std::format("{:>6}", '|');
+
+        for (size_t i{1}; i <= table; ++i)
+        {
+            std::cout << std::format(" {:3} |", i);
+        }
+        std::cout << std::endl;
+
+        for (size_t i{}; i <= table; ++i)
+        {
+            std::cout << "------";
+        }
+        std::cout << "-----";
+        std::cout << std::endl;
+        for (size_t i{1}; i <= table; ++i)
+        {
+            std::cout << std::format(" {:3} |", i);
+
+            for (size_t j{1}; j <= table; ++j)
+            {
+                std::cout << std::format(" {:3} |", i * j);
+            }
+            std::cout << std::endl;
+        }
+
+        std::cout << "\nDo you want another table(y or n)? ";
+        std::cin >> reply;
+    } while (std::tolower(reply) == 'y');
+}
+```
+此例可学习的点:  
+1. 采用format()可以结果和定位字符一起输出,如`format(" {:3} |",i*j)`输出"空格+占三位的数字+空格+|",便于对齐.
+2. 先输出表头,再用多重循环输出行和列的内容:  
+    - 第1重循环输出多少行,变量 i 控制行数
+    - 第2重循环输出多少列,变量 j 控制列数
+3. 最外面再套一个大循环do-while,用于处理是否再开始一轮
+4. 变量table用于控制要打印的行数和列数及其乘法结果,table_min和table_max控制最小和最大行列数,防止输入不合理的数值.
