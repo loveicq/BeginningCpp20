@@ -303,29 +303,32 @@ int main()
             return 1;
         }
 
-        std::cout << std::format("{:>6}", '|');
-
+        // 打印列表头
+        std::cout << std::format("{:>6}", '|'); // 打印表头第一个竖线
         for (size_t i{1}; i <= table; ++i)
         {
-            std::cout << std::format(" {:3} |", i);
+            std::cout << std::format(" {:3} |", i); // 打印表头后面的数字和竖线
         }
         std::cout << std::endl;
 
-        for (size_t i{}; i <= table; ++i)
+        // 打印表头下面的分隔线
+        for (size_t i{}; i <= table + 1; ++i)
         {
             std::cout << "------";
         }
-        std::cout << "-----";
         std::cout << std::endl;
+
+        // 外循环打印行内容
         for (size_t i{1}; i <= table; ++i)
         {
-            std::cout << std::format(" {:3} |", i);
+            std::cout << std::format(" {:3} |", i); // 打印行表头
 
+            // 内循环打印列内容
             for (size_t j{1}; j <= table; ++j)
             {
                 std::cout << std::format(" {:3} |", i * j);
             }
-            std::cout << std::endl;
+            std::cout << std::endl; // 打印完最后一列换到下一行
         }
 
         std::cout << "\nDo you want another table(y or n)? ";
