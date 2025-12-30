@@ -343,3 +343,49 @@ int main()
     - 第2重循环输出多少列,变量 j 控制列数
 3. 最外面再套一个大循环do-while,用于处理是否再开始一轮
 4. 变量table用于控制要打印的行数和列数及其乘法结果,table_min和table_max控制最小和最大行列数,防止输入不合理的数值.
+## 5.13 跳过循环迭代
+```c++
+#include <iostream>
+#include <format>
+#include <cctype>
+
+int main()
+{
+    constexpr auto header_format = "{:^11}{:^11}{:^11}{:^11}\n";
+    constexpr auto body_format = "{0:^11}{0:^11X}{0:^11d}{0:^11b}\n";
+
+    std::cout << std::format(header_format, "Character", "Hexadecimal", "Decimal", "Binary");
+    char ch{};
+    do
+    {
+        if (!std::isprint(ch))
+        {
+            continue;
+        }
+        std::cout << std::format(body_format, ch);
+    } while (ch++ < 127);
+}
+```
+修改成for循环
+```c++
+#include <iostream>
+#include <format>
+#include <cctype>
+
+int main()
+{
+    constexpr auto header_format = "{:^11}{:^11}{:^11}{:^11}\n";
+    constexpr auto body_format = "{0:^11}{1:^11d}{1:^11X}{1:^11b}\n";
+
+    std::cout << std::format(header_format, "Character", "Decimal", "Hexadecimal", "Binary");
+
+    for (int ch{}; ch <= 127; ++ch)
+    {
+        if (!std::isprint(static_cast<char>(ch)))
+        {
+            continue;
+        }
+        std::cout << std::format(body_format, static_cast<char>(ch), ch);
+    }
+}
+```
