@@ -457,3 +457,93 @@ int main()
     } while (std::tolower(reply) == 'y');
 }
 ```
+```c++
+#include <iostream>
+#include <format>
+
+int main()
+{
+    const size_t size{1000};
+    double x[size]{};
+    size_t count{};
+
+    while (true)
+    {
+        double input{};
+        std::cout << "Enter a non-zero value, or 0 to end: ";
+        std::cin >> input;
+        if (input == 0)
+        {
+            break;
+        }
+        x[count] = input;
+
+        if (++count == size)
+        {
+            std::cout << "Sorry, I can only store " << size << "values.\n";
+            break;
+        }
+    }
+    if (count == 0)
+    {
+        std::cout << "Nothing to sort..." << std::endl;
+        return 0;
+    }
+
+    std::cout << "Staring sort..." << std::endl;
+
+    while (true)
+    {
+        bool swapped{false};
+
+        for (size_t i{}; i < count - 1; ++i)
+        {
+            if (x[i] > x[i + 1])
+            {
+                const auto temp = x[i];
+                x[i] = x[i + 1];
+                x[i + 1] = temp;
+                swapped = true;
+            }
+        }
+        if (!swapped)
+        {
+            break;
+        }
+    }
+
+    std::cout << "Your data in ascending sequence:\n";
+    const size_t perline{10};
+    size_t n{};
+    for (size_t i{}; i < count; ++i)
+    {
+        std::cout << std::format("{:8.1f}", x[i]);
+        if (++n == perline)
+        {
+            std::cout << std::endl;
+            n = 0;
+        }
+    }
+    std::cout << std::endl;
+}
+```
+## 5.15 使用无符号整数控制for循环
+从无符号整数减去值时应当小心.任何在数学意义上为负的值将被转换为一个极大的正数.这类错误在循环控制表达式中会造成灾难性后果.如果0-1的结果是numeric_limits<size_t>::max().
+解决方法:
+- 进入循环之前检查值是否为0,如案例Ex5_09.
+- 强制转换为带符号整数.`for (int i{};i<staic_cast<int>(count)-1;++i)`
+- 重写循环使其不再使用减法.`for(size_t i{};i+1<count;++i)`
+```c++
+    // 倒序输出案例Ex5_09的数组
+    n = 0;
+    for (auto i{static_cast<int>(count - 1)}; i >= 0; --i)
+    {
+        std::cout << std::format("{:8.1f}", x[i]);
+        if (++n == perline)
+        {
+            std::cout << std::endl;
+            n = 0;
+        }
+    }
+    std::cout << std::endl;
+```
