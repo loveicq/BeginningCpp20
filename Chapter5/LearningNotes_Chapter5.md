@@ -547,3 +547,54 @@ int main()
     }
     std::cout << std::endl;
 ```
+## 5.16 字符数组
+char 类型的数组:
+1. 字符数组,每个元素存储一个字符。`char vowels[5]{'a','e','i','o','u'}`没有以'\0'结尾，所以是字符数组。
+2. 字符串,结尾用空字符'\0'终止(C样式的字符串)。`char vowels[6]{'a','e','i','o','u'}`数组定义了6个元素，只初始化5个，第6个就默认为0,即'\0'，所以是字符串。字符串也可以看作字符数组。
+3. 另外的数组定义
+    - `char vowels[]{'a','e','i','o','u'};`--字符数组，编译器设置数组大小
+    - `char name[10]{"Mae West"}';`--字符串，初始化为一个字符串字面量,10个元素
+    - `char name[]{"Mae West"};`，9个元素
+4. 使用数组名可以输出字符串。`std::cout<<name<<std::endl;`。如果char数组没有用空字符'\0'结束，直接输出数组名，程序很可能崩溃。
+5. cin流的getline()函数可以读取一系列字符，包括空格。默认情况下，在读取换行符'\n'后输入结束。
+6. getline()有两个必选参数和一个可选参数。`std::cin.getline(test,max_length,'*')`，第一个参数指定存储的位置，第二个参数指定要存储的最大字符数，第三个指定'\n'的替代字符（输入多行文本时可用这个参数）。
+7. 空字符'\0'会被转换为布尔值false，所以有以下判断形式`for (int i{};text[i];i++)`。text[i]等价于text[i] == '\0'。
+
+```c++
+#include <iostream>
+#include <cctype>
+
+int main()
+{
+    const unsigned max_length{100};
+    char text[max_length]{};
+
+    std::cout << "Enter a line of text:" << std::endl;
+    std::cin.getline(text, max_length);
+    std::cout << "You entered:\n"
+              << text << std::endl;
+
+    size_t vowels{};
+    size_t consonants{};
+    for (int i{}; text[i] != '\0'; i++)
+    {
+        if (std::isalpha(text[i]))
+        {
+            switch (std::tolower(text[i]))
+            {
+            case 'a':
+            case 'e':
+            case 'i':
+            case 'o':
+            case 'u':
+                ++vowels;
+                break;
+            default:
+                ++consonants;
+            }
+        }
+    }
+    std::cout << "Your input contained " << vowels << " vowels and "
+              << consonants << " consonants." << std::endl;
+}
+```
