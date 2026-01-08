@@ -554,7 +554,7 @@ char 类型的数组:
 3. 另外的数组定义
     - `char vowels[]{'a','e','i','o','u'};`--字符数组，编译器设置数组大小
     - `char name[10]{"Mae West"}';`--字符串，初始化为一个字符串字面量,10个元素
-    - `char name[]{"Mae West"};`，9个元素
+    - `char name[]{"Mae West"};`，字符串,9个元素
 4. 使用数组名可以输出字符串。`std::cout<<name<<std::endl;`。如果char数组没有用空字符'\0'结束，直接输出数组名，程序很可能崩溃。
 5. cin流的getline()函数可以读取一系列字符，包括空格。默认情况下，在读取换行符'\n'后输入结束。
 6. getline()有两个必选参数和一个可选参数。`std::cin.getline(test,max_length,'*')`，第一个参数指定存储的位置，第二个参数指定要存储的最大字符数，第三个指定'\n'的替代字符（输入多行文本时可用这个参数）。
@@ -596,5 +596,173 @@ int main()
     }
     std::cout << "Your input contained " << vowels << " vowels and "
               << consonants << " consonants." << std::endl;
+}
+```
+## 5.17 多维数组
+- 一维数组:一个索引值来引用元素
+- 二维数组:两个索引值来引用元素
+- 三维数组:三个索引值来引用元素
+- `double carrots[3][4] {};`,第一个索引值指定行,第二个索引值指定列
+- 数组的元素存储在一个连续的内存块中
+- `std::cout<<carrots<<std::endl;`和char类型的数组不同,因为类型是double,这条语句会输出一个十六进制值,它是数组中第一个元素的内存地址
+- `std::size(arr)`返回数组第一维的大小,一维数组返回元素个数,二维数组返回第一维的数量(即行数)
+### 5.17.1 初始化多维数组
+1. 第一种形式(元素不齐)
+```c++
+    double carrots[3][4]
+    {
+        {2.5,3.2,3.7,4.1},
+        {4.1,3.9,1.6,3.5},
+        {2.8,2.3,0.9,1.1}
+    };
+```
+2. 第二种形式(元素不齐)
+```c++
+    double carrots[3][4]
+    {
+        {2.5,3.2},      //后两个元素初始化为0.0
+        {4.1},          //后三个元素初始化为0.0
+        {2.8,2.3,0.9}   //后一个元素初始化为0.0
+    };
+```
+3. 第三种形式(元素不齐)
+```c++
+    double carrots[3][4]{1.1,1.2,1.3,1.4,1.5,1.6,1.7};//元素填满一行再一行,不够则初始化为0.0
+```
+**在默认情况下设置维数**  
+可以让编译器根据初始值,决定数组的第一个维度的大小.
+1. 二维数组
+```c++
+    double carrots[][4]
+    {
+        {2.5,3.2},
+        {4.1},
+        {2.8,2.3,0.9}
+    };
+```
+2. 三维数组
+```c++
+    double numbers[][3][4]
+    {
+        {
+            {2,4,6,8},
+            {3,5,7,9},
+            {5,8,11,14}
+        },
+        {
+            {12,14,16,18},
+            {13,15,17,19},
+            {15,18,21,24}
+        }
+    };
+```
+### 5.17.2 多维字符数组
+1. 在用字符串字面量初始化char类型的二维数组时,不需要对每行字面量加上大括号——界定字面量的双引号就完成了大括号的工作。
+```c++
+//Ex5_11.cpp
+#include <iostream>
+#include <array>
+
+int main()
+{
+    const size_t max_length{80};
+    char stars[][max_length]{
+        "Fatty Arbuckle",
+        "Clara Bow",
+        "Boris Karloff",
+        "Mae West",
+        "Lassie",
+        "Slim Pickens",
+        "Oliver Hardy",
+        "Greta Garbo"};
+
+    size_t choice{};
+    std::cout << "Pick a lucky star! Enter a number between 1 and  "
+              << std::size(stars) << ": ";
+    std::cin >> choice;
+
+    if (choice >= 1 && choice <= std::size(stars))
+    {
+        std::cout << "Your lucky star is " << stars[choice - 1] << std::endl;
+    }
+    else
+    {
+        std::cout << "Sorry, you haven't got a lucky star." << std::endl;
+    }
+}
+```
+2. 多维字符数组只需要一个索引值就可以输出一个字符串
+3. 索引被指定为choice-1，因为choice值从1开始，而索引值需要从0开始。
+## 5.18 在运行期间给数组分配内存空间
+**注意**：这个案例在gcc15.1.0中提示错误：“ISO C++ forbids variable length array 'height' [-Wvla]”【C++标准禁止使用变长数组（VLA）】
+1. 案例一
+```c++
+// Ex5_12.cpp
+#include <iostream>
+#include <format>
+
+int main()
+{
+    size_t count{};
+    std::cout << "How man height will you enter? ";
+    std::cin >> count;
+    int height[count];
+
+    size_t entered{};
+    while (entered < count)
+    {
+        std::cout << "Enter a height (in inches): ";
+        std::cin >> height[entered];
+        if (height[entered] > 0)
+        {
+            ++entered;
+        }
+        else
+        {
+            std::cout << "A height must be positive - try again.\n";
+        }
+
+        unsigned total{};
+        for (size_t i{}; i < count; ++i)
+        {
+            total += height[i];
+        }
+
+        std::cout << std::format("The average height is {:.1f}\n",
+                                 static_cast<double>(total) / count);
+    }
+}
+```
+2. 案例二
+```c++
+// Ex5_12.cpp
+#include <iostream>
+#include <format>
+
+int main()
+{
+    size_t count{};
+    std::cout << "How man height will you enter? ";
+    std::cin >> count;
+    int height[count];
+
+    size_t entered{};
+    unsigned total{};
+    while (entered < count)
+    {
+        std::cout << "Enter a height (in inches): ";
+        std::cin >> height[entered];
+        if (height[entered] > 0)
+        {
+            total += height[entered++]; // 注意必须是后缀++
+        }
+        else
+        {
+            std::cout << "A height must be positive - try again.\n";
+        }
+
+        std::cout << std::format("The average height is {:.1f}\n",
+                                 static_cast<double>(total) / count);
+    }
 }
 ```
