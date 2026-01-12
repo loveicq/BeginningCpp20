@@ -766,3 +766,49 @@ int main()
     }
 }
 ```
+## 5.19 数组的替代品
+类模板
+- `std::array<T,N>`
+- `std::vector<T>`
+### 5.19.1 使用`array<T,N>`容器
+1. T表示Type,元素类型;N表示Number,编译时常量整数值。
+2. `array<T,N>`模板在`<array>`模块中定义。
+3. `std::array<double,100> values;`创建一个名称为values的对象,这个对象包含100个double类型的元素,其中`std::array<double,100>`是values对象的数据类型。
+4. 大部分标准库类型，包括vector<>和其它所有容器，总是初始化其元素，通常初始化为0。但是array<>是特殊情况，如果不指定初始值，则元素是垃圾值。也可以在定义时初始化其元素：`std::array<double,100>values{0.5,1.0,1.5,2.0};`，初始化前4个元素，后面的元素是0。
+5. C++17开始，编译器可以通过给定的初始化列表来推断模板参数。`std::array values {0.5,1.0,1.5,2.0}`，其类型是`std::array<double,4>`，并且这里推断出数组的大小为4，不是前面所说的100。要对模板参数进行推断，初始化列表就不能为空，且其中值的类型必须相同。
+6. array<>对象的fill()函数也可以把所有元素设置为某个给定的值。`values.fill(std::numbers::pi);`。
+7. array<>对象的size()函数返回size_t类型的元素个数。  
+
+<h4 style="color:#8B4513;font-weight:bold;font-style:italic;">1. 访问各个元素</h4>  
+
+- 使用索引可以访问和使用元素，其方式和标准数组相同。`values[3]=values[2]+2.0*values[1];`
+```c++
+//求所有元素的总和
+double total{};
+for(size_t i{};i<values.size();++i)
+{
+    total+= values[i];
+}
+```
+- array<>对象是一个范围，可以使用基于范围的for循环
+```c++
+//基于范围的for循环求所有元素的总和
+double total{};
+for(auto value:values)
+{
+    total+=value;
+}
+```
+- array<>对象的at()函数会检查索引值是否超出合法的范围，这个函数的参数是一个索引。如果运行时索引值i超出合法范围，at(i)函数会抛出一个异常。而values[i]则不会，很可能导致未定义行为。
+```c++
+double total{};
+for(size_t i{};i<values.size();++i)
+{
+    total+=values.at(i);
+}
+```
+- array<>对象的values.front()函数等同于values[0],values.back()函数等同于values[values.size()-1]。  
+
+<h4 style="color:#8B4513;font-weight:bold;font-style:italic;">2.将array<>作为整体操作</h4>  
+
+
