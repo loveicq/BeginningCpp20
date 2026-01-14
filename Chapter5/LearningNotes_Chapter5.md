@@ -779,7 +779,7 @@ int main()
 6. array<>对象的fill()函数也可以把所有元素设置为某个给定的值。`values.fill(std::numbers::pi);`。
 7. array<>对象的size()函数返回size_t类型的元素个数。  
 
-<h4 style="color:#8B4513;font-weight:bold;font-style:italic;">1. 访问各个元素</h4>  
+**1. 访问各个元素**
 
 - 使用索引可以访问和使用元素，其方式和标准数组相同。`values[3]=values[2]+2.0*values[1];`
 ```c++
@@ -809,6 +809,128 @@ for(size_t i{};i<values.size();++i)
 ```
 - array<>对象的values.front()函数等同于values[0],values.back()函数等同于values[values.size()-1]。  
 
-<h4 style="color:#8B4513;font-weight:bold;font-style:italic;">2.将array<>作为整体操作</h4>  
+**2.将array<>作为整体操作**  
 
+- 只要容器大小相同,存储相同类型的元素,就可以用任意比较运算符来比较整个array<>容器
+```c++
+#include <iostream>
+#include <array>
 
+int main()
+{
+    // 使用两对大括号分为两个作用域，these、those和them就变为局部变量，解决变量命名冲突问题
+    {
+        std::cout << "First we try out the comparison operators for std::array<> objects:" << std::endl;
+
+        std::array these{1.0, 2.0, 3.0, 4.0};
+        std::array those{1.0, 2.0, 3.0, 4.0};
+        std::array them{1.0, 1.0, 5.0, 5.0};
+
+        if (these == those)
+            std::cout << "these and those are equal." << std::endl;
+        if (those != them)
+            std::cout << "those and them are not equal." << std::endl;
+        if (those > them)
+            std::cout << "those are greater than them." << std::endl;
+        if (them < those)
+            std::cout << "them are less than those." << std::endl;
+    }
+
+    std::cout << std::endl;
+
+    {
+        std::cout << "Next we repeat exactly the same comparisons with plain C++ arrays:" << std::endl;
+
+        double these[]{1.0, 2.0, 3.0, 4.0};
+        double those[]{1.0, 2.0, 3.0, 4.0};
+        double them[]{1.0, 1.0, 5.0, 5.0};
+
+        if (these == those)
+            std::cout << "these and those are equal." << std::endl;
+        if (those != them)
+            std::cout << "those and them are not equal." << std::endl;
+        if (those > them)
+            std::cout << "those are greater than them." << std::endl;
+        if (them < those)
+            std::cout << "them are less than those." << std::endl;
+    }
+}
+```
+- C++20开始，已废弃使用<、>、==和!=的C风格数组类型的比较
+- 与标准数组不同，只要两个array<>容器存储相同数量和相同类型的元素，就可以直接赋值，如`them = those;`
+- array<>可以存储在其它容器内，而普通数组不行，如`std::vector<std::array<int ,3>> triplets;`
+
+**3.结论与示例**  
+```c++
+#include <iostream>
+#include <format>
+#include <array>
+
+int main()
+{
+    const unsigned min_wt{100};
+    const unsigned max_wt{250};
+    const unsigned wt_step{10};
+    const size_t wt_count{1 + (max_wt - min_wt) / wt_step};
+
+    const unsigned min_ht{48};
+    const unsigned max_ht{84};
+    const unsigned ht_step{2};
+    const size_t ht_count(1 + (max_ht - min_ht) / ht_step);
+
+    const double lbs_per_kg{2.2};
+    const double ins_per_m{39.37};
+    std::array<unsigned, wt_count> weight_lbs{};
+    std::array<unsigned, ht_count> height_ins{};
+
+    for (unsigned i{}, w{min_wt}; i < wt_count; w += wt_step, ++i)
+    {
+        weight_lbs[i] = w;
+    }
+
+    for (unsigned i{}, h{min_ht}; h <= max_ht; h += ht_step)
+    {
+        height_ins.at(i++) = h;
+    }
+
+    std::cout << std::format("{:>8}", "|");
+    for (auto w : weight_lbs)
+    {
+        std::cout << std::format("{:^6}|", w);
+    }
+    std::cout << std::endl;
+
+    for (unsigned i{1}; i < wt_count; ++i)
+    {
+        std::cout << "--------";
+    }
+    std::cout << std::endl;
+
+    const unsigned int inches_per_foot{12U};
+    for (auto h : height_ins)
+    {
+        const unsigned feet = h / inches_per_foot;
+        const unsigned inches = h % inches_per_foot;
+        std::cout << std::format("{:2}'{:2}\" |", feet, inches);
+
+        const double h_m = h / ins_per_m;
+        for (auto w : weight_lbs)
+        {
+            const double w_kg = w / lbs_per_kg;
+            const double bmi = w_kg / (h_m * h_m);
+            std::cout << std::format(" {:2.1f} |", bmi);
+        }
+        std::cout << std::endl;
+    }
+
+    for (size_t i{1}; i < wt_count; ++i)
+    {
+        std::cout << "--------";
+    }
+    std::cout << "\nBMI from 18.5 to 24.9 is normal" << std::endl;
+}
+```
+- 💯示例程序对输出表格的宽度进行过精细的计算!特别是`for(unsigned i{1};i<wt_count;++i)`，此处变量从1开始，循环15次，共15*8=120行宽！
+- 示例程序包含很多单位换算,需要查资料了解
+- 示例程序演示了基于范围的for循环用法
+- 示例程序演示了std::array<>对象的at()函数,比arr[i]安全,但不如arr[i]方便。
