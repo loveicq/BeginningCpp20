@@ -1,20 +1,29 @@
 #include <iostream>
-#include <format>
 #include <cctype>
+#include <format>
 
 int main()
 {
-    constexpr auto header_format = "{:^11}{:^11}{:^11}{:^11}\n";
-    constexpr auto body_format = "{0:^11}{1:^11d}{1:^11X}{1:^11b}\n";
+    unsigned count{};
+    long long total{};
 
-    std::cout << std::format(header_format, "Character", "Decimal", "Hexadecimal", "Binary");
-
-    for (int ch{}; ch <= 127; ++ch)
+    while (true)
     {
-        if (!std::isprint(static_cast<char>(ch)))
+        int n{};
+        std::cout << "Enter an integer: ";
+        std::cin >> n;
+        total += n;
+        ++count;
+
+        char yesNo{};
+        std::cout << "Do you want to enter another(y/n)? ";
+        std::cin >> yesNo;
+        if (std::tolower(yesNo) == 'n')
         {
-            continue;
+            break;
         }
-        std::cout << std::format(body_format, static_cast<char>(ch), ch);
     }
+
+    std::cout << std::format("Total:{},Average:{:.2f}.", total, static_cast<double>(total) / count)
+              << std::endl;
 }

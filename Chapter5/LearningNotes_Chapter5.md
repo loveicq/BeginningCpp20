@@ -1055,3 +1055,96 @@ int main()
 - vector<>会有很小的性能开销  
 
 🔺重点：如果在编译时知道元素的准确数量，就使用std::array<>，否则使用std::vector<>。基本不需要再使用普通数组！
+
+## 5.20 本章小结
+## 5.21 练习
+1. 第1题
+```c++
+#include <iostream>
+#include <format>
+
+int main()
+{
+    unsigned input{};
+
+    std::cout << "Input a positive integer: ";
+    std::cin >> input;
+
+    size_t perLine{};
+    for (size_t i{1}; i <= input; ++i)
+    {
+        if (i % 2 != 0)
+        {
+            std::cout << std::format("{:<10}", i * i);
+            perLine += 1;
+            if (perLine == 10)
+            {
+                std::cout << std::endl;
+                perLine = 0;
+            }
+        }
+    }
+
+    std::cout << std::endl;
+}
+```
+2. 第2题
+```c++
+#include <iostream>
+#include <cctype>
+#include <format>
+
+int main()
+{
+    unsigned count{};
+    long long total{};
+
+    while (true)
+    {
+        int n{};
+        std::cout << "Enter an integer: ";
+        std::cin >> n;
+        total += n;
+        ++count;
+
+        char yesNo{};
+        std::cout << "Do you want to enter another(y/n)? ";
+        std::cin >> yesNo;
+        if (std::tolower(yesNo) == 'n')
+        {
+            break;
+        }
+    }
+
+    std::cout << std::format("Total:{},Average:{:.2f}.", total, static_cast<double>(total) / count)
+              << std::endl;
+}
+```
+3. 第3题
+```c++
+#include <iostream>
+#include <cctype>
+
+int main()
+{
+    unsigned total{};
+    unsigned i{};
+    const unsigned max_length{100};
+    char text[max_length]{};
+
+    std::cout << "Enter a line of text:" << std::endl;
+    std::cin.getline(text, max_length);
+
+    do
+    {
+        if (!(std::isspace(text[i])))
+        {
+            ++total;
+        }
+        ++i;
+    } while (text[i] != '\0' && text[i] != '#');
+
+    std::cout << "You enter " << total << " non-blank characters. "
+              << std::endl;
+}
+```
