@@ -935,3 +935,123 @@ int main()
 - 例程演示了表格化显示数据的模式
 - 例程演示了基于范围的for循环用法
 - 例程演示了std::array<>对象的at()函数,比arr[i]安全,但不如arr[i]方便。
+### 5.19.2 使用`std::vector<T>`容器
+1. `vector<>`容器只有一个类型参数T,不用分配空间
+   - 容器变量声明
+     - `std::vector<double> values;`
+   - 使用push_back()函数添加元素
+     - `values.push_back(3.1415);`
+2. `vector<>`容器总是会初始化元素
+   - 元素默认初始化为0
+     - `std::vector<double> values(20);`，容器有20个元素，默认初始化值为0.0
+   - 也可以指定初始化值
+     - `std::vector<long> numbers(20,99L);`，容器有20个元素，初始化值为99L
+   - 也可以使用初始化列表指定初始值
+     - `std::vector<int> primes{2,3,5,7,11,13,17,19};`
+3. C++17编译器可以推断模板类型参数
+   - `std::vector primes{2,3,5,7,11,13,17,19};`，类型推断为`std::vector<int>`
+   - `std::vector<20,99L>;`，类型推断为`std::vector<long>`
+4. 初始化时使用大括号和小括号的差异
+   - 小括号
+     - `std::vector<double> values(20);`，初始化20个double类型的元素，值均为0
+     - `std::vector<long> numbers(20,99L);`，初始化20个long类型的元素，值均为99
+   - 大括号（初始化列表）
+     - `std::vector<double> values{20};`，初始化1个double类型的元素，值为20
+     - `std::vector<long> numbers(20,99L);`，初始化2个long类型的元素，值为20和99
+5. 可以使用中括号索引可以给已有的元素设置值，或者引用当前值
+   - `values[0]=std::numbers::pi;`          //Pi
+   - `values[1]=5.0;`                       //Radius of a circle
+   - `values[2]=2.0*values[0]*values[1];`   //Circumference of a circle
+6. 不能使用中括号索引创建新元素，应该使用push_back()函数
+7. `vector<>`对象也提供at()函数，只要索引可能会超出合法的范围，应该使用at()函数引用元素
+8. 可以使用size()成员查询`vector<>`的大小
+9. 可以使用函数front()和back()访问首尾元素
+10. 可以使用比较运算符比较两个`vector<>`容器，大小原则为字典序
+    - `arrdvark < zombie`，因为第一个元素a的ASCII编码为97，z为122
+    - `love < lovesickness`，因为字典序规定如果前缀字符相同，较短的字符串较小
+11. 将一个`vector<>`赋值给另一个`vecotr<>`时，会覆盖后者已经存在的任何元素。如果后者的元素更少，会分配更多的内存来容纳。
+12. `vecotr<>`没有fill()函数，但它提供assign()函数，用来重新初始化`vector<>`内容
+    - `std::vector numbers(20,99L);`//声明并初始化容器，20个元素，值均为99
+    - `numbers.assign(99,20L);`//重新初始化为99个元素，值均为20
+    - `numbers.assign({99L,20L});`//重新初始化为2个元素，值为99和20【注意：大括号（初始化列表法）与小括号不同】
+
+**1.删除元素**  
+1. 从C++20开始，可以使用`std::erase()`删除某个元素出现的所有位置
+   - `std::vector numbers{7,9,7,2,0,4};`//定义并初始化容器
+      - `std::erase(numbers,7);`//删除容器中值为7的所有元素
+2. 调用向量对象的clear()成员函数，可以删除`vector<>`中的所有元素
+   - 注意clear()与empty()的不同，empty()的作用是检查容器是否为空。当容器不包含元素时，empty()返回true
+3. 调用pop_back()函数，可以删除向量对象的最后一个元素
+   - `std::vector numbers{7,9,7,2,0,4};`//定义并初始化容器
+   - `numbers.pop_back();`//删除容器中最后一个元素，4
+
+**2.示例和结论**  
+```c++
+#include <iostream>
+#include <vector>
+
+int main()
+{
+    std::vector<double> x;
+
+    while (true)
+    {
+        double input{};
+        std::cout << "Enter a non-zero value,or 0 to end: ";
+        std::cin >> input;
+
+        if (input == 0)
+        {
+            break;
+        }
+
+        x.push_back(input);
+    }
+
+    if (x.empty())
+    {
+        std::cout << "Nothing to sort..." << std::endl;
+        return 0;
+    }
+
+    std::cout << "Starting sort." << std::endl;
+    while (true)
+    {
+        bool swapped(false);
+
+        for (size_t i{}; i < x.size() - 1; ++i) //x.size()-1是保证下面x[i+1]不会越界
+        {
+            if (x[i] > x[i + 1])
+            {
+                const auto temp = x[i];
+                x[i] = x[i + 1];
+                x[i + 1] = temp;
+                swapped = true;
+            }
+        }
+
+        if (!swapped)
+        {
+            break;
+        }
+    }
+
+    std::cout << "Your data in ascending sequence:\n";
+    const size_t perline{10};
+    size_t n{};
+    for (size_t i{}; i < x.size(); ++i)
+    {
+        std::cout << std::format("{:<8.1f}", x[i]);
+        if (++n == perline)
+        {
+            std::cout << std::endl;
+            n = 0;
+        }
+    }
+    std::cout << std::endl;
+}
+```
+结论：
+- vector<>会有很小的性能开销  
+
+🔺重点：如果在编译时知道元素的准确数量，就使用std::array<>，否则使用std::vector<>。基本不需要再使用普通数组！
