@@ -1137,14 +1137,91 @@ int main()
 
     do
     {
-        if (!(std::isspace(text[i])))
+        if (!std::isspace(text[i]))
         {
             ++total;
         }
         ++i;
     } while (text[i] != '\0' && text[i] != '#');
 
-    std::cout << "You enter " << total << " non-blank characters. "
+    std::cout << "You entered " << total << " non-blank characters. "
               << std::endl;
+}
+```
+4. 第4题
+```c++
+#include <iostream>
+
+int main()
+{
+    const unsigned maxCharacters{1000};
+    char enterString[maxCharacters]{};//无{}初始化，数组会存入垃圾值，直接使用会导致程序异常，比如后面无cin.getline()的操作。数组在全局/静态作用域（函数外或带 static 关键字）例外。
+
+    std::cout << "Enter a string less or equal than 1000 characters:" << std::endl;
+    std::cin.getline(enterString, maxCharacters);
+
+    // 统计字符串包含的字符数量
+    size_t count{};
+    for (; enterString[count]; ++count)
+    {
+    }
+
+    // 如果未输入字符,则提示未输入字符,直接退出程序
+    if (count == 0)
+    {
+        std::cout << "No characters were entered.\n";
+        return 1;
+    }
+
+    // 如果已输入字符,则显示字符总数
+    std::cout << "There're " << count << " characters.\n\n";
+
+    // 反向输出字符串
+    std::cout << "Reverse output this string:";
+    while (count > 0)
+    {
+        std::cout << enterString[count - 1];
+        count--;
+    }
+    std::cout << "." << std::endl;
+}
+```
+5. 第5题
+```c++
+#include <iostream>
+
+int main()
+{
+    const int maxCharacters{1000};
+    char characters[maxCharacters]{};
+
+    std::cout << "Please input a string:\n";
+
+    // 采用循环直接将字符写入数组.包含空白字符,所以得用cin.get()
+    char character{};
+    int count{};
+    do
+    {
+        std::cin.get(character);
+        if (character == '\n')
+            break;
+        characters[count] = character;
+        ++count;
+    } while (character != '\n' && count < maxCharacters);
+
+    if (count == 0)
+    {
+        std::cout << "No characters were entered!\n";
+        return 1;
+    }
+
+    // 显示字符总数
+    std::cout << "You entered " << count << " characters.\n";
+
+    // 逆向输出字符串
+    std::cout << "Reverse output this string:";
+    for (; count >= 0; --count)
+        std::cout << characters[count];
+    std::cout << ".\n";
 }
 ```

@@ -13,13 +13,13 @@ int main()
 
     do
     {
-        if (!(std::isspace(text[i])))
+        if (!std::isspace(text[i]))
         {
             ++total;
         }
         ++i;
     } while (text[i] != '\0' && text[i] != '#');
 
-    std::cout << "You enter " << total << " non-blank characters. "
+    std::cout << "You entered " << total << " non-blank characters. "
               << std::endl;
 }
