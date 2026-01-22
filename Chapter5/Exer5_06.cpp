@@ -8,7 +8,7 @@ int main()
     std::cout << "Enter a non-negative integer: ";
     std::cin >> maxInteger;
 
-    std::vector<int> integers;
+    std::vector<unsigned> integers;
     integers.reserve(maxInteger); // 预先一次分配合适的内存,避免每次push_back()都重新分配内存
 
     for (size_t i{}; i < maxInteger; ++i)
@@ -16,12 +16,11 @@ int main()
 
     const unsigned perLine{10};
     unsigned n{};
-    size_t i{};
-    do
+    for (auto integer : integers)
     {
-        if (integers[i] % 7 && integers[i] % 13) // 运算结果非0即为true,true && true才等于true
+        if (integer % 7 && integer % 13) // 运算结果非0即为true,true && true才等于true
         {
-            std::cout << std::format("{:<8}", integers[i]);
+            std::cout << std::format("{:<8}", integer);
             n++;
             if (n == perLine)
             {
@@ -29,7 +28,7 @@ int main()
                 n = 0;
             }
         }
-    } while (++i < maxInteger);
+    }
 
     std::cout << std::endl;
 }

@@ -1237,7 +1237,7 @@ int main()
     std::cout << "Enter a non-negative integer: ";
     std::cin >> maxInteger;
 
-    std::vector<int> integers;
+    std::vector<unsigned> integers;
     integers.reserve(maxInteger); // 预先一次分配合适的内存,避免每次push_back()都重新分配内存
 
     for (size_t i{}; i < maxInteger; ++i)
@@ -1245,12 +1245,11 @@ int main()
 
     const unsigned perLine{10};
     unsigned n{};
-    size_t i{};
-    do
+    for (auto integer : integers)
     {
-        if (integers[i] % 7 && integers[i] % 13) // 运算结果非0即为true,true && true才等于true
+        if (integer % 7 && integer % 13) // 运算结果非0即为true,true && true才等于true
         {
-            std::cout << std::format("{:<8}", integers[i]);
+            std::cout << std::format("{:<8}", integer);
             n++;
             if (n == perLine)
             {
@@ -1258,8 +1257,71 @@ int main()
                 n = 0;
             }
         }
-    } while (++i < maxInteger);
+    }
 
     std::cout << std::endl;
+}
+```
+7. 第7题
+```c++
+#include <iostream>
+#include <format>
+#include <vector>
+#include <cctype>
+
+int main()
+{
+    std::vector<size_t> productId;
+    std::vector<size_t> quantity;
+    std::vector<double> unitPrice;
+
+    for (;;)
+    {
+        size_t id{};
+        size_t number{};
+        double price{};
+
+        std::cout << "Please enter the product ID, product quantity and unit price , separated by Spaces:";
+        std::cin >> id >> number >> price;
+
+        productId.push_back(id);
+        quantity.push_back(number);
+        unitPrice.push_back(price);
+
+        char answer{};
+        std::cout << "Do we need to add more records?<Y/N>: ";
+        std::cin >> answer;
+        if (std::toupper(answer) == 'N')
+            break;
+    }
+
+    double totalPrice{};
+    std::cout << std::format("{:14}{:14}{:14}{:14}\n", "Product_Id", "Quantity", "Unit Price", "Cost");
+    for (size_t i{}; i < productId.size(); ++i)
+    {
+        double subtotal{quantity[i] * unitPrice[i]};
+        std::cout << std::format("{:<14}{:<14}${:<13.2f}${:<13.2f}\n", productId[i], quantity[i], unitPrice[i], subtotal);
+        totalPrice += subtotal;
+    }
+    std::cout << std::format("{:42}${:<13.2f}", "", totalPrice) << std::endl;
+}
+```
+8. 第8题
+```c++
+#include <iostream>
+#include <array>
+
+int main()
+{
+    const size_t maxNumber{93};
+    std::array<unsigned long long, maxNumber> fibonacci;
+    fibonacci[0] = fibonacci[1] = 1UL;
+    size_t i{1}; // 下面的while循环条件没有"=",可以使用size_t类型变量
+    while (++i < maxNumber)
+        fibonacci[i] = fibonacci[i - 1] + fibonacci[i - 2];
+
+    std::cout << "The first " << maxNumber << " fibonacci numbers are:\n";
+    for (auto number : fibonacci)
+        std::cout << number << std::endl;
 }
 ```
