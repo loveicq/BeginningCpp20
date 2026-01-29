@@ -170,3 +170,13 @@ int main()
     }
 }
 ```
+## 6.6 常量指针和指向常量的指针
+1. 指向常量的指针。指针指向的内容不能修改，但可以把指针设置为指向其他内容。
+    - `const char* pstring{"Some text that cannot be changed"};`
+    - `const int value{20};`,`const int* pvalue{&value};`
+    - 不能在非const类型的指针中存储const类型变量的地址
+2. 常量指针。存储在指针中的地址不能修改。常量指针只能指向初始化时指定的地址，但是地址的内容不是常量，可以修改。
+    - `int data{20};`,`int* const pdata{&data};`,`*pdata=25;`//允许修改
+    - 如果data声明为常量，就不能用&data初始化pdata，指针pdata只能指向int类型的非const变量。
+3. 指向常量的常量指针。存储在指针中的地址和指针指向的内容都是常量，都不能修改。
+    - `const float value{3.1415f};`,`const float* const pvalue{&value};`
