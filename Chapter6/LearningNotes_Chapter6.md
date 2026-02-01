@@ -344,3 +344,123 @@ int main()
 ✅记住黄金法则：从右向左读，const 修饰它左边紧邻的东西（在指针声明中）。  
 
 ## 6.7 指针和数组
+
+1. 数组名会退化为指针，除了char类型的数组(因为所有标准输出流都假定它是C样式的字符串)。因为数组名可以解释为地址，所以也可以用于初始化指针。
+```cpp
+double values[10];
+double* pvalue{value};
+```
+2. 尽管数组名是一个地址，但它不是指针。存储在指针中的地址可以修改，而数组名表示的地址是固定的。
+
+### 6.7.1 指针的自述运算
+
+1. 指针可以进行加减，得到地址结果；也可以进行指针比较，得到逻辑结果。
+```cpp
+double values[10];
+double* pvalue{value};   //pvalue=value[0]的地址
+++pvalue;                //自增后，pvalue=value[1]的地址，或pvalue += 1
+```
+2. 数组指针不一定指向数组的开始地址。
+```cpp
+double values[10];
+double* pvalue{&value[3]};   //pvalue=value[3]的地址
+//也可以用数组名偏移的方式得到地址，如：double* pvalue{value+3};
+++pvalue;                    //自增后，pvalue=value[4]的地址
+```
+3. 表达式pvalue + n的结果是给指针pvalue指向的地址加上n*sizeof(double)。
+```cpp
+*(pvalue + 1) = *(pvalue+2);
+value[4]=value[5];  //与上式等价
+```
+4. pvalue+1不会改变pvalue中的地址，而++pvalue和pvalue+=n会改变pvalue中的地址。
+5. 在递增或递减指针包含的地址后，解引用要使用小括号。
+```cpp
+//假设pvalue指向value[3]
+*(pvalue+1);    //解引用，得到value[4]的值
+*pvalue+1;      //先解引用得到value[3]的值，再+1
+```
+6. 如果指针包含无效的地址（如在它指向的数组上下限之外的地址），使用该指针存储一个值时，就会改写该地址所在的内存。这一般会导致灾难，程序将以某种方式失败。
+
+**1.计算两个指针之间的差**  
+
+1. 可以从一个指针减去另一个指针，但这仅在指针的类型相同且指向同一个数组中的元素时才有意义。
+```cpp
+long numbers[]{10,20,30,40,50,60,70,80};
+long* pnum1{&number[6]};//Point to 7th array element
+long* pnum2{&number[1]};//Point to 2nd array element
+auto difference {pnum1-pnum2};//Result is 5
+auto difference2 {pnum2-pnum1};//Result is -5
+```
+指针之差由元素（而不是由字节）决定。  
+
+2. C++语言规定，将两个指针相减，得到的值的类型为std::ptrdiff_t，这是在<csddef>模块中定义的某个带符号的整形的平台特定的类型`别名`
+```cpp
+std::ptrdiff_t difference2 {pnum2-pnum1};//Result is -5
+```
+取决于平台，std::ptrdiff_t通常是int、long或long long的别名。
+
+**2.比较指针**
+
+
+使用==、!=、<、>、<=和>=运算符，可以安全地比较相同类型的指针。如果指针指向的数组位置更深，或者所指向的元素的索引更高，指针就更大。
+```cpp
+pnum2<pnum1;//结果为true，因为pnum2-pnum1<0
+```
+
+### 6.7.2 使用数组名的指针表示法
+
+```cpp
+long data[5]{};
+//把data数组的值设置为偶数
+for(size_t i{};i<std::size(data);++i)
+    *(data+i)=2*(i+1);
+//累加数组元素的值
+long sum{};
+for(size_t i{};i<std::size(data);++i)
+    sum+=*(data+i);
+```
+```cpp
+//Ex6_05.cpp
+//利用指针计算质数
+#include <iostream>
+#include <format>
+
+int main()
+{
+    const size_t max{100};
+    long primes[max]{2L};
+    size_t count{1};
+    long trial{3L};
+    while (count < max)
+    {
+        bool isprime{true};
+        for (size_t i{}; i < count && isprime; ++i)
+        {
+            isprime = trial % *(primes + i) > 0;
+        }
+
+        if (isprime)
+        {
+            *(primes + count++) = trial;
+        }
+        trial += 2;
+    }
+
+    std::cout << "The first " << max << " primes are:" << std::endl;
+    for (size_t i{}; i < max; ++i)
+    {
+        std::cout << std::format("{:7}", *(primes + i));
+        if ((i + 1) % 10 == 0)
+            std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
+```
+**案例理解**  
+1. 质数是指在大于1的自然数中，除了1和它本身以外不再有其他因数的数。
+2. 2是最小的偶质数，3是最小的奇质数。
+3. 数组primes赋一个初值2，因为2是已知最小质数，同时不全部初始化为0，也避免了后面trial % *(primes+i)可能会产生被除数为0的错误。
+4. count赋初值为1，是因为已知第一个元素primes[0]=2，而如果count为0的话，*(primes + count++) 就不对了。
+5. trial赋初值为3，是因为下面从3开始测试。
+6. trial+=2;是避免计算偶数，因为偶数都不是质数（2除外）。
+7. 整个程序写得很紧凑，主要注意数组名退化为指针的用法：`*(primes+i)`和`*(primes+count)`。
