@@ -464,3 +464,109 @@ int main()
 5. trial赋初值为3，是因为下面从3开始测试。
 6. trial+=2;是避免计算偶数，因为偶数都不是质数（2除外）。
 7. 整个程序写得很紧凑，主要注意数组名退化为指针的用法：`*(primes+i)`和`*(primes+count)`。
+
+## 6.8 动态分配内存
+
+- 在动态分配内存时,请求分配的空间由其地址标识
+- 存储这个地址的地方是指针
+
+### 6.8.1 栈和自由存储区
+
+1. 在内存区域给自动变量分配的空间称为栈。调用函数时，传递给函数的参数和地址就存储在栈上，函数执行完毕后，就返回该地址。
+2. 操作系统或当前加载的其他程序未占用的内存称为自由存储区（堆）
+    - 使用new运算符给运行期间的新变量在堆中分配空间，并返回所分配空间的地址，把该地址存储在一个指针中。
+    - delete运算符用来释放new分配的内存。如果不用delete释放内存，程序执行结束时，变量会被自动释放。
+
+### 6.8.2 运算符new和delete
+
+1. 假定一个double类型的变量需要内存空间，可以定义一个指向double*类型的指针，再在执行程序时，请求为该变量分配内存空间。
+    ```cpp
+    double* pvalue{};
+    pvalue=new double;
+    *pvalue=3.14;
+    ```
+    - 如果自由存储区的内存空间已经用尽，new运算会抛出一个异常，该异常默认结束程序。
+2. 初始化变量  
+   1. `pvalue=new double{3.14};`
+   2. `double* pvalue{new double{3.14}};`
+3. 要注意区分变量初始化为0和指针初始化为nullptr
+   1. `double* pvalue{new double{}};`//变量初始化为0
+   2. `double* pvalue{};`//指针初始化为nullptr
+4. delete的问题
+   1. 如果没有delete内存，又在指针pvalue中存储了另一个地址，就不能分配和访问原来的内存空间。
+   2. 如果用delete释放了内存，但没有改变指针，此指针就变成悬挂指针，解引用悬挂指针会造成严重问题。所以delete后，应该马上重置指针：`pvalue=nullptr;`。
+   3. 解引用nullptr指针，会终止程序。
+   4. delete包含nullptr值的指针是安全的，delete前不用使用if测试。
+
+### 6.8.3 数组的动态内存分配
+
+1. 数组的动态内存分配
+    ```cpp
+    double* data{new double[100]{}};
+    int* one_two_three{new int[3]{1,2,3}};
+    float* fdata{new float[20]{.1f,.2f}};
+    int* one_two_three{new int[]{1,2,3}};//C++20及以后支持推断数组维数
+    ```
+2. 释放动态数组，需要在delete后面加上中括号[]。注意[]内不能写维数！！！
+    ```cpp
+    delete [] data;
+    ```
+3. delete后，还应该重置指针
+    ```cpp
+    data=nullptr;
+    ```
+4. 案例
+    ```cpp
+    //Ex6_06.cpp
+    #include <iostream>
+    #include <format>
+    #include <math.h>
+
+    int main()
+    {
+        size_t max{};
+        std::cout << "How many primes would you like? ";
+        std::cin >> max;
+
+        if (max == 0)
+            return 0;
+
+        auto *primes{new unsigned[max]};
+        primes[0] = 2;
+        size_t count{1};
+        unsigned trial{3};
+
+        while (count < max)
+        {
+            bool isprime{true};
+            const auto limit{static_cast<unsigned>(std::sqrt(trial))};
+            for (size_t i{}; primes[i] <= limit && isprime; ++i)
+                isprime = trial % primes[i] > 0;
+            if (isprime)
+                primes[count++] = trial;
+            trial += 2;
+        }
+
+        std::cout << "The first " << max << " primes are:" << std::endl;
+        for (size_t i{}; i < max; ++i)
+        {
+            std::cout << std::format("{:7}", primes[i]);
+            if ((i + 1) % 10 == 0) // primes[9]已经是第10个元素了,要换行,所以是i+1
+                std::cout << std::endl;
+        }
+        std::cout << std::endl;
+
+        delete[] primes;
+        primes = nullptr;
+    }
+    ```
+5. 在实际编程中，几乎总是应该使用vector<>容器来管理动态内存，比手动管理动态内存安全。
+
+**多维数组**  
+1. 标准C++不支持有多个动态维数的多维数组
+2. 可以使用auto关键字来定义一个动态维数的二维数组
+    ```cpp
+    auto carrots{new double[rows][4]{}};
+    ```
+3. 可以使用一维动态数组来模拟二维动态数组，但比较复杂
+4. 删除多维动态数组需要使用for循环逐个解除对行分配的内存，然后删除数组。应该把这种功能封装到一个可重用的类中。
