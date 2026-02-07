@@ -616,3 +616,140 @@ int main()
 ## 6.11 内存分配的黄金准则
 
 ❌在日常编码中，不要直接使用new、new[]、delete和delete[]运算符。应该使用std::vector<>容器来替换动态数组，或使用智能指针来动态分配对象并管理其生存期。这些高级替代方法比低级的内存管理方法安全得多，可立即清除程序中的所有悬挂指针、多次释放、分配/释放不匹配和内存泄漏问题。
+
+## 6.12 原始指针和智能指针
+
+1. 原始指针可以存储自动变量或在自由存储区中分配的变量的地址
+2. 智能指针仅用于存储在自由存储区中分配的内存的地址
+   - `unique_ptr<T>`对象：类似于指向T类型的指针。不能有多个`unique_ptr<T>`对象保存相同的地址。
+   - `shared_ptr<T>`对象：类似于指向T类型的指针。可以有任意多个`shared_ptr<T>`对象包含或共享相同的地址。
+     - 在任何给定时刻，运行时知道包含给定地址的shared_ptr<>对象的个数，称为引用计数。
+   - `weak_ptr<T>`对象：被链接到`shared_ptr<T>`上，包含相同的地址。创建weak_ptr<>不会递增所链接的shared_ptr<>对象的引用计数。
+
+### 6.12.1 使用`unique_ptr<T>`指针
+
+1. 以前创建和初始化`unique_ptr<T>`对象的方法：  
+`std::unique_ptr<double> pdata{new double{999.0}};`
+2. 现在创建和初始化`unique_ptr<T>`对象的方法：  
+`std::unique_ptr<double> pdata{std::make_unique<double>(999.0)};`  
+或  
+`auto pdata{std::make_unique<double> (999.0)};`
+3. 要创建一个`std::unique_ptr<T>`对象来指向新分配的T值，总是应该使用`std::make_unique<T>()`函数。
+4. 访问智能指针指向的地址和值
+    - 通过调用get()函数，可以访问智能指针包含的地址。  
+    `std::cout<<pdata.get()<<std::endl;`
+    - 通过解引用，可以访问智能指针指向地址的值。
+    `std::cout<<*pdata<<std::endl;`
+5. 创建指向数组的唯一指针  
+`auto pdata{std::make_unique<double[]>(n)};`
+6. 智能指针数组赋值  
+    ```cpp
+    for(size_t i{};i<n;++i)
+    pvalues[i]=static_cast<double>(i+1);
+    ```
+7. 智能指针数组读取
+    ```cpp
+    for(size_t i{};i<n;++i)
+    {
+    std::cout<<pvalues[i]<<' ';
+    if((i+1)%10==0)
+        std::cout<<std::endl;
+    }
+    ```
+8. 应该使用`vector<T>`容器而不是`unique_ptr<T[]>`
+9. 通过调用智能指针对象的`get()`函数，可以访问智能指针包含的地址
+    `std::cout<<pdata.get()<<std::endl;`
+10. 通过调用智能指针对象的`reset()`函数，可以重置`unique_ptr<>`中包含的指针或任意类型的智能指针。  
+    `pvalues.reset();`
+    ```cpp
+    //使用空的花括号，或者干脆省略花括号，可创建一个包含nullptr的智能指针
+    std::unique_ptr<int> my_number;//或... my_number{};
+    //通过reset()可以修改智能指针指向的值
+    my_number.reset(new int{123});//注意my_number是指针，所以必须new
+    ```
+11. 通过调用智能指针对象的`release()`函数，可以将智能指针转换为原始指针。特别要注意，此操作将导致智能指针不能自动释放内存，要程序员手动释放，否则容易造成**内存泄漏**。
+12. 在C++20中，智能指针使用值初始化，基本类型值就是0；可以使用`std::make_unique_default_init<T>()`或`make_unique_default_init<T[]>(n)`来提高效率，这两个函数是默认初始化，但是基本类型会导致不确定、未初始化的值。详见书中提示！
+13. 对于unique_ptr<>对象，**不允许**进行以下两种操作：
+    ```cpp
+    //第一种
+    std::unique_ptr<double> pdata{new double {999.0}};
+    std::unique_ptr<double> pdata2{pdata};
+    //第二种
+    auto pdata{std::make_unique<double> (999.0)};
+    std::make_unique<double> pdata2;
+    pdata2=pdata;
+    ```
+
+### 6.12.2 使用`shared_ptr<T>`指针
+
+1. 定义方式  
+`std::shared_ptr<double> pdata{new double{999.0}};`
+2. 解引用
+    ```cpp
+    std::cout<<*pdata<<std::endl;//输出999
+    *pdata=888.0;
+    std::cout<<*pdata<<std::endl;//输出888
+    ```
+3. 使用std::make_shared<T>()函数  
+`auto pdata{std::make_shared<double>(999.0)};`
+
+4. 定义`shared_ptr<T>`时，可以用另一个`shared_ptr<T>`初始化它。  
+`std::shared_ptr<double> pdata1{pdata};`
+
+```cpp
+// Ex6_07.cpp
+#include <iostream>
+#include <format>
+#include <memory>
+#include <vector>
+#include <cctype>
+
+int main()
+{
+    std::vector<std::shared_ptr<std::vector<double>>> records;
+    size_t day{1};
+
+    while (true)
+    {
+        auto day_records{std::make_shared<std::vector<double>>()};
+        records.push_back(day_records);
+
+        std::cout << "Enter the temperratures for day " << day++
+                  << " separated by spaces.Enter 1000 to end:\n";
+
+        while (true)
+        {
+            double t{};
+            std::cin >> t;
+            if (t == 1000.0)
+                break;
+
+            day_records->push_back(t);
+        }
+
+        std::cout << "Enter another day's tempertatures (Y or N)? ";
+        char answer;
+        std::cin >> answer;
+        if (std::toupper(answer) != 'Y')
+            break;
+    }
+
+    day = 1;
+
+    for (auto record : records)
+    {
+        double total{};
+        size_t count{};
+
+        std::cout << std::format("\nTemperatures for day {}:\n", day++);
+        for (auto temp : *record)
+        {
+            total += temp;
+            std::cout << std::format("{:6.2f}", temp);
+            if (++count % 5 == 0)
+                std::cout << std::endl;
+        }
+        std::cout << std::format("\nAverage temperature: {:.2f}", total / count) << std::endl;
+    }
+}
+```
