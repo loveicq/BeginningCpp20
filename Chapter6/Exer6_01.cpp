@@ -1,7 +1,7 @@
 // Exer6_01.cpp
 #include <iostream>
 #include <format>
-#include <array>
+#include <string>
 
 int main()
 {
@@ -13,9 +13,9 @@ int main()
         oddNumbers[i] = 2 * i + 1;
 
     // 计算数组最后一个元素的位数
-    unsigned maxValue{oddNumbers[NUMBER - 1]};
-    size_t count{std::to_string(maxValue).length()};
-    size_t width{count + 1};
+    unsigned maxValue{oddNumbers[NUMBER - 1]};       // 取得最大的奇数
+    size_t count{std::to_string(maxValue).length()}; // 计算最大奇数的位数
+    size_t width{count + 1};                         // 每个输出的数字宽度为最大奇数位数+1
 
     // 用指针正序输出数组元素（数组名退化为指针），每行10个元素
     std::cout << "正序输出：" << std::endl;

@@ -827,11 +827,11 @@ int main()
 // Exer6_01.cpp
 #include <iostream>
 #include <format>
-#include <array>
+#include <string>
 
 int main()
 {
-    const unsigned NUMBER{50};   // 要输出的奇数数量
+    const unsigned NUMBER{50};     // 要输出的奇数数量
     unsigned oddNumbers[NUMBER]{}; // 只考虑正奇数
 
     // 生成正奇数
@@ -839,9 +839,9 @@ int main()
         oddNumbers[i] = 2 * i + 1;
 
     // 计算数组最后一个元素的位数
-    unsigned maxValue{oddNumbers[NUMBER - 1]};
-    size_t count{std::to_string(maxValue).length()};
-    size_t width{count + 1};
+    unsigned maxValue{oddNumbers[NUMBER - 1]};       // 取得最大的奇数
+    size_t count{std::to_string(maxValue).length()}; // 计算最大奇数的位数
+    size_t width{count + 1};                         // 每个输出的数字宽度为最大奇数位数+1
 
     // 用指针正序输出数组元素（数组名退化为指针），每行10个元素
     std::cout << "正序输出：" << std::endl;
@@ -865,5 +865,46 @@ int main()
     std::cout << std::endl;
 }
 ```
+2. 第2题
+```cpp
+// Exer6_02.cpp
+#include <iostream>
+#include <format>
+#include <string>//应用std::to_string
 
+int main()
+{
+    const size_t NUMBER{50};
+    unsigned oddNumbers[NUMBER]{};
+
+    for (size_t i{}; i < NUMBER; ++i)
+        oddNumbers[i] = 2 * i + 1;
+
+    unsigned maxValue{*(oddNumbers + NUMBER - 1)};
+    size_t width(std::to_string(maxValue).length() + 1);
+
+    size_t count{};
+    size_t perLine{10};
+    auto *ascendingOrder{oddNumbers};
+    std::cout << "正序输出前" << NUMBER << "位正奇数:\n";
+    do
+    {
+        std::cout << std::format("{:{}}", *(ascendingOrder++), width);
+        if ((count + 1) % perLine == 0)
+            std::cout << std::endl;
+    } while (++count < NUMBER);
+
+    ascendingOrder = oddNumbers + NUMBER - 1;
+    count = 0;
+    std::cout << "\n逆序输出前" << NUMBER << "位正奇数:\n";
+    while (true)
+    {
+        std::cout << std::format("{:{}}", *(ascendingOrder--), width);
+        if (++count % perLine == 0)
+            std::cout << std::endl;
+        if (count == NUMBER)
+            break;
+    }
+}
+```
 
