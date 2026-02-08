@@ -753,3 +753,117 @@ int main()
     }
 }
 ```
+
+## 6.13 理解引用
+
+1. 引用是一个名称,可以用作某对象的别名
+2. 声明引用必须初始化
+3. 引用不能修改为另一个对象的别名
+
+### 6.13.1 定义引用
+
+1. 案例如下：
+    ```cpp
+    double data{3.5};
+    double& rdata{data};//给变量声明一个引用
+    ```
+    类型名后面的&符号表示，所定义的变量rdata是对double型变量的引用，可以把引用作为原始变量名的替代。
+2. 引用不需要解引用，直接像变量一样进行处理  
+`rdata+=2.5;`
+3. 引用和原变量的地址是相同的。
+    ```cpp
+    double* pdata1{&rdata};
+    double* pdata2{&data};//pdata1==pdata2
+    ```
+4. 引用和指针的区别
+   - 指针需要解引用
+       ```cpp
+       double* pdata{&data};
+       *pdata+=2.5;
+       ```
+   - 引用不能再引用其它变量
+       ```cpp
+       double data{3.5};
+       double& rdata{data};
+       double other_data=5.0;
+       rdata=other_data;//此语句实际是等于:data=other_data
+       ```
+    - 指针可以指向别的地址
+       ```cpp
+       double data{3.5};
+       double* pdata{&data};
+       double other_data=5.0;
+       pdata=&other_data;
+       ```
+    - 引用与const指针变量非常类似  
+    `double* const pdata{&data};`//指针常量，不能再指向别的变量
+    - 对const变量的引用  
+    `const double& const_ref{data};`//类似于常量指针，不能修改变量的值，这种引用相当于指向const变量的const指针。`const_ref*=2`这样的语句不能编译
+
+### 6.13.2 在基于范围的for循环中使用引用变量
+
+1. 基于范围的for循环使用引用，可以修改数组元素
+    ```cpp
+    double temperatrues[]{45.5,50.0,48.2,57.0,63.8};
+    const double F2C{5.0/9.0};
+    for(auto&t:temperatures)
+        t=(t-32.0)*F2C;
+    ```
+2. 在基于范围的for循环中，在给变量使用引用类型且不需要修改值时，就可以给循环变量使用const引用类型
+    ```cpp
+    double temperatrues[]{45.5,50.0,48.2,57.0,63.8};
+    const double F2C{5.0/9.0};
+    for(const auto&t:temperatures)
+        std::cout<<std::format("{:6.2}",t);
+    std::cout<<std::endl;
+    ```
+
+## 6.14 本章小结
+
+## 6.15 练习
+
+1. 第1题
+```cpp
+// Exer6_01.cpp
+#include <iostream>
+#include <format>
+#include <array>
+
+int main()
+{
+    const unsigned NUMBER{50};   // 要输出的奇数数量
+    unsigned oddNumbers[NUMBER]{}; // 只考虑正奇数
+
+    // 生成正奇数
+    for (size_t i{}; i < NUMBER; ++i)
+        oddNumbers[i] = 2 * i + 1;
+
+    // 计算数组最后一个元素的位数
+    unsigned maxValue{oddNumbers[NUMBER - 1]};
+    size_t count{std::to_string(maxValue).length()};
+    size_t width{count + 1};
+
+    // 用指针正序输出数组元素（数组名退化为指针），每行10个元素
+    std::cout << "正序输出：" << std::endl;
+    for (size_t i{}; i < NUMBER; ++i)
+    {
+        std::cout << std::format("{:{}}", *(oddNumbers + i), width); // 输出数字和宽度
+        if ((i + 1) % 10 == 0)
+            std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
+    // 用指针逆序输出数组元素（数组名退化为指针），每行10个元素
+    std::cout << "逆序输出：" << std::endl;
+    const auto *pOddNumbersFinal{oddNumbers + NUMBER - 1};
+    for (size_t i{}; i < NUMBER; ++i, --pOddNumbersFinal)
+    {
+        std::cout << std::format("{:{}}", *pOddNumbersFinal, width);
+        if ((i + 1) % 10 == 0)
+            std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
+```
+
+
