@@ -1008,3 +1008,54 @@ int main()
     std::cout<<"结果是："<<result<<"。"<<std::endl;
 }
 ```
+
+# 第7章 操作字符串
+
+string 类型比char元素数组的C样式字符串更加高效和安全
+
+## 7.1 更强大的string类
+
+- c语言`<cstring>`模块提供很多函数用来操作C样式字符串，但是必须要有空字符，否则会出错
+- c++语言`<string>`模块定义了std::string类型，由一个类模板定义，是复合类型。使用时必须导入`<string>`模块
+
+## 7.2 定义string对象
+
+1. 用空字符串初始化string对象  
+`std::string empty;`//string对象，空字符串长度为0，占用32字节空间
+2. 用字符串字面量初始化string对象  
+`std::string proverb {"Many a mickle makes a muckle."};`//string对象封装的字符数组总是用空字符终止。
+    - 调用string对象的length()函数可以得到字符串的长度  
+`std::cout<<proverb.length();`//输出29
+    - 可以将std::string对象转换为C样式字符串
+        - 调用c_str()成员函数  
+        `const char* proverb_c_str=proverb.c_str();`
+        - 调用data()成员函数  
+        `char* proverb_data=proverb.data();`
+3. 用字符串字面量中的初始序列初始化string对象  
+`std::string part_literal {"Least said soonest mended.", 5};`//"Least"
+4. 用任意多个实例来初始化string对象  
+`std::string sleeping(6, 'Z');`//"ZZZZZZ"，注意是小括号，不能用大括号
+    - 教材中说“不能用括在单引号的字符来初始化string对象，必须使用放在双引号中的字符串字面量，即使只有一个字符也是如此。”，这得分情况： 
+        - C++11及以后列表初始化可以用单引号初始化   
+        `std::string singleChar{'a'};`//正确！！！
+        - C++11之前统一初始化不可以用单引号初始化  
+        `std:string singleChar = 'a';`//错误！！！  
+        `std:string singleChar = "a";`//正确！！！  
+        `std:string singleChar("a");`//正确！！！
+    - 要使用重复的字符值初始化string对象，不能使用大括号  
+        `std::string sleeping{6,'Z'};`//错误！！！这会得到两个字母，不是6个Z
+5. 使用已有的string对象提供初始值来初始化  
+`std::string sentence {proverb};`
+    - 使用从0开始的索引值可以引用string对象中的字符  
+    `std::string phrase {proverb,0,13};`//"Many a mickle"
+        - 第一个参数是源字符串
+        - 第二个参数是开始索引位置
+        - 第三个参数是引用的字符个数
+            - 一定要注意第二参数索引是从0开始的，因此提取字符串"mickle"是`{proverb,7,6}`，而不是`{proverb,8,6}`
+            - 一定要注意第三参数是字符串长度，而不是索引位置，因此提取字符串"mickle"是`{proverb,7,6}`，而不是`{proverb,7,13}`
+6. 通过已有的std::string对象和一个整数初始化std::string对象  
+```cpp
+std::string string{"Consistency is the key to success"};
+std::string part_string{string, 15};//"the key to success"
+```
+注意这种方式第3种之间的差异！前面是字面量+整数，代表从索引0开始的字符数量；这个是对象和整数，代表索引从整数开始到字符串最后的字符串。意义完全不一样。
