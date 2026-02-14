@@ -910,5 +910,101 @@ int main()
 3. 第3题
 ```cpp
 // Exer6_03.cpp
+// 实际上是计算圆周率近似值
+#include <iostream>
+#include <cmath>
+int main()
+{
+    size_t size{};
+    std::cout<<"请输入数组大小:";
+    std::cin>>size;
+    double* dataArr{new double[size]{}};
+    double sum{};
+    for(size_t n{};n<size;++n)
+    {
+        *(dataArr+n)=1.0/((n+1)*(n+1));//必须写1.0，不能写1，否则精度不足，第一轮循环以后的结果总是0。
+        sum+=*(dataArr+n);
+    }
+    double result{std::sqrt(sum*6)};
+    std::cout<<"最终结果是:"<<result<<"。"<<std::endl;
+    delete[] dataArr;
+    dataArr=nullptr;
+}
+```
+4. 第4题
+```cpp
+//Exer6_04.cpp
+#include <iostream>
+#include <cmath>
+#include <vector>
 
+int main()
+{
+    size_t size{};
+    std::cout<<"请输入数组大小：";
+    std::cin>>size;
+    std::vector<double> dataArr(size);
+    double sum{};
+
+    for(size_t n{};n<size;++n)
+    {
+        dataArr[n]=1.0/((n+1)*(n+1));
+        sum+=dataArr[n];
+    }
+
+    double result{std::sqrt(sum*6)};
+    std::cout<<"结果是："<<result<<"。"<<std::endl;
+}
+```
+5. 第5题
+```cpp
+//Exer6_05.cpp
+#include <iostream>
+#include <cmath>
+#include <memory>
+
+int main()
+{
+    size_t size{};
+    std::cout<<"请输入数组大小：";
+    std::cin>>size;
+    double sum{};
+    auto dataArr{std::make_unique<double[]>(size)};
+
+    for(size_t n{};n<size;++n)
+    {
+        dataArr[n]=1.0/((n+1)*(n+1));
+        // *(dataArr.get()+n)=1.0/((n+1)*(n+1));//解引用指针方式
+        sum+=dataArr[n];
+        // sum+=*(dataArr.get()+n);
+    }
+
+    double result{std::sqrt(sum*6)};
+    std::cout<<"结果是："<<result<<"。"<<std::endl;
+}
+```
+6. 第6题
+```cpp
+// Exer6_06.cpp
+#include <iostream>
+#include <cmath>
+#include <vector>
+#include <memory>
+
+int main()
+{
+    size_t size{};
+    std::cout<<"请输入数组大小：";
+    std::cin>>size;
+    auto dataArr{std::make_unique<std::vector<double>>(size)};
+    double sum{};
+    for(size_t n{};n<size;++n)
+    {
+        *((*dataArr).data() + n) = 1.0 / ((n + 1) * (n + 1));
+        sum+=*(dataArr->data() + n);
+    }
+
+    double result{std::sqrt(sum*6)};
+    std::cout<<"结果是："<<result<<"。"<<std::endl;
+}
 ```
