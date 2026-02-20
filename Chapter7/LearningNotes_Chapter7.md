@@ -145,7 +145,7 @@ int main()
 ```
 - 可以通过std::to_string将其它类型转换成字符类型，再连接std::string对象
 ```cpp
-//Test7_01.cpp
+//Test7_03.cpp
 #include<iostream>
 #include<string>
 #include<numbers>
@@ -163,3 +163,132 @@ int main()
 
 }
 ```
+
+### 7.1.3 访问字符串中的字符
+
+- 在中括号中使用索引值，就可以引用字符串中的某个字符，std::string对象中的第一个字符索引值是0
+- std::string对象是一个范围，可以使用基于范围的for循环操作，但修改字符需使用引用
+- 其实不管是中括号加索引还是引用，目的都是为了指定内存地址
+```cpp
+//Test7_02.cpp
+#include<iostream>
+#include<string>
+#include<cctype>
+
+int main()
+{
+    //定义并输入名字
+    std::string first;
+    std::string second;
+    std::cout<<"Enter your first name: ";
+    std::cin>>first;
+    std::cout<<"Enter your second name: ";
+    std::cin>>second;
+
+    //定义句子并连接名字
+    std::string sentence {"Your full name is "};
+    sentence+=first+" "+second+".";
+
+    //输出句子
+    std::cout<<sentence<<std::endl;
+
+    //用索引方式修改句子全部字母为大写
+    for(size_t i{};i<sentence.length();++i)
+    {
+        sentence[i]=static_cast<char>(std::toupper(sentence[i]));
+    }
+    std::cout<<sentence<<std::endl;//YOUR FULL NAME IS PHIL MCCAVITY.
+
+    //用基于范围for循环方式修改句子全部字母为小写
+    for(char& ch:sentence)
+    {
+        ch=static_cast<char>(std::tolower(ch));
+    }
+    std::cout<<sentence<<std::endl;//your full name is phil mccavity.
+}
+```
+```cpp
+//Ex7_02.cpp
+//Accessing characters in a string
+#include<iostream>
+#include<cctype>
+#include<string>
+
+int main()
+{
+    //使用std::getline()输入字符串，包含空格字符
+    std::string text;
+    std::cout<<"Enter a line of text:\n";
+    std::getline(std::cin,text);//和std::cin.getline()有差别
+
+    //统计字符串元音字符和辅音字符的数量
+    unsigned vowels{};//元音数量
+    unsigned consonants{};//辅音数量
+    for(size_t i{};i<text.length();++i)
+    {
+        if(std::isalpha(text[i]))//判断是否为字母
+        {
+            switch (std::tolower(text[i]))
+            {
+            case 'a' :case 'e':case 'i':case 'o':case 'u':
+                ++vowels;
+                break;
+            
+            default:
+                ++consonants;
+                break;
+            }
+        }
+    }
+
+    //输出元音和辅音的数量
+    std::cout<<"Your input contained "<<vowels<<" voewls and "
+            <<consonants<<" consonants."<<std::endl;
+}
+````
+- std::getline()读取一行字符，直到遇到换行符为止
+- std::getline()可以修改表示输入行结尾的分隔符，使用第三个参数
+`std::getline(std::cin,text,'#');`,此时换行符不是结束，可以输入任意多行内容
+
+### 7.1.4 访问子字符串
+
+- 使用substr()函数可以获取string对象的一个子字符串。第一个实参指定子字字符串开始索引位置，第二个实参指定子字符串中的字符个数。该字符串返回一个包含子字符串的string对象。
+```cpp
+//Test7_03.cpp
+//substr()函数获取子字符串
+#include<iostream>
+#include<string>
+
+int main()
+{
+    std::string phrase{"The higher the fewer."};
+    std::string word1{phrase.substr(4,6)};
+
+    std::cout<<word1<<std::endl;//higher
+}
+```
+- substr()第二个实参超过string对象的结尾，则返回从指定位置开始直到该字符串最后的所有字符
+```cpp
+//Test7_04.cpp
+//substr()函数获取子字符串,第二个实参超过string对象长度
+#include<iostream>
+#include<string>
+
+int main()
+{
+    std::string phrase{"The higher the fewer."};
+    std::string word1{phrase.substr(4,100)};
+
+    std::cout<<word1<<std::endl;//higher the fewer.
+}
+```
+- 如果省略第二个实参，则从第一个实参指定的索引位置开始到最后的所有字符返回给子字符串
+`std::string word1{phrase.substr(4)};`
+- 如果省略第一和第二实参，则把字符串所有字符返回给子字符串
+`std::string word1{phrase.substr()};`
+- 如果第一实参超出string对象的有效边界，就会抛出一个std::out_of_range类型的异常，程序将异常终止
+
+### 7.1.5 比较字符串
+
+
+
