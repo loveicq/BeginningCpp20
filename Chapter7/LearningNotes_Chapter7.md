@@ -24,8 +24,8 @@ string 类型比char元素数组的C样式字符串更加高效和安全
 `std::string part_literal {"Least said soonest mended.", 5};`//"Least"
 4. 用任意多个实例来初始化string对象  
 `std::string sleeping(6, 'Z');`//"ZZZZZZ"，注意是小括号，不能用大括号
-    - 教材中说“不能用括在单引号的字符来初始化string对象，必须使用放在双引号中的字符串字面量，即使只有一个字符也是如此。”，这得分情况： 
-        - C++11及以后列表初始化可以用单引号初始化   
+    - 教材中说“不能用括在单引号的字符来初始化string对象，必须使用放在双引号中的字符串字面量，即使只有一个字符也是如此。”，这得分情况：
+        - C++11及以后列表初始化可以用单引号初始化  
         `std::string singleChar{'a'};`//正确！！！
         - C++11之前统一初始化不可以用单引号初始化  
         `std:string singleChar = 'a';`//错误！！！  
@@ -43,10 +43,12 @@ string 类型比char元素数组的C样式字符串更加高效和安全
             - 一定要注意第二参数索引是从0开始的，因此提取字符串"mickle"是`{proverb,7,6}`，而不是`{proverb,8,6}`
             - 一定要注意第三参数是字符串长度，而不是索引位置，因此提取字符串"mickle"是`{proverb,7,6}`，而不是`{proverb,7,13}`
 6. 通过已有的std::string对象和一个整数初始化std::string对象  
+
 ```cpp
 std::string string{"Consistency is the key to success"};
 std::string part_string{string, 15};//"the key to success"
 ```
+
 注意这种方式第3种之间的差异！前面是字面量+整数，代表从索引0开始的字符数量；这个是对象和整数，代表索引从整数开始到字符串最后的字符串。意义完全不一样。
 
 ### 7.1.2 string对象的操作
@@ -58,6 +60,7 @@ std::string part_string{string, 15};//"the key to success"
 - 使用加号“+”可以把一个字符串字面量和一个string对象连接在一起
 - 加号“+”不能连接两个字符串字面量
 - 可以通过几种方法将两个字符串字面量连接在一起，如省略加号、使用小括号、使用初始化语法、字符串字面量后面加字母“s”等
+
 ```cpp
 //Ex7_01.cpp
 #include <iostream>
@@ -80,10 +83,11 @@ int main(){
     <<" characters."<<std::endl;
 }
 ```
+
 - +=运算符也可用于string类型的对象，如上例
 - 可使用std::string对象的append()函数代替+=运算符，此函数比+=更灵活，允许连接字符串或重复的字符。
 
-**2.连接字符串和字符** 
+**2.连接字符串和字符**  
 
 ```cpp
 //Exer7_01.cpp
@@ -109,12 +113,14 @@ int main(){
     <<" characters."<<std::endl;
 }
 ```
+
 - std::string连接的一般规则很简单：连接从左向右计算，只要连接运算+有一个操作数是std::string对象，就能正常工作
 - 任何地方使用字符串字面量时，都可以使用C样式字符串，即char[]数组或char*变量，“+”连接运算符前后也可以使用C样式字符串，或使用char类型字符
 
-**3.连接字符串和数字** 
+**3.连接字符串和数字**  
 
 - 除了字符串和字符，std::string对象无法连接，否则编译会报错
+
 ```cpp
 //Test7_01.cpp
 #include<iostream>
@@ -129,7 +135,9 @@ int main()
     std::cout<<result_string+result<<std::endl;//无法编译，std::string对象不能连接double类型
 }
 ```
+
 - 有时候能编译，但结果错误
+
 ```cpp
 //Test7_02.cpp
 #include<iostream>
@@ -143,7 +151,9 @@ int main()
     std::cout<<song_title<<std::endl;//Summer of 'E
 }
 ```
+
 - 可以通过std::to_string将其它类型转换成字符类型，再连接std::string对象
+
 ```cpp
 //Test7_03.cpp
 #include<iostream>
@@ -169,6 +179,7 @@ int main()
 - 在中括号中使用索引值，就可以引用字符串中的某个字符，std::string对象中的第一个字符索引值是0
 - std::string对象是一个范围，可以使用基于范围的for循环操作，但修改字符需使用引用
 - 其实不管是中括号加索引还是引用，目的都是为了指定内存地址
+
 ```cpp
 //Test7_02.cpp
 #include<iostream>
@@ -207,6 +218,7 @@ int main()
     std::cout<<sentence<<std::endl;//your full name is phil mccavity.
 }
 ```
+
 ```cpp
 //Ex7_02.cpp
 //Accessing characters in a string
@@ -246,6 +258,7 @@ int main()
             <<consonants<<" consonants."<<std::endl;
 }
 ````
+
 - std::getline()读取一行字符，直到遇到换行符为止
 - std::getline()可以修改表示输入行结尾的分隔符，使用第三个参数
 `std::getline(std::cin,text,'#');`,此时换行符不是结束，可以输入任意多行内容
@@ -253,6 +266,7 @@ int main()
 ### 7.1.4 访问子字符串
 
 - 使用substr()函数可以获取string对象的一个子字符串。第一个实参指定子字字符串开始索引位置，第二个实参指定子字符串中的字符个数。该字符串返回一个包含子字符串的string对象。
+
 ```cpp
 //Test7_03.cpp
 //substr()函数获取子字符串
@@ -267,7 +281,9 @@ int main()
     std::cout<<word1<<std::endl;//higher
 }
 ```
+
 - substr()第二个实参超过string对象的结尾，则返回从指定位置开始直到该字符串最后的所有字符
+
 ```cpp
 //Test7_04.cpp
 //substr()函数获取子字符串,第二个实参超过string对象长度
@@ -282,6 +298,7 @@ int main()
     std::cout<<word1<<std::endl;//higher the fewer.
 }
 ```
+
 - 如果省略第二个实参，则从第一个实参指定的索引位置开始到最后的所有字符返回给子字符串
 `std::string word1{phrase.substr(4)};`
 - 如果省略第一和第二实参，则把字符串所有字符返回给子字符串
@@ -289,6 +306,14 @@ int main()
 - 如果第一实参超出string对象的有效边界，就会抛出一个std::out_of_range类型的异常，程序将异常终止
 
 ### 7.1.5 比较字符串
+
+- 比较运算符:>、>=、<、<=、==、!=、<=>
+- 比较运算符用于比较两个string对象，或者比较string对象与字符串字面量或C样式字符串
+- 比较运算符逐个比较其中的字符，直到找到不同的字符，或到达一个或两个操作数的结尾
+- 如果没有找到不同的字符，但字符串有不同的长度，则较短的字符串就小于较长的字符串
+- 如果两个字符串包含相同数量的字符，且对应的字符都相同，则这两个字符串相等
+- 比较是区分大小写的（因为比较的是ASCII码）
+- ❗要特别注意：如果没有String对象，只比较char[]或者char*类型字符串，不能用比较运算符，因为这样比较的是指针地址，不是每个字符的ASCII码。要比较这两种类型，可以用strcmp()函数，如下例
 
 ```cpp
 // Test7_05.cpp
@@ -327,5 +352,71 @@ int main()
 
     delete[] word4;
     word4 = nullptr;
+}
+```
+
+- 采用条件运算符写比较语句比较简洁：
+
+```cpp
+std::cout << word1 << word1<word2 ? " comes " : " does not comes "  
+          << "before "<<word2<<'.' << std::endl;
+```
+
+```cpp
+// Ex7_03.cpp
+// Comparing strings
+#include <iostream>
+#include <string>
+#include <format>
+#include <vector>
+
+int main()
+{
+    // 创建一个字符串向量来存储名字
+    std::vector<std::string> names; // 因为是类类型，调用构造函数把内部状态置为空，有没有{}都是一样的
+    std::string input_name;
+
+    // 输入名字，直到用户输入空行
+    for (;;)
+    {
+        std::cout << "输入名称,然后按Enter(空行停止): ";
+        std::getline(std::cin, input_name);
+        if (input_name.empty())
+            break;
+        names.push_back(input_name);
+    }
+
+    // 名字按字母顺序排序
+    bool sorted{};
+    do
+    {
+        sorted = true; // 假设已经排好序
+        for (size_t i{1}; i < names.size(); ++i)
+            if (names[i - 1] > names[i])
+            {
+                names[i].swap(names[i - 1]);
+                sorted = false; // 如果有交换,则还未排好序
+            }
+    } while (!sorted); // 如果没排好序,为false;!false=true,继续循环
+
+    // 找出最长名字的长度
+    size_t max_length{};
+    for (const auto &name : names)
+        if (max_length < name.length())
+            max_length = name.length();
+
+    // 按每行5个名字输出
+    const size_t field_width = max_length + 2;
+    size_t count{};
+
+    std::cout << "名字按字母先后排序:\n";
+    for (const auto &name : names)
+    {
+        std::cout << std::format("{:>{}}", name, field_width); // 右对齐+动态宽度
+        if (!(++count % 5))
+            std::cout << std::endl;
+    }
+
+    std::cout << std::endl;
 }
 ```
