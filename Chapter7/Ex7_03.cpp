@@ -47,7 +47,7 @@ int main()
     std::cout << "名字按字母先后排序:\n";
     for (const auto &name : names)
     {
-        std::cout << std::format("{:>{}}", name, field_width); // 右对齐+动态宽度
+        std::cout << std::format("{:>{}}", name, field_width, 1, 5); // 右对齐+动态宽度
         if (!(++count % 5))
             std::cout << std::endl;
     }
