@@ -427,4 +427,34 @@ int main()
 - ❗format格式化输出，`宽度`和`精度`可以用嵌套的替代字段来动态指定，如：`std::format("{:>{}}",name,field_width)`,外部的{}用第0个参数替代，内部的{}用第1个参数替代。也可以写作:`std::format("{1:>{0}}",field_width,name)`,这样外部的{}就用第1个参数替代，内部的{}就用第0个参数替代。也即可以有多个参数，如`format("{:>{}}",name,field_width,1,5,8)`也是可以的，但最终要么按顺序调用，要么直接指定。除了宽度和精度，格式说明符的其它部分不能替代。
 
 **1.三向比较运算符**  
-123
+三向比较函数可以解决string对象比较的低效问题
+
+- <=>运算符
+
+```cpp
+const auto order = s1 <=> s2;
+if(std::is_lt(order))//is_lt(),is less than,小于
+    ...
+else if(std::is_gt(order))//is_gt(),is greater than,大于
+    ...
+else //is_eq(),is equivalent,等价(与相等(equal)不一样)。这三个函数在<compare>模块中定义
+    ...
+```
+
+❗注意：<=>的结果是类类型，不是Boolean类型，不能用于if()等判断场合。
+
+- compare()函数
+
+```cpp
+const int comp = s1.compare(s2);
+if(comp<0)
+    ...
+else if(comp>0)
+    ...
+else
+    ...
+```
+
+❗注意：compare()函数的结果int类型，s1 > s2,返回正整数；s1 = s2, 返回0；s1 < s2，返回负整数。
+
+**2.使用compare()比较字符串**  

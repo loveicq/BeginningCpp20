@@ -47,7 +47,10 @@ int main()
     std::cout << "名字按字母先后排序:\n";
     for (const auto &name : names)
     {
-        std::cout << std::format("{:>{}}", name, field_width, 1, 5); // 右对齐+动态宽度
+        std::cout << std::format("{:>{}}", name, field_width); // 右对齐+动态宽度
+        // 嵌套的format,外层的{}是输出内容,内层的{}是个变量,field_width是个变量,所以用{}占位
+        // 如果field_width是个常量,比如20,就直接写成{:>20}就行了,本例用{}可以用变量来动态设置宽度
+        // 每一对{}就代表一个变量,用后面的参数来替换,如果有多个{}就用多个参数来替换,参数的顺序和{}的顺序一一对应
         if (!(++count % 5))
             std::cout << std::endl;
     }
