@@ -458,3 +458,46 @@ else
 ❗注意：compare()函数的结果int类型，s1 > s2,返回正整数；s1 = s2, 返回0；s1 < s2，返回负整数。
 
 **2.使用compare()比较字符串**  
+
+```cpp
+// 使用compare()比较子字符串
+#include <iostream>
+#include <string>
+
+int main()
+{
+    std::string word1{"A jackhammer"};
+    std::string word2{"jack"};
+
+    const int result{word1.compare(2, word2.length(), word2)};
+
+    if (result == 0)
+    {
+        std::cout << word1 << " contains " << word2 << " starting at index 2" << std::endl;
+    }
+}
+```
+
+❗注意,compare()函数有多种重载模式，上面测试案例就是其中一种。
+
+```cpp
+// compare()函数搜索子字符串
+#include <iostream>
+#include <string>
+
+int main()
+{
+    std::string text{"Peter Piper picked a peck of pickled peppers."};
+    std::string word{"pick"};
+
+    for(size_t i{};i<text.length()-word.length()+1;++i) //+1是为了最少循环一次，假设text和word内容一样，也能正确输出结果（即包含，从索引0开始）
+    {
+        if(text.compare(i,word.length(),word)==0)
+        {
+            std::cout<<"text contains "<<word<<" starting at index "<<i<<std::endl;
+        }
+    }
+}
+```
+
+上面测试案例是用compare()成员函数搜索子字符串的方法。
