@@ -315,111 +315,111 @@ int main()
 - 比较是区分大小写的（因为比较的是ASCII码）
 - ❗要特别注意：如果没有String对象，只比较char[]或者char*类型字符串，不能用比较运算符，因为这样比较的是指针地址，不是每个字符的ASCII码。要比较这两种类型，可以用strcmp()函数，如下例
 
-```cpp
-// Test7_05.cpp
-// 测试比较运算符
-#include <iostream>
-#include <string>
-#include <cstring>
-#include <string.h>
+    ```cpp
+    // Test7_05.cpp
+    // 测试比较运算符
+    #include <iostream>
+    #include <string>
+    #include <cstring>
+    #include <string.h>
 
-int main()
-{
-    const std::string word1{"age"};
-    const std::string word2{"beauty"};
-    const char word3[] = "cout";
-    const char *word4{new char[]{"cout"}};
+    int main()
+    {
+        const std::string word1{"age"};
+        const std::string word2{"beauty"};
+        const char word3[] = "cout";
+        const char *word4{new char[]{"cout"}};
 
-    // 比较两个string对象
-    if (word1 < word2)
-        std::cout << word1 << " comes before " << word2 << '.' << std::endl;
-    else
-        std::cout << word2 << " comes before " << word1 << '.' << std::endl;
+        // 比较两个string对象
+        if (word1 < word2)
+            std::cout << word1 << " comes before " << word2 << '.' << std::endl;
+        else
+            std::cout << word2 << " comes before " << word1 << '.' << std::endl;
 
-    // 比较一个string对象和char[]字符串
-    if (word2 < word3) // 只要有string对象参与比较，就重载了运算符，可以直接与char[]或char*
-        std::cout << word2 << " is less than " << word3 << '.' << std::endl;
-    else
-        std::cout << word3 << " is less than " << word2 << '.' << std::endl;
+        // 比较一个string对象和char[]字符串
+        if (word2 < word3) // 只要有string对象参与比较，就重载了运算符，可以直接与char[]或char*
+            std::cout << word2 << " is less than " << word3 << '.' << std::endl;
+        else
+            std::cout << word3 << " is less than " << word2 << '.' << std::endl;
 
-    // 比较char[]字符串数组和char*字符串
-    if (strcmp(word3, word4) < 0) // char*和char[]之间比较，不能用比较运算符，因为比较的是指针地址
-        std::cout << word4 << " is greater than " << word3 << '.' << std::endl;
-    else if (strcmp(word3, word4) > 0)
-        std::cout << word3 << " is greater than " << word4 << '.' << std::endl;
-    else
-        std::cout << word3 << " is equal to " << word4 << '.' << std::endl;
+        // 比较char[]字符串数组和char*字符串
+        if (strcmp(word3, word4) < 0) // char*和char[]之间比较，不能用比较运算符，因为比较的是指针地址
+            std::cout << word4 << " is greater than " << word3 << '.' << std::endl;
+        else if (strcmp(word3, word4) > 0)
+            std::cout << word3 << " is greater than " << word4 << '.' << std::endl;
+        else
+            std::cout << word3 << " is equal to " << word4 << '.' << std::endl;
 
-    delete[] word4;
-    word4 = nullptr;
-}
-```
+        delete[] word4;
+        word4 = nullptr;
+    }
+    ```
 
 - 采用条件运算符写比较语句比较简洁：
 
-```cpp
-std::cout << word1 << word1<word2 ? " comes " : " does not comes "  
-          << "before "<<word2<<'.' << std::endl;
-```
+    ```cpp
+    std::cout << word1 << word1<word2 ? " comes " : " does not comes "  
+            << "before "<<word2<<'.' << std::endl;
+    ```
 
-```cpp
-// Ex7_03.cpp
-// Comparing strings
-#include <iostream>
-#include <string>
-#include <format>
-#include <vector>
+    ```cpp
+    // Ex7_03.cpp
+    // Comparing strings
+    #include <iostream>
+    #include <string>
+    #include <format>
+    #include <vector>
 
-int main()
-{
-    // 创建一个字符串向量来存储名字
-    std::vector<std::string> names; // 因为是类类型，调用构造函数把内部状态置为空，有没有{}都是一样的
-    std::string input_name;
-
-    // 输入名字，直到用户输入空行
-    for (;;)
+    int main()
     {
-        std::cout << "输入名称,然后按Enter(空行停止): ";
-        std::getline(std::cin, input_name);
-        if (input_name.empty())
-            break;
-        names.push_back(input_name);
+        // 创建一个字符串向量来存储名字
+        std::vector<std::string> names; // 因为是类类型，调用构造函数把内部状态置为空，有没有{}都是一样的
+        std::string input_name;
+
+        // 输入名字，直到用户输入空行
+        for (;;)
+        {
+            std::cout << "输入名称,然后按Enter(空行停止): ";
+            std::getline(std::cin, input_name);
+            if (input_name.empty())
+                break;
+            names.push_back(input_name);
+        }
+
+        // 名字按字母顺序排序
+        bool sorted{};
+        do
+        {
+            sorted = true; // 假设已经排好序
+            for (size_t i{1}; i < names.size(); ++i)
+                if (names[i - 1] > names[i])
+                {
+                    names[i].swap(names[i - 1]);
+                    sorted = false; // 如果有交换,则还未排好序
+                }
+        } while (!sorted); // 如果没排好序,为false;!false=true,继续循环
+
+        // 找出最长名字的长度
+        size_t max_length{};
+        for (const auto &name : names)
+            if (max_length < name.length())
+                max_length = name.length();
+
+        // 按每行5个名字输出
+        const size_t field_width = max_length + 2;
+        size_t count{};
+
+        std::cout << "名字按字母先后排序:\n";
+        for (const auto &name : names)
+        {
+            std::cout << std::format("{:>{}}", name, field_width); // 右对齐+动态宽度
+            if (!(++count % 5))
+                std::cout << std::endl;
+        }
+
+        std::cout << std::endl;
     }
-
-    // 名字按字母顺序排序
-    bool sorted{};
-    do
-    {
-        sorted = true; // 假设已经排好序
-        for (size_t i{1}; i < names.size(); ++i)
-            if (names[i - 1] > names[i])
-            {
-                names[i].swap(names[i - 1]);
-                sorted = false; // 如果有交换,则还未排好序
-            }
-    } while (!sorted); // 如果没排好序,为false;!false=true,继续循环
-
-    // 找出最长名字的长度
-    size_t max_length{};
-    for (const auto &name : names)
-        if (max_length < name.length())
-            max_length = name.length();
-
-    // 按每行5个名字输出
-    const size_t field_width = max_length + 2;
-    size_t count{};
-
-    std::cout << "名字按字母先后排序:\n";
-    for (const auto &name : names)
-    {
-        std::cout << std::format("{:>{}}", name, field_width); // 右对齐+动态宽度
-        if (!(++count % 5))
-            std::cout << std::endl;
-    }
-
-    std::cout << std::endl;
-}
-```
+    ```
 
 - 可以使用empty()函数来检查输入是否为空行，这是std::string与std::vector<>共有的这么多函数之一
 - std::string可以存储在容器中，而C样式字符串不能
@@ -431,73 +431,163 @@ int main()
 
 - <=>运算符
 
-```cpp
-const auto order = s1 <=> s2;
-if(std::is_lt(order))//is_lt(),is less than,小于
-    ...
-else if(std::is_gt(order))//is_gt(),is greater than,大于
-    ...
-else //is_eq(),is equivalent,等价(与相等(equal)不一样)。这三个函数在<compare>模块中定义
-    ...
-```
+    ```cpp
+    const auto order = s1 <=> s2;
+    if(std::is_lt(order))//is_lt(),is less than,小于
+        ...
+    else if(std::is_gt(order))//is_gt(),is greater than,大于
+        ...
+    else //is_eq(),is equivalent,等价(与相等(equal)不一样)。这三个函数在<compare>模块中定义
+        ...
+    ```
 
 ❗注意：<=>的结果是类类型，不是Boolean类型，不能用于if()等判断场合。
 
 - compare()函数
 
-```cpp
-const int comp = s1.compare(s2);
-if(comp<0)
-    ...
-else if(comp>0)
-    ...
-else
-    ...
-```
+    ```cpp
+    const int comp = s1.compare(s2);
+    if(comp<0)
+        ...
+    else if(comp>0)
+        ...
+    else
+        ...
+    ```
 
-❗注意：compare()函数的结果int类型，s1 > s2,返回正整数；s1 = s2, 返回0；s1 < s2，返回负整数。
+- ❗注意：compare()函数的结果int类型，s1 > s2,返回正整数；s1 = s2, 返回0；s1 < s2，返回负整数。
 
 **2.使用compare()比较字符串**  
 
-```cpp
-// 使用compare()比较子字符串
-#include <iostream>
-#include <string>
+- 对齐
 
-int main()
-{
-    std::string word1{"A jackhammer"};
-    std::string word2{"jack"};
+    ```cpp
+    // 使用compare()比较子字符串
+    #include <iostream>
+    #include <string>
 
-    const int result{word1.compare(2, word2.length(), word2)};
-
-    if (result == 0)
+    int main()
     {
-        std::cout << word1 << " contains " << word2 << " starting at index 2" << std::endl;
-    }
-}
-```
+        std::string word1{"A jackhammer"};
+        std::string word2{"jack"};
 
-❗注意,compare()函数有多种重载模式，上面测试案例就是其中一种。
+        const int result{word1.compare(2, word2.length(), word2)};
 
-```cpp
-// compare()函数搜索子字符串
-#include <iostream>
-#include <string>
-
-int main()
-{
-    std::string text{"Peter Piper picked a peck of pickled peppers."};
-    std::string word{"pick"};
-
-    for(size_t i{};i<text.length()-word.length()+1;++i) //+1是为了最少循环一次，假设text和word内容一样，也能正确输出结果（即包含，从索引0开始）
-    {
-        if(text.compare(i,word.length(),word)==0)
+        if (result == 0)
         {
-            std::cout<<"text contains "<<word<<" starting at index "<<i<<std::endl;
+            std::cout << word1 << " contains " << word2 
+                    << " starting at index 2" << std::endl;
         }
     }
-}
-```
+    ```
 
-上面测试案例是用compare()成员函数搜索子字符串的方法。
+- ❗注意,compare()函数有多种重载模式，上面测试案例就是其中一种。
+
+    ```cpp
+    // compare()函数搜索子字符串
+    #include <iostream>
+    #include <string>
+
+    int main()
+    {
+        std::string text{"Peter Piper picked a peck of pickled peppers."};
+        std::string word{"pick"};
+
+        for(size_t i{};i<text.length()-word.length()+1;++i) //+1是为了最少循环一次，假设text和word内容一样，也能正确输出结果（即包含，从索引0开始）
+        {
+            if(text.compare(i,word.length(),word)==0)
+            {
+                std::cout<<"text contains "<<word<<" starting at index "<<i<<std::endl;
+            }
+        }
+    }
+    ```
+
+- 上面测试案例是用compare()成员函数搜索子字符串的方法。
+
+- 可以利用compare()函数比较一个string对象的子字符串和另一个String对象的子字符串,这需要传送5个参数
+
+    ```cpp
+    // 利用compare()函数比较string对象子字符串和另一个string对象子字符串
+    #include <iostream>
+    #include <string>
+
+    int main()
+    {
+        std::string text{"Peter Piper picked a peck of pickled peppers."};
+        std::string phrase{"Got to pick a pocker or two."};
+
+        for (size_t i{}; i < text.length() - 3; ++i) //or i<=text.length()-4;防止越界访问
+        {
+            if (text.compare(i, 4, phrase, 7, 4) == 0)
+            {
+                std::cout << "text contains " << phrase.substr(7, 4)
+                        << " starting at index " << i << std::endl;
+            }
+        }
+    }
+    ```
+
+- compare()函数还可以比较string对象的子字符串和C样式字符串  
+`if(text.compare(i,4,"pick")==0)`
+
+- compare()函数还可以指定要使用的字符个数,从C样式字符串中选择前n个字符  
+`if(text.compare(i,4,"picked",4)==0)`
+
+**使用substr()进行比较**  
+
+- substr()函数用于提取String对象子字符串
+
+    ```cpp
+    // substr()函数提取string()对象子字符串
+    #include <iostream>
+    #include <string>
+
+    int main()
+    {
+        std::string text{"Peter Piper picked a peck of pickled peppers."};
+        std::string phrase{"Got to pick a pocket or two."};
+
+        for (size_t i{}; i < text.length() - 3; ++i)
+        {
+            if (text.substr(i, 4) == phrase.substr(7, 4))
+            {
+                std::cout << "text contains " << phrase.substr(7, 4)
+                        << " starting at index " << i << std::endl;
+            }
+        }
+    }
+    ```
+
+- substr()函数效率比compare()函数略低,但代码的清晰性和可读性要比性能的些许提高要重要得多
+
+**检查字符串的开始或结束**  
+
+- C++20引入starts_with()和ends_with()两个有用的成员函数来检查字符串的开始和结尾
+
+    ```cpp
+    // 检查字符串的开始或结尾
+    #include <iostream>
+    #include <string>
+
+    int main()
+    {
+        std::string text{"Start with the end in mind."};
+
+        if (text.starts_with("Start"))
+        {
+            std::cout << "The text starts with 'Start'." << std::endl;
+        }
+        if (!text.ends_with("end"))
+        {
+            std::cout << "The text does not end with 'end'." << std::endl;
+        }
+    }
+    ```
+
+- 这两个函数还可以比较单个字符  
+
+    `if(text.ends_with('.'))`  
+    `std::cout<<"The text ends with a period."`
+
+- 在空字符串上使用这两个函数也是案例的(对空字符串返回false)。对于[]、front()、back()和substr()这一点不成立。
