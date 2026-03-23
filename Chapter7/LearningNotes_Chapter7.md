@@ -591,3 +591,7 @@ int main()
     `std::cout<<"The text ends with a period."`
 
 - 在空字符串上使用这两个函数也是案例的(对空字符串返回false)。对于[]、front()、back()和substr()这一点不成立。
+
+### 7.1.6 搜索字符串
+
+- find()函数
