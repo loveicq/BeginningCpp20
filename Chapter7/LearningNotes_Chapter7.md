@@ -595,3 +595,52 @@ int main()
 ### 7.1.6 搜索字符串
 
 - find()函数
+
+    ```cpp
+    // Ex7_04.cpp
+    // Searching within strings
+    #include <iostream>
+    #include <string>
+
+    int main()
+    {
+        std::string sentence{"Manners maketh man"};
+        std::string word{"man"};
+
+        std::cout << sentence.find(word) << std::endl;
+        std::cout << sentence.find("Ma") << std::endl;
+        std::cout << sentence.find('k') << std::endl;
+        std::cout << sentence.find('x') << std::endl;
+    }
+    ```
+
+**1.在子字符串内搜索**  
+
+- find()函数允许从指定位置开始搜索
+
+    ```cpp
+    // find()函数在子字符串内搜索
+    #include <iostream>
+    #include <string>
+
+    int main()
+    {
+        std::string sentence{"Manners maketh man"};
+        std::string word{"an"};
+        int count{};
+
+        for (size_t i{}; i <= sentence.length() - word.length();)
+        {
+            size_t position = sentence.find(word, i);
+            if (position == std::string::npos)
+            {
+                break;
+            }
+            ++count;
+            i = position + 1;
+        }
+
+        std::cout << '"' << word << "\" occurs in \"" << sentence
+                << "\" " << count << " times." << std::endl;
+    }
+    ```
