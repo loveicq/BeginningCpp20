@@ -754,3 +754,54 @@ int main()
     ```
 
 **3.逆向搜索字符串**  
+
+- rfind()函数可以从一个std::string对象的末尾向前搜索子字符串(可以是std::string,也可以是C样式字符串)
+- rfind()得到的结果是后面搜索遇到的第一个符合条件的字符的位置(这个位置是从前面第0个字符开始数的)
+- rfind()如果未搜索到符合条件的字符串,则返回npos值(-1)
+- 和find()一样,有多种重载函数,如两个参数,三个参数等
+
+    ```cpp
+    // rfind()测试
+    #include <iostream>
+    #include <string>
+
+    int main()
+    {
+        std::string sentence{"Manners maketh man"};
+        std::string word{"an"};
+
+        std::cout << sentence.rfind(word) << std::endl;  // 16 搜索string对象
+        std::cout << sentence.rfind("man") << std::endl; // 15 搜索C样式字符串
+        std::cout << sentence.rfind('e') << std::endl;   // 11 搜索字符,注意是单引号
+    }
+    ```
+
+### 7.1.7 修改字符串
+
+- **insert()函数插入字符串**  
+
+    ```cpp
+    // 测试insert()函数
+    #include <iostream>
+    #include <string>
+
+    int main()
+    {
+        const std::string ORIGINAL_PHRASE{"We can insert a string."};
+        std::string phrase{ORIGINAL_PHRASE};
+        std::string words{"a string into "};
+
+        phrase.insert(14, words);         // 插入string对象,phrase字符串第14位字符是'a'
+        std::cout << phrase << std::endl; //"We can insert a string into a string."
+
+        phrase = ORIGINAL_PHRASE;
+        phrase.insert(14, "a string into "); // 插入C样式字符串
+        std::cout << phrase << std::endl;    //"We can insert a string into a string."
+
+        phrase = ORIGINAL_PHRASE;
+        phrase.insert(13, words, 8, 5);   // 插入string对象其中一部分内容,words第8位开始,取5个字符,即" into"
+        std::cout << phrase << std::endl; //"We can insert into a string.
+    }
+    ```
+
+- **replace()函数替换子字符串**  
