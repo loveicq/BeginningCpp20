@@ -805,3 +805,56 @@ int main()
     ```
 
 - **replace()函数替换子字符串**  
+
+    ```cpp
+    // Ex7_07.cpp
+    // Replacing words in a string
+    #include <iostream>
+    #include <string>
+
+    int main()
+    {
+        std::string text;
+        std::cout << "Enter a string terminated by *:\n";
+        std::getline(std::cin, text, '*');
+
+        std::string word;
+        std::cout << "Enter the word to be replaced: ";
+        std::cin >> word;
+
+        std::string replacement;
+        std::cout << "Enter the string to be substituted for " << word << ": ";
+        std::cin >> replacement;
+
+        if (word == replacement)
+        {
+            std::cout << "The word its replacement are the same.\n"
+                    << "Operation aborted." << std::endl;
+            return 1;
+        }
+
+        size_t start{text.find(word)};
+        while (start != std::string::npos)
+        {
+            text.replace(start, word.length(), replacement);
+            start = text.find(word, start + replacement.length());
+        }
+
+        std::cout << "\nThe string you entered is now:\n"
+                << text << std::endl;
+    }
+    ```
+
+    注意.length()取得某个字符串的长度的用法
+
+- **erase()删除字符串中的字符**  
+
+  - `text.erase(0,6);` 从第几(实参1)位删除几(实参2)个字符
+  - `text.erase(6);` 删除第几(实参)位以后的字符
+  - `text.erase();` 删除全部字符,text成为空字符串,与`text.clear();`作用一样
+  - `text.erase('v')` 删除字符串中所有的字母'v'(实参)
+
+### 7.1.8 对比std::string与std::vector<char>
+
+- `std::string`对象支持`std::vector<char>`的几乎全部成员函数，如push_back()、at()、size()、front()和back()、assign()等
+- `std::string`对象还有专属的更方便的函数,如连接字符串、访问子字符串、搜索和替换字符串等
