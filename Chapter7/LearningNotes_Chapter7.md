@@ -854,7 +854,19 @@ int main()
   - `text.erase();` 删除全部字符,text成为空字符串,与`text.clear();`作用一样
   - `text.erase('v')` 删除字符串中所有的字母'v'(实参)
 
-### 7.1.8 对比std::string与std::vector<char>
+### 7.1.8 对比`std::string`与`std::vector<char>`
 
 - `std::string`对象支持`std::vector<char>`的几乎全部成员函数，如push_back()、at()、size()、front()和back()、assign()等
 - `std::string`对象还有专属的更方便的函数,如连接字符串、访问子字符串、搜索和替换字符串等
+
+### 将字符串转换为数字
+
+- `std::to_string()`数字转换字符串
+- `std::stoi()`字符串转换数字
+
+    ```cpp
+    std::string s{"123"};
+    int i{std::stoi(s)};
+    ```
+
+- `<string>`提供stol()、stoll()、stoul()、stoull()、stof()、stod()和stold()函数
