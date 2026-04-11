@@ -859,7 +859,7 @@ int main()
 - `std::string`对象支持`std::vector<char>`的几乎全部成员函数，如push_back()、at()、size()、front()和back()、assign()等
 - `std::string`对象还有专属的更方便的函数,如连接字符串、访问子字符串、搜索和替换字符串等
 
-### 将字符串转换为数字
+## 7.2 将字符串转换为数字
 
 - `std::to_string()`数字转换字符串
 - `std::stoi()`字符串转换数字
@@ -870,3 +870,68 @@ int main()
     ```
 
 - `<string>`提供stol()、stoll()、stoul()、stoull()、stof()、stod()和stold()函数
+
+## 7.3 国际字符串
+
+- `std::wstring`对象，包含wchar_t类型的字符串，是C++内置的宽字符类型
+- `std::unstring`对象，类型是charn_t
+- 可以使用`std::string`的所有函数
+
+### 7.3.1 存储wchar_t字符的字符串
+
+**声明、赋值和输出的方式**  
+
+```cpp
+// 测试wchar_t字符串
+#include <iostream>
+#include <string>
+
+int main()
+{
+    std::wstring saying{L"Test!"};     // 定义使用wstring,赋值使用"L"
+    std::wcout << saying << std::endl; // 使用wcout输出
+}
+```
+
+### 7.3.2 包含Unicode字符串的对象
+
+- Unicode字符串对象的定义
+
+    | 字符串类型 | 字符类型 | 字符序列 |前缀|
+    | :-------- | :------- | :------- |:-------|
+    | std::u8string | char8_t | UTF-8 | u8 |
+    | std::u16string | char16_t | UTF-16 | u |
+    | std::u32string | char32_t | UTF-32 | U |
+
+- Unicode字符串不能直接用cout或wcout输出，需要转换，但是C++没有直接的转换功能，需要用第三方库
+
+    ```cpp
+    // 测试Unicode字符串对象
+    #include <iostream>
+    #include <string>
+
+    int main()
+    {
+        // 注意声明和赋值的关键字
+        std::u8string u8{u8"u8string！你好，中文!"}; // UTF-8
+        std::u16string u16{u"u16string!"};           // UTF-16
+        std::u32string u32{U"u32string!"};           // UTF-32
+
+        // Unicode字符串对象需要转换才能输出，这样转换可以输出UTF-8编码的中文
+        std::string s(reinterpret_cast<const char *>(u8.data()), u8.size());
+        std::cout << s << std::endl;
+
+        // 或者用范围循环输出每个字符
+        for (char16_t c : u16)
+        {
+            std::cout << static_cast<char>(c);
+        }
+        std::cout << std::endl;
+
+        for (char32_t c : u32)
+        {
+            std::cout << static_cast<char>(c);
+        }
+        std::cout << std::endl;
+    }
+    ```
