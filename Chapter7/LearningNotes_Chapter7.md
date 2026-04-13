@@ -935,3 +935,105 @@ int main()
         std::cout << std::endl;
     }
     ```
+
+## 7.4 原始字符串字面量
+
+- 原始字符串字面量的基本形式是`R"(...)"`，小括号本身不是字面量的一部分。
+`auto path{R"(C:\ProgramData\MyCompany\MySoftware\MyFile.ext)"};`
+- 所有类型的字面量都可以指定为原始字面量：LR、u8R、uR、UR
+- 如果要在原始字符串字面量里使用`"(`和`")`这样的字符，需要使用在原始字符串字面量开始和结束的前面使用一样的界定符，开始位置的界定符位于`"`和`(`之间，结束位置的界定符位于`)`和`"`之间。界定符不能超过16个字符，也不能包含小括号、空格、控制字符和反斜杠字符。
+
+    ```cpp
+    R"*(The answer is "(a-b)" not "(b-a)")*"  \\界定符是‘*’
+    R"Fa-la-la-la-la(The answer is "(a-b)" not "(b-a)")Fa-la-la-la-la"  \\界定符是"Fa-la-la-la-la"
+    ```
+
+## 7.5 本章小结
+
+## 7.6 练习
+
+1. 第1题
+
+    ```cpp
+    /*************************第7章_练习_第1题************************
+    编写一个程序，读取并存储任意多个学生的名字及其成绩。计算并输出平均成绩，
+    在一个表格中输出所有学生的名字和成绩，每一行输出3个学生的名字和成绩。
+    *****************************************************************/
+    #include <iostream>
+    #include <string>
+    #include <vector>
+    #include <format>
+    #include <cctype>
+
+    int main()
+    {
+        std::vector<double> grades;
+        std::vector<std::string> names;
+        double totalGrade{};
+        size_t maxLength{};
+
+        while (true)
+        {
+            std::string name;
+            std::cout << "请输入学生姓名：";
+            std::getline(std::cin, name);
+            while (!name.length())
+            {
+                std::cout << "请输入学生姓名：";
+                std::getline(std::cin, name);
+            }
+            names.push_back(name);
+            if (maxLength < name.length())
+            {
+                maxLength = name.length();
+            }
+
+            double grade{};
+            std::cout << "请输入成绩：";
+            std::cin >> grade;
+            while (grade < 0 || grade > 100)
+            {
+                std::cout << "成绩必须为0~100之间，请输入成绩：";
+                std::cin >> grade;
+            }
+            grades.push_back(grade);
+            totalGrade += grade;
+
+            char confirmChar{};
+            std::cout << "输入另一组记录？(Y/N):";
+            std::cin >> confirmChar;
+            confirmChar = std::toupper(confirmChar);
+            while (confirmChar != 'Y' && confirmChar != 'N')
+            {
+                std::cout << "请输入Y或N：";
+                std::cin >> confirmChar;
+                confirmChar = std::toupper(confirmChar);
+            }
+            if (confirmChar == 'N')
+            {
+                break;
+            }
+
+            std::cin.ignore();
+        }
+
+        if (names.size())
+        {
+            std::cout << std::format("\n共有{}名学生，平均成绩为{:.2f}。\n", names.size(), totalGrade / names.size());
+        }
+
+        size_t perline{3};
+        for (size_t i{}; i < names.size(); ++i)
+        {
+            std::cout << std::format("{:<{}} {:>4}  ", names[i], maxLength, grades[i]);
+            if ((i + 1) % perline == 0)
+            {
+                std::cout << std::endl;
+            }
+        }
+
+        std::cout << std::endl;
+    }
+    ```
+
+2. 第2题
