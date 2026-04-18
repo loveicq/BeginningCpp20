@@ -6,7 +6,6 @@ silent则不然。PS：只要单词字母数相等，字母频次相同即满足
 *****************************************************************/
 #include <iostream>
 #include <string>
-#include <algorithm> //sort()
 #include <format>
 
 int main()
