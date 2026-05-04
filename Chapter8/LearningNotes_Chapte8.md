@@ -234,4 +234,112 @@ Result returned is 15
 
 ---
 
+**2.给函数传递数组**  
 
+数组名本质是地址，传递给函数会复制数组的地址  
+
+- 传递数组的地址比传递数组更高效。数组不能作为一个实参按值传递每个元素，因为每个参数都表示一个单独的数据项
+- 函数不处理原始数组变量，但通过副本，函数体中的代码可以把表示数组的参数作为指针来看待，包括修改它包含的地址，可以使用指针表示法的强大功能
+
+```cpp
+// Ex8_05.cpp
+// 将数组传递给函数
+#include <iostream>
+#include <array> //用于 std::size()
+
+double average(double array[], size_t count); // 函数原型
+
+int main()
+{
+    double values[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
+    std::cout << "Average = " << average(values, std::size(values)) << std::endl;
+}
+
+// 计算平均值的函数
+double average(double array[], size_t count)
+{
+    double sum{}; // 在此累加总和
+    for (size_t i{}; i < count; ++i)
+        sum += array[i]; // 对数组元素求和
+    return sum / count;  // 返回平均值
+}
+```
+
+上面示例程序运行结果如下：
+
+---
+
+```cpp
+Average = 5.5 
+```
+
+---
+
+❗注意：不能通过在average()函数中使用sizeof运算符或std::size()函数来避免指定count参数。数组参数只是存储数组的地址，而不是数组本身。  
+
+也可以把传递给函数的数组看成指针，使用指针表示法访问元素，如以下函数。甚至都不用修改函数声明。
+
+```cpp
+double average(double* array, size_t count)
+{
+    double sum{}; // 在此累加总和
+    for (size_t i{}; i < count; ++i)
+        sum += *array++; // 对数组元素求和
+        /*
+        sum += *array++;等价于以下语句:
+        sum += *array;
+        array++;
+        */
+    return sum / count;  // 返回平均值
+}
+```
+
+❗注意：当按值传递数组时，绝不应该指定维数。按值传递的数组总是作为指针传递，编译器不会检查其维数。`double average10(double array[10])`完全等效于`double average10(double array[])`和`double average10(double* array)`两种形式
+
+**3.const指针参数**  
+
+average()函数只需要访问数组元素的值，不需要修改它们。这需要把数组参数类型指定为const。而count不用const，因为按值传递是复制实参，不能修改实参的值，但count参数最好还是加上const。
+
+```cpp
+//要注意，函数声明也要相应修改，加上const
+double average(const double* array,const size_t cont)
+{
+    double sum{};
+    for(size_t i{};i<count;++i)
+        sum += *array++;
+    return sum / count;
+}
+```
+
+**4.把多维数组传递给函数**  
+
+```cpp
+// Ex8_06.cpp
+// 将二维数组传递给函数
+#include <iostream>
+#include <array> //用于 std::size()
+
+double yield(const double values[][4], size_t n);
+
+int main()
+{
+    double beans[3][4]{{1.0, 2.0, 3.0, 4.0},
+                       {5.0, 6.0, 7.0, 8.0},
+                       {9.0, 10.0, 11.0, 12.0}};
+    std::cout << "Yield= " << yield(beans, std::size(beans)) // std::size(beans)实际得出数组的行数（第一维数量）
+              << std::endl;
+}
+
+// 计算总产量的函数
+double yield(const double array[][4], size_t size)
+{
+    double sum{};
+    for (size_t i{}; i < size; ++i) // 遍历行
+        for (double val : array[i]) // 遍历行中的各元素
+            sum += val;
+    return sum;
+}
+```
+
+- 多维数组并不适合使用指针表示法，如`sum += *(*(array+i)+j)`。用数组表示法会清楚得多。
+- 第二维可以用基于范围的for循环，因为编译器知道array[i]的大小，但不知道第一维的大小，所以外层循环不能用范围for循环。
