@@ -485,3 +485,245 @@ Your string contains the following 26 words:
 - 输入参数：一般不允许修改实参，通常应该是对const值的引用
 - 输入-输出参数：既是输入又是输出的参数，这种方式不好
 - 可以将T值传递给T&和const T&引用，但是只能将const T值传递给const T&引用
+
+**3.按引用传递数组**  
+
+```cpp
+double average10(const double (&array)[10])//Only arrays of length 10 be passed!
+{
+    double sum{};//Accumulate total in here
+    for(size_t i{};i<10;++i)
+        sum += array[i];//Sum array elements
+    return sum / 10;//Return average
+}
+```
+
+- 因为数组运算符[]比引用运算符&的优先级更高，所以把&括起来。可以是`const double (&array)[10]`，也可以是`const double (&array[10])`，但不能是`const double &array[10]`，因为后者表示10个`const double &`引用的数组
+- 按引用传递数组，可以使用sizeof()、std::size()和基于范围的for循环等
+- 现代C++更推荐使用`std::array<double, 10>`，避免复杂的数组引用语法。`double average10(const std::array<double,10>& value)`
+
+```cpp
+// Ex8_09A.cpp
+// 按引用传递数组
+#include <iostream>
+#include <iterator>
+
+double average10(const double (&array)[10]);
+
+int main()
+{
+    double values[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
+    std::cout << "Average = " << average10(values) << std::endl;
+}
+
+double average10(const double (&array)[10])
+{
+    double sum{};
+    for (size_t i{}; i < std::size(array); ++i)
+        sum += array[i];
+    return sum / std::size(array);
+}
+```
+
+上面示例程序运行结果如下：
+
+---
+
+```cpp
+Average = 5.5
+```
+
+---
+
+```cpp
+// Ex8_09B.cpp
+// 按引用传递数组
+#include <iostream>
+#include <iterator>
+
+double average10(const double (&)[10]);
+
+int main()
+{
+    double values[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
+    std::cout << "Average = " << average10(values) << std::endl;
+}
+
+double average10(const double (&array)[10])
+{
+    double sum{};
+    for (auto val : array)
+        sum += val;
+    return sum / std::size(array);
+}
+```
+
+上面示例程序运行结果如下：
+
+---
+
+```cpp
+Average = 5.5 
+```
+
+---
+
+```cpp
+// Ex8_09C.cpp
+// 按引用传递数组，std::array<>方式
+#include <iostream>
+#include <array>
+
+double average10(const std::array<double, 10> &);
+
+int main()
+{
+    std::array<double, 10> values{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
+    std::cout << "Average = " << average10(values) << std::endl;
+}
+
+double average10(const std::array<double, 10> &array)
+{
+    double sum{};
+    for (auto val : array)
+        sum += val;
+    return sum / array.size();
+}
+```
+
+上面示例程序运行结果如下：
+
+---
+
+```cpp
+Average = 5.5
+```
+
+---
+
+**4.引用和隐式转换**  
+
+- 按值传递实参的函数，会对不同类型的数据进行隐式转换
+- 按引用传递实参，如果是const值，可以隐式转换（在内存某个位置创建临时值），如果是非const值，则不允许转换(不允许创建临时值，编译报错)
+
+```cpp
+// Ex8_10.cpp
+// Implicit conversions of reference parameters
+#include <iostream>
+
+void double_it(double &it) { it *= 2; }
+void print_it(const double &it) { std::cout << it << std::endl; }
+
+int main()
+{
+    double d{123};
+    double_it(d);
+    print_it(d);
+
+    int i{456};
+    // double_it(i);
+    /*
+    提示两条错误：
+    1.cannot bind non-const lvalue reference of type 'double&' to a value of type 'int'
+    2.无法用 "int" 类型的值初始化 "double &" 类型的引用(非常量限定)
+    */
+    print_it(i);
+}
+```
+
+上面示例程序运行结果如下：
+
+---
+
+```cpp
+246
+456
+```
+
+---
+
+## 8.4默认实参值
+
+1. 指定默认实参值的方式如下：  
+`void show_error(std::string message="Program Error");`
+2. 如果分别创建了函数原型和函数定义，则在函数原型中指定默认实参，而不是在函数定义中指定
+3. 要输出默认消息，可以在调用函数时不指定对应的实参，要输出特定的消息，则指定实参
+4. 给引用参数指定默认值的方式和按值传递实参的方式完全相同，但是对于引用非const值的参数是非法的，不能编译，如：  
+`void show_error(std::string& message="Program Error");//非法`  
+`void show_error(const std::string& message="Program Error");//合法`
+
+**多个默认实参值**  
+
+- 对于有默认值的参数，应把最不可能省略的参数放在前面，把最可能省略的放在最后
+- 只能省略参数列表中最后的几个参数，不能跳着省略
+
+```cpp
+// Ex8_11.cpp
+// Using multiple default parameter
+#include <iostream>
+#include <format>
+#include <string>
+
+void show_data(const int data[], size_t count = 1,
+               const std::string &title = "Data Values",
+               size_t width = 10, size_t perline = 5);
+
+int main()
+{
+    int samples[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+    int dataItem{-99};
+    show_data(&dataItem);
+
+    dataItem = 13;
+    show_data(&dataItem, 1, "Unlucky for some!");
+
+    show_data(samples, std::size(samples));
+    show_data(samples, std::size(samples), "Samples");
+    show_data(samples, std::size(samples), "Samples", 6);
+    show_data(samples, std::size(samples), "Samples", 8, 4);
+}
+
+void show_data(const int data[], size_t count,
+               const std::string &title,
+               size_t width, size_t perline)
+{
+    std::cout << title << std::endl;
+    for (size_t i{}; i < count; ++i)
+    {
+        std::cout << std::format("{:{}}", data[i], width);
+        if ((i + 1) % perline == 0)
+            std::cout << '\n';
+    }
+    std::cout << std::endl;
+}
+```
+
+上面示例程序运行结果如下：
+
+---
+
+```cpp
+Data Values
+       -99
+Unlucky for some!
+        13
+Data Values
+         1         2         3         4         5
+         6         7         8         9        10
+        11        12
+Samples
+         1         2         3         4         5
+         6         7         8         9        10
+        11        12
+Samples
+     1     2     3     4     5
+     6     7     8     9    10
+    11    12
+Samples
+       1       2       3       4
+       5       6       7       8
+       9      10      11      12
+```
+
+---
