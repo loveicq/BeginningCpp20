@@ -353,3 +353,135 @@ Yield= 78
 
 - 多维数组并不适合使用指针表示法，如`sum += *(*(array+i)+j)`。用数组表示法会清楚得多。
 - 第二维可以用基于范围的for循环，因为编译器知道array[i]的大小，但不知道第一维的大小，所以外层循环不能用范围for循环。
+
+### 8.3.2按引用传递
+
+引用只是另一个变量的别名，使用引用参数不会进行复制。  
+
+**1.对比引用与指针**  
+
+```cpp
+// Ex8_07.cpp
+// 修改调用者变量的值 - 引用与指针
+#include <iostream>
+
+void change_it_by_pointer(double *reference_to_it);   // 传递指针（按值传递）
+void change_it_by_reference(double &reference_to_it); // 按引用传递
+
+int main()
+{
+    double it{5.0};
+
+    change_it_by_pointer(&it); // 现在我们传递地址
+    std::cout << "After first function execution,it = " << it << std::endl;
+
+    change_it_by_reference(it); // 现在我们传递引用，而不是值！
+    std::cout << "After second function execution,it = " << it << std::endl;
+}
+
+void change_it_by_pointer(double *pit)
+{
+    *pit += 10.0; // 这会修改原始的double值
+}
+void change_it_by_reference(double &pit)
+{
+    pit += 10.0; // 这也会修改原始的double值！
+}
+```
+
+上面示例程序的运行结果如下：
+
+---
+
+```cpp
+After first function execution,it = 15
+After second function execution,it = 25
+```
+
+---
+
+- 如想允许nullptr实参，就不能使用引用
+- 如果从上下文不能明显看出函数会修改实参，就绝不应该修改实参的值
+- 通过指向const值的引用来传递实参，一般认为是比指向const值的指针更好的方法
+
+**2.对比输入与输出参数**  
+
+```cpp
+// Ex8_08.cpp
+// 使用引用参数
+#include <iostream>
+#include <format>
+#include <vector>
+#include <string>
+
+using std::string;
+using std::vector;
+
+void find_words(vector<string> &words, const string &str, const string &separators);
+void list_words(const vector<string> &words);
+
+int main()
+{
+    string text; // 要搜索的字符串
+    std::cout << "Enter some text terminated by *:\n";
+    std::getline(std::cin, text, '*');
+
+    const string separators{" ,;:.\"!?'\n"}; // 单词分隔符
+    vector<string> words;
+
+    find_words(words, text, separators);
+    list_words(words);
+}
+
+void find_words(vector<string> &words, const string &text, const string &separators)
+{
+    size_t start{text.find_first_not_of(separators)}; // 第一个单词的起始索引
+
+    while (start != string::npos) // 查找单词
+    {
+        size_t end = text.find_first_of(separators, start + 1); // 查找单词的结尾
+        if (end == string::npos)
+            end = text.length();
+
+        words.push_back(text.substr(start, end - start));    // 存储单词
+        start = text.find_first_not_of(separators, end + 1); // 查找下一个单词的第一个字符
+    }
+}
+
+void list_words(const vector<string> &words)
+{
+    std::cout << "Your string contains the following " << words.size() << " words:\n";
+    size_t count{};
+    for (const auto &word : words)
+    {
+        std::cout << std::format("{:>15}", word);
+        if (!(++count % 5))
+            std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
+```
+
+上面示例程序的执行结果如下：
+
+---
+
+```cpp
+Enter some text terminated by *:
+Never judge a man until you have walked a mile in his shoes.
+Then,who cares?He is a mile away and you have his shoes!*
+Your string contains the following 26 words:
+          Never          judge              a            man          until
+            you           have         walked              a           mile
+             in            his          shoes           Then            who
+          cares             He             is              a           mile
+           away            and            you           have            his
+          shoes
+```
+
+---
+
+- 输出参数：允许函数修改实参
+- 输入参数：一般不允许修改实参，通常应该是对const值的引用
+- 输入-输出参数：既是输入又是输出的参数，这种方式不好
+- 可以将T值传递给T&和const T&引用，但是只能将const T值传递给const T&引用
