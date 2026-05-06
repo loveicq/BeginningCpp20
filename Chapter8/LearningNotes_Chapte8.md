@@ -727,3 +727,75 @@ Samples
 ```
 
 ---
+
+## 8.5 main()函数的实参
+
+可以把函数main()定义为在运行程序时接收从命令行输入的实参。格式如下：  
+`int main(int argc,char* argv[]) {//Code for main()...}`
+
+1. 调用程序时使用的程序名总是在argv的第一个元素argv[0]中记录
+2. argv中的最后一个元素（即argv[argc]）总是nullptr，因此argv中元素的个数是argc+1
+3. 如何处理命令行实参完全取决于程序员，如下案例：
+
+```cpp
+// Ex8_12.cpp
+// 命令行计算器：支持加减乘除
+#include <iostream>
+#include <cstdlib> // for atof()
+
+int main(int argc, char *argv[])
+{
+    // 检查参数数量是否正确
+    if (argc != 4)
+    {
+        std::cout << "用法: Ex8_12.exe <数字1> <运算符> <数字2>" << std::endl;
+        std::cout << "示例: Ex8_12.exe 10 + 5" << std::endl;
+        return 1; // 返回非零表示错误
+    }
+
+    // 解析参数
+    double num1 = std::atof(argv[1]); // 字符串转浮点
+    char op = argv[2][0];             // 运算符
+    double num2 = std::atof(argv[3]);
+
+    // 计算并输出结果
+    double result;
+    switch (op)
+    {
+    case '+':
+        result = num1 + num2;
+        break;
+    case '-':
+        result = num1 - num2;
+        break;
+    case '*':
+        result = num1 * num2;
+        break;
+    case '/':
+        if (num2 == 0)
+        {
+            std::cout << "错误：除数不能为零！" << std::endl;
+            return 1;
+        }
+        result = num1 / num2;
+        break;
+    default:
+        std::cout << "不支持的运算符: " << op << std::endl;
+        return 1;
+    }
+
+    std::cout << num1 << " " << op << " " << num2 << " = " << result << std::endl;
+    return 0;
+}
+```
+
+上面示例程序运行结果如下：
+
+---
+
+```cpp
+ex8_12.exe 10 + 5
+10 + 5 = 15
+```
+
+---
