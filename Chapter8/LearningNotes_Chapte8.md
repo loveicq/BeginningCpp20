@@ -799,3 +799,120 @@ ex8_12.exe 10 + 5
 ```
 
 ---
+
+## 8.6 从函数中返回值
+
+在指针返回到调用函数时，指针指向的变量必须仍在其作用域中。  
+**不要从函数中返回在栈上分配的自动局部变量的地址。**  
+
+```cpp
+// Ex8_13.cpp
+// Retruning a pointer
+#include <iostream>
+#include <format>
+#include <array>
+#include <string>
+
+void show_data(const double data[], size_t count = 1,
+               const std::string &title = "Data Values",
+               size_t width = 10, size_t perLine = 5);
+const double *largest(const double data[], size_t count);
+const double *smallest(const double data[], size_t count);
+double *shift_range(double data[], size_t count, double delta);
+double *scale_range(double data[], size_t count, double divisor);
+double *normalize_range(double data[], size_t count);
+
+int main()
+{
+    double samples[]{
+        11.0, 23.0, 13.0, 4.0,
+        57.0, 36.0, 317.0, 88.0,
+        9.0, 100.0, 121.0, 12.0};
+    const size_t count{std::size(samples)};             // Number of samples
+    show_data(samples, count, "Original Values");       // Output original values
+    normalize_range(samples, count);                    // Normalize the values
+    show_data(samples, count, "Normalized Values", 12); // Output normalized values
+}
+
+// Output an array of double values
+void show_data(const double data[], size_t count,
+               const std::string &title, size_t width, size_t perLine)
+{
+    std::cout << title << std::endl; // Display the title
+    // Output the data value
+    for (size_t i{}; i < count; ++i)
+    {
+        // Display a data item(uses a ddynamic field width:see Chapter 7)
+        std::cout << std::format("{:{}.6g}", data[i], width);
+        if ((i + 1) % perLine == 0)
+            std::cout << '\n';
+    }
+    std::cout << std::endl;
+}
+
+const double *smallest(const double data[], size_t count)
+{
+    if (!count)
+        return nullptr; // There is no smallest in an empty array
+
+    size_t index_min{};
+    for (size_t i{1}; i < count; ++i)
+        if (data[index_min] > data[i])
+            index_min = i;
+    return &data[index_min];
+}
+
+double *shift_range(double data[], size_t count, double delta)
+{
+    for (size_t i{}; i < count; ++i)
+        data[i] += delta;
+    return data;
+}
+
+const double *largest(const double data[], size_t count)
+{
+    if (!count)
+        return nullptr; // There is no largest in an empty array
+
+    size_t index_max{};
+    for (size_t i{1}; i < count; ++i)
+        if (data[index_max] < data[i])
+            index_max = i;
+
+    return &data[index_max];
+}
+
+double *scale_range(double data[], size_t count, double divisor)
+{
+    if (!divisor)
+        return data; // Do nothing for a zero divisor
+
+    for (size_t i{}; i < count; ++i)
+        data[i] /= divisor;
+    return data;
+}
+
+double *normalize_range(double data[], size_t count)
+{
+    shift_range(data, count, -(*smallest(data, count)));
+    return scale_range(data, count, *largest(data, count));
+}
+```
+
+上面示例程序主要目的是对一组数据进行归一化处理，将数据映射到[0,1]区间。**归一化是数据预处理常用技术，方便不同量纲的数据进行比较或输入到机器学习模型中。** 程序运行结果如下：
+
+---
+
+```cpp
+Original Values                                                               
+        11        23        13         4        57                            
+        36       317        88         9       100                            
+       121        12                                                          
+Normalized Values                                                             
+   0.0223642   0.0607029    0.028754           0    0.169329                  
+    0.102236           1    0.268371   0.0159744    0.306709                  
+    0.373802   0.0255591 
+```
+
+---
+
