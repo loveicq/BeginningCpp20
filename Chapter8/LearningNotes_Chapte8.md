@@ -916,3 +916,57 @@ Normalized Values
 
 ---
 
+### 8.6.2 返回引用
+
+```cpp
+std::string& larger(std::string& s1,std::string& s2)
+{
+    return s1>s2?s1:s2;//return a reference to the larger string
+}
+```
+
+不要从函数中返回自动局部变量的引用  
+
+如果要修改std::string变量的值，就不能定义为const  
+
+如果是非const变量，就不能用字符串字面量来作实参。反之，如果要用字符串字面量做实参，就必须定义为const变量  
+
+### 8.6.3 对比返回值与输出参数
+
+1. 返回一个值  
+`vector<std::string> find_words(const std::string& str,const std::string& separators);`
+2. 将值放到输出参数中  
+`void find_words(vector<std::string>& words,const std::string str,const std::string& separators);`
+
+- 在现代C++中，一般应该首选返回值
+- 数组或包含数组的对象是明显的例外，对于它们来说，使用输出参数仍然是更好的方案
+
+### 8.6.4 返回类型推断
+
+- 一定不要返回一个指向自动局部变量或临时对象的指针或引用
+- auto不会推断为一个引用类型，而总是推断为一个值类型。要让编译器推断一个引用类型，可以使用auto&或const auto&
+- 对局部变量使用auto时，上面的规则也适用
+
+## 8.7 静态变量
+
+用`static`关键字声明静态变量  
+
+```cpp
+unsigned int nextInteger()
+{
+    static unsigned int count {0};//声明静态变量
+    return ++count;
+}
+```
+
+- 只有第一次执行包含`static`的语句时，才会创建变量并初始化，后面再执行该语句就没有效果了
+- 如果不初始化静态变量，默认初始化为0
+- 普通变量不初始化，将包含垃圾值，而不是0
+
+## 8.8 函数重载
+
+1. 编译器通过函数的签名来区分函数，函数的签名是函数名及其参数列表的组合
+2. 重载函数的名称相同，所以每个重载函数的签名必须有不同的参数列表
+    - 函数的参数个数不同
+    - 至少有一对对应参数的类型不同
+3. 函数的返回类型不是函数签名的一部分。如果声明了两个同名的函数，参数列表也相同，只是返回类型不同，程序将无法编译
