@@ -970,3 +970,215 @@ unsigned int nextInteger()
     - 函数的参数个数不同
     - 至少有一对对应参数的类型不同
 3. 函数的返回类型不是函数签名的一部分。如果声明了两个同名的函数，参数列表也相同，只是返回类型不同，程序将无法编译
+
+```cpp
+// Ex8_14.cpp
+// Overloading a function
+#include <iostream>
+#include <string>
+#include <vector>
+
+// Function prototypes
+double largest(const double data[], size_t count);
+double largest(const std::vector<double> &data);
+int largest(const std::vector<int> &data);
+std::string largest(const std::vector<std::string> &words);
+/*Above function overload would not compile:overloaded function
+must differ in more than just their return type!*/
+
+int main()
+{
+    double array[]{1.5, 44.6, 13.7, 21.2, 6.7};
+    std::vector<int> numbers{15, 44, 13, 21, 6, 8, 5, 2};
+    std::vector<double> data{3.5, 5, 6, -1.2, 8.7, 6.4};
+    std::vector<std::string> names{"Charles Dickens", "Emily Bronte",
+                                   "Jane Austen", "Henry James", "Arthur Miller"};
+    std::cout << "The largest of array is " << largest(array, std::size(array)) << std::endl;
+    std::cout << "The largest of numbers is " << largest(numbers) << std::endl;
+    std::cout << "The largest of data is " << largest(data) << std::endl;
+    std::cout << "The largest of words is " << largest(names) << std::endl;
+}
+
+// Finds the largest of an array of double values
+double largest(const double data[], size_t count)
+/*data[]会自动退化为指向数组第一个元素的指针，所以不用引用。
+但编译时必须知道元素数量，所以参数count不可少*/
+{
+    double max{data[0]};
+    for (size_t i{1}; i < count; ++i)
+        if (max < data[i])
+            max = data[i];
+    return max;
+}
+
+// Finds the largest of a vector of double values
+double largest(const std::vector<double> &data)
+{
+    double max{data[0]};
+    for (auto value : data)
+        if (max < value)
+            max = value;
+    return max;
+}
+
+// Finds the largest of a vector of int values
+int largest(const std::vector<int> &data)
+{
+    int max{data[0]};
+    for (auto value : data)//这里不用&，是因为value是基本类型int，复制开销小
+        if (max < value)
+            max = value;
+    return max;
+}
+
+// Finds the largest of a vector of string objects
+std::string largest(const std::vector<std::string> &words)
+{
+    std::string max_word{words[0]};
+    for (const auto &word : words)//这里用&，是因为string类型，复制开销大，故引用之
+        if (max_word < word)
+            max_word = word;
+    return max_word;
+}
+```
+
+上面示例程序运行结果如下：  
+
+---
+
+```cpp
+The largest of array is 44.6
+The largest of numbers is 44
+The largest of data is 8.7
+The largest of words is Jane Austen 
+```
+
+---
+
+上面这个示例的多个largest()函数有相同的实现，为避免代码重复，应使用**函数模板**。  
+
+### 8.8.1 重载和指针参数
+
+```cpp
+int largest(int* pValues,size_t count);//Prototype 1
+int largest(float* pValues,size_t count);//Prototype 2
+int largest(int values[],size_t count);//Identical signature to prototype 1
+int largest(int values[100],size_t count);//Identical signature to prototype 1
+//第1和第3、4个函数是相同的重载函数（不能同时存在，否则无法编译），和第2是不同的重载函数（可以同时存在）
+```
+
+### 8.8.2 重载和引用参数
+
+不能把参数类型是data_type的函数，重载为参数类型是data_type&的函数，如下：
+
+```cpp
+void do_it(std::string number);//These are not distinguishable...
+void do_it(std::string& number);//...from the argument type
+```
+
+```cpp
+// Ex8_15.cpp
+// Overloading a function with reference parameters
+#include <iostream>
+#include <format>
+
+double larger(double a, double b); // Non-reference parameters
+long &larger(long &a, long &b);    // Reference parameters
+
+int main()
+{
+    double a_double{1.5}, b_double{2.5};
+    std::cout << std::format("The larger of double values {} and {} is {}\n",
+                             a_double, b_double, larger(a_double, b_double));
+
+    int a_int{15}, b_int{25};
+    std::cout << std::format("The larger of int values {} and {} is {}\n",
+                             a_int, b_int,
+                             larger(static_cast<long>(a_int), static_cast<long>(b_int)));
+}
+
+//Returns the larger of two floating point values
+double larger(double a,double b)
+{
+    std::cout<<"double larger() called."<<std::endl;
+    return a>b?a:b;
+}
+
+//Returns the larger of two long references
+long& larger(long& a,long& b)
+{
+    std::cout<<"long ref larger() called"<<std::endl;
+    return a>b?a:b;
+}
+```
+
+上面示例程序运行结果如下：
+
+---
+
+```cpp
+double larger() called.
+The larger of double values 1.5 and 2.5 is 2.5
+double larger() called.
+The larger of int values 15 and 25 is 25
+```
+
+---
+
+**注意：**  
+
+1. `static_cast<long>()`创建临时地址，编译器不会使用临时地址来初始化非const值的引用，所以会调用`double larger(double a, double b)`函数而不是`long &larger(long &a, long &b)`函数
+
+2. 如果要引用调用long&类型的函数，可以把形参声明为const引用：`long larger(const long& a,const long& b);`，因为C++可以const& 临时地址。如果非要返回long&，则函数返回值前面也要加上const：`const long& larger(const long& a,const long& b);`
+
+### 8.8.3 重载和const参数
+
+1. 实参在按值传递时，在函数原型中把参数指定为const是没有意义的，因为传递的是副本，不会修改实参的初始值
+2. 实参在按引用或按指针传递时，会有区别：  
+
+    **重载和const指针参数**  
+
+    - 一个函数参数类型是type*，另一个函数的参数类型是const type*，这两个函数就是不同的
+
+    ```cpp
+    //Prototype1
+    long* larger(long* a,long* b);
+    //Protoytpe2
+    const long* larger(const long* a,const long* b);
+    ```
+
+    - 编译器不会把const值传递给带非const指针参数的函数
+
+    ```cpp
+    long num1{1L};
+    long num2{2L};
+    long num3{*larger(&num1,&num2)};//调用Prototype1，注意函数前的*是解引用的意思，因为函数原型是返回指针
+
+    const long num4{1L};
+    const long num5{2L};
+    const long num6{*larger(&num4,&num5)};//调用Protoytpe2，注意函数前的*是解引用的意思，因为函数原型是返回指针
+    ```
+
+    - 在函数原型中的星号后面添加const修饰符没有意义，只有在函数定义中才应该考虑这么做  
+
+    ```cpp
+    //与prototype1相同
+    long* larger(long* const a,long* const b);
+    //与prototype2相同
+    const long* larger(const long* const a,const long* const b);
+    ```
+
+    **重载和const引用参数**
+
+    - 不允许在&符号后添加const  
+    - T&和const T&总是不同的
+
+### 8.8.4 重载和默认实参值
+
+对于重载函数，默认实参值有时会影响编译器区分函数调用的能力
+
+## 8.9 递归
+
+使用递归可有效地遍历组织为树的数据
+
+### 8.9.1 基本示例
