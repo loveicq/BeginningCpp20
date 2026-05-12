@@ -1179,6 +1179,94 @@ The larger of int values 15 and 25 is 25
 
 ## 8.9 递归
 
-使用递归可有效地遍历组织为树的数据
+在函数包含对自身的调用时，该函数就称为递归函数。使用递归可有效地遍历组织为树的数据。
 
 ### 8.9.1 基本示例
+
+```cpp
+// Ex8_16.cpp
+// Recursive version of function for x to the power n, n positive or negative
+#include <iostream>
+#include <format>
+
+double power(double x, int n);
+
+int main()
+{
+    for (int i{-3}; i <= 3; ++i) // Calculate powers of 8 from -3 to +3
+        std::cout << std::format("{:10g}", power(8.0, i));
+    std::cout << std::endl;
+}
+
+// Recursive function to calculate x to the power n
+double power(double x, int n)
+{
+    if (n == 0)
+        return 1.0;
+    else if (n > 0)
+        return x * power(x, n - 1);
+    else // n<0
+        return 1.0 / power(x, -n);
+}
+```
+
+上面示例程序运行结果如下：
+
+---
+
+```cpp
+0.00195312  0.015625     0.125         1         8        64       512 
+```
+
+---
+
+使用递归，需要确保解决问题所需的递归深度本身不会成为问题。
+
+### 8.9.2 递归算法
+
+递归常常用于实现排序和合并操作  
+
+**1.快速排序算法**  
+
+首先从单词集合中任意选择一个单词，然后安排剩余单词的位置，把所有小于所选单词的单词放在所选单词的左边，把所有大于所选单词的单词放在所选单词的右边，所选单词左右两边的单词不必按顺序排序。对越来越小的单词集合执行相同的过程，直到每个单词都位于一个独立的集合中为止。  
+应采用std::string对象的智能指针来存储单词，并将这些指针存储在一个向量容器中。  
+
+**2.main()函数**  
+
+```cpp
+// Ex8_17.cpp
+//  Sorting words recursively
+#include <iostream>
+#include <format>
+#include <memory>
+#include <vector>
+
+using Words = std::vector<std::shared_ptr<std::string>>;
+
+void swap(Words &words, size_t first, size_t second);
+void sort(Words &words);
+void sort(Words &words, size_t start, size_t end);
+void extract_words(Words &words, const std::string &text, const std::string &separators);
+void show_words(const Words &words);
+size_t max_word_length(const Words &words);
+
+int main()
+{
+    Words words;
+    std::string text;                   // The string to be sorted
+    const auto separators{" ,.!?\"\n"}; // Word delimiters
+
+    // Read the string to be processed from the dkyboard
+    std::cout << "Enter a string terminated by *:" << std::endl;
+    getline(std::cin, text, '*');
+    extract_words(words, text, separators);
+    if (words.empty())
+    {
+        std::cout << "No words in text." << std::endl;
+        return 0;
+    }
+
+    sort(words);       // Sort the words
+    show_words(words); // Output the words
+}
+```
