@@ -73,6 +73,7 @@ void sort(Words &words, size_t start, size_t end)
     }
 
     swap(words, start, current); // Swap chosen and last swapped words
+
     if (current > start)
         sort(words, start, current - 1); // Sort left subset if exists
     if (end > current + 1)
