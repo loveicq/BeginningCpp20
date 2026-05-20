@@ -16,7 +16,7 @@ You were born on the 21st of November,2012
 int validate_input(int lower, int upper, const std::string &description);
 int year();
 int month();
-int date(int month_value, int year_value);
+int date(int month_value, int year_value); // 两个参数是用来判断闰年的
 std::string ending(int date_day);
 
 int main()
