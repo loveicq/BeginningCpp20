@@ -67,18 +67,22 @@ int main()
         &gradeStdDev);
 
     // 输出题目要求的各项数据
-    std::cout << "\n前5名成绩为：\n";
+    std::cout << "\n前5名成绩为：";
     for (size_t i{}; i < size; ++i)
-        std::cout << top5grades[i] << std::endl;
+        std::cout << top5grades[i] << " ";
+    std::cout << std::endl;
 
-    std::cout << "后5名成绩为：\n";
+    std::cout << "后5名成绩为：";
     for (size_t i{}; i < size; ++i)
-        std::cout << bottom5grades[i] << std::endl;
+        std::cout << bottom5grades[i] << " ";
+    std::cout << std::endl;
 
     std::cout << "平均成绩是：" << gradeAverage << std::endl;
     std::cout << "中值成绩是：" << gradeMiddle << std::endl;
     std::cout << "成绩方差是：" << gradeVariance << std::endl;
     std::cout << "成绩标准差是：" << gradeStdDev << std::endl;
+
+    std::cout<<std::endl;
 }
 
 void inputGrades(std::vector<int> &grades)
@@ -97,13 +101,16 @@ void inputGrades(std::vector<int> &grades)
         }
         else
         {
-            char ch{};
+            std::string input;
             std::cin.clear(); // 清除错误的状态
-            std::cin >> ch;
-            if (ch == '#')
+            std::cin >> input;
+            // 同时支持半角 '#' 和全角 '＃'
+            if (input == "#" || input == "＃")
                 break;
             else
                 std::cout << "输入无效，请输入整数或‘#’结束！" << std::endl;
+            // 清空输入缓冲区中剩余的字符（包括换行符）
+            std::cin.ignore(1000, '\n');
         }
     }
 }
