@@ -2079,7 +2079,7 @@ were        were        winter      wisdom      worst
         //递归计算
         {auto start{std::chrono::high_resolution_clock::now()};//开始时间
         std::cout<<"\n递归版本结果：\n";
-        for(size_t i{0};i<count;++i)
+        for(size_t i{1};i<=count;++i)
             std::cout<<"F("<<i<<") = "<<fibonacci_recursive(i)<<std::endl;
         auto end{std::chrono::high_resolution_clock::now()};//结束时间
         auto duration{std::chrono::duration_cast<std::chrono::milliseconds>(end-start)};
@@ -2088,7 +2088,7 @@ were        were        winter      wisdom      worst
         //循环计算
         {auto start{std::chrono::high_resolution_clock::now()};//开始时间
         std::cout<<"\n循环版本结果：\n";
-        for(size_t i{0};i<count;++i)
+        for(size_t i{1};i<=count;++i)
             std::cout<<"F("<<i<<") = "<<fibonacci_iterative(i)<<std::endl;
         auto end{std::chrono::high_resolution_clock::now()};//结束时间
         auto duration {std::chrono::duration_cast<std::chrono::microseconds>(end-start)};
@@ -2132,7 +2132,6 @@ were        were        winter      wisdom      worst
     要计算多少个斐波那契数?[0~92]:40
 
     递归版本结果：
-    F(0) = 0
     F(1) = 1
     F(2) = 1
     F(3) = 2
@@ -2172,11 +2171,11 @@ were        were        winter      wisdom      worst
     F(37) = 24157817
     F(38) = 39088169
     F(39) = 63245986
+    F(40) = 102334155
 
-    递归版本耗时：2432 毫秒。
+    递归版本耗时：2965 毫秒。
 
     循环版本结果：
-    F(0) = 0
     F(1) = 1
     F(2) = 1
     F(3) = 2
@@ -2216,8 +2215,9 @@ were        were        winter      wisdom      worst
     F(37) = 24157817
     F(38) = 39088169
     F(39) = 63245986
+    F(40) = 102334155
 
-    循环版本耗时：148 微秒。
+    循环版本耗时：45662 微秒。
     ```
 
     ---

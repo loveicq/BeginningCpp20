@@ -13,59 +13,66 @@
 有必要在一个vector<>中记录完整的序列。
 *****************************************************************/
 #include <iostream>
-#include<chrono>//计时
+#include <chrono> //计时
 
 long long fibonacci_recursive(size_t n);
 long long fibonacci_iterative(size_t n);
 
 int main()
 {
-    size_t count{};//要输出的斐波那契数字个数
-    std::cout<<"要计算多少个斐波那契数?[0~92]:";
-    std::cin>>count;
+    size_t count{}; // 要输出的斐波那契数字个数
+    std::cout << "要计算多少个斐波那契数?[0~92]:";
+    std::cin >> count;
 
-    //递归计算
-    {auto start{std::chrono::high_resolution_clock::now()};//开始时间
-    std::cout<<"\n递归版本结果：\n";
-    for(size_t i{0};i<count;++i)
-        std::cout<<"F("<<i<<") = "<<fibonacci_recursive(i)<<std::endl;
-    auto end{std::chrono::high_resolution_clock::now()};//结束时间
-    auto duration{std::chrono::duration_cast<std::chrono::milliseconds>(end-start)};
-    std::cout<<"\n递归版本耗时："<< duration.count()<<" 毫秒。"<<std::endl;}
+    // 递归计算
+    {
+        auto start{std::chrono::high_resolution_clock::now()}; // 开始时间
+        std::cout << "\n递归版本结果：\n";
+        for (size_t i{1}; i <= count; ++i)
+            std::cout << "F(" << i << ") = " << fibonacci_recursive(i) << std::endl;
+        auto end{std::chrono::high_resolution_clock::now()}; // 结束时间
+        auto duration{std::chrono::duration_cast<std::chrono::milliseconds>(end - start)};
+        std::cout << "\n递归版本耗时：" << duration.count() << " 毫秒。" << std::endl;
+    }
 
-    //循环计算
-    {auto start{std::chrono::high_resolution_clock::now()};//开始时间
-    std::cout<<"\n循环版本结果：\n";
-    for(size_t i{0};i<count;++i)
-        std::cout<<"F("<<i<<") = "<<fibonacci_iterative(i)<<std::endl;
-    auto end{std::chrono::high_resolution_clock::now()};//结束时间
-    auto duration {std::chrono::duration_cast<std::chrono::microseconds>(end-start)};
-    std::cout<<"\n循环版本耗时："<< duration.count()<<" 微秒。"<<std::endl;}
-
+    // 循环计算
+    {
+        auto start{std::chrono::high_resolution_clock::now()}; // 开始时间
+        std::cout << "\n循环版本结果：\n";
+        for (size_t i{1}; i <= count; ++i)
+            std::cout << "F(" << i << ") = " << fibonacci_iterative(i) << std::endl;
+        auto end{std::chrono::high_resolution_clock::now()}; // 结束时间
+        auto duration{std::chrono::duration_cast<std::chrono::microseconds>(end - start)};
+        std::cout << "\n循环版本耗时：" << duration.count() << " 微秒。" << std::endl;
+    }
 }
 
 long long fibonacci_recursive(size_t n)
 {
-    if(n==0) return 0;
-    if(n==1) return 1;
-    //最后一个数等于前两个数相加，前两个数又分别用递归求得
-    return fibonacci_recursive(n-1)+fibonacci_recursive(n-2);//最终只返回一个数
+    if (n == 0)
+        return 0;
+    if (n == 1)
+        return 1;
+    // 最后一个数等于前两个数相加，前两个数又分别用递归求得
+    return fibonacci_recursive(n - 1) + fibonacci_recursive(n - 2); // 最终只返回一个数
 }
 
 long long fibonacci_iterative(size_t n)
 {
-    if(n==0) return 0;
-    if(n==1) return 1;
+    if (n == 0)
+        return 0;
+    if (n == 1)
+        return 1;
 
     long long prev2{0};
     long long prev1{1};
     long long current;
 
-    for(size_t i{2};i<=n;++i)
+    for (size_t i{2}; i <= n; ++i)
     {
-        current=prev1+prev2;
-        prev2=prev1;
-        prev1=current;
+        current = prev1 + prev2;
+        prev2 = prev1;
+        prev1 = current;
     }
 
     return current;
