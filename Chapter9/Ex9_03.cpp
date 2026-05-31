@@ -22,7 +22,7 @@ std::string largest(std::span<const std::string> words);
 
 int main()
 {
-    double array[]{1.5, 44.6, 13.7, 21.2, 6.7};           // C++17及以后自动推导类型为vector<double>
+    double array[]{1.5, 44.6, 13.7, 21.2, 6.7};
     std::vector numbers{15, 44, 13, 21, 6, 8, 5, 2};      // C++17及以后自动推导类型为vector<int>
     std::vector data{3.5, 5.0, 6.0, -1.2, 8.7, 6.4};      // C++17及以后自动推导类型为vector<double>
     std::array array_data{3.5, 5.0, 6.0, -1.2, 8.7, 6.4}; // 顺便加入一个 std::array 作为补充测试;

@@ -183,6 +183,32 @@ Found an early i at index 4
     }
     ```
 
+    上面示例程序运行结果如下：
+
+    ---
+
+    ```cpp
+    请输入字符串，以*号结束：
+    The morning sun filtered through the kitchen window, casting warm golden rays on the wooden table. A fresh pot of coffee steamed gently, its rich aroma mixing with the scent of freshly baked bread. Outside, birds chirped happily in the oak tree, while a soft breeze rustled the leaves. I sipped my coffee slowly, enjoying the peaceful moment before the day's busy schedule began.*
+
+    字符串分解单词列举如下：
+    The      morning  sun      filtered through  
+    the      kitchen  window   casting  warm     
+    golden   rays     on       the      wooden   
+    table    A        fresh    pot      of       
+    coffee   steamed  gently   its      rich     
+    aroma    mixing   with     the      scent    
+    of       freshly  baked    bread    Outside  
+    birds    chirped  happily  in       the      
+    oak      tree     while    a        soft     
+    breeze   rustled  the      leaves   I        
+    sipped   my       coffee   slowly   enjoying 
+    the      peaceful moment   before   the      
+    day      s        busy     schedule began
+    ```
+
+    ---
+
 ### 9.2.2 合适的动机
 
 如果char数组不是空字符元素终止，就不能构造string_view对象，  
@@ -195,6 +221,7 @@ Found an early i at index 4
 3. std::span<>对象提供size()、empty()、data()、front()和back()等函数
 
     ```cpp
+    //Ex9_03.cpp
     // 使用 std::span<> 减少 largest() 函数的重载数量
     // 显然，这三个生成的函数仍然很相似。
     // 有关如何使用函数模板消除这种重复代码，请参见第10章。
@@ -219,11 +246,11 @@ Found an early i at index 4
 
     int main()
     {
-        double array[]{1.5, 44.6, 13.7, 21.2, 6.7};           // C++17及以后自动推导类型为vector<double>
+        double array[]{1.5, 44.6, 13.7, 21.2, 6.7};
         std::vector numbers{15, 44, 13, 21, 6, 8, 5, 2};      // C++17及以后自动推导类型为vector<int>
         std::vector data{3.5, 5.0, 6.0, -1.2, 8.7, 6.4};      // C++17及以后自动推导类型为vector<double>
         std::array array_data{3.5, 5.0, 6.0, -1.2, 8.7, 6.4}; // 顺便加入一个 std::array 作为补充测试;
-                                                            // C++17及以后自动推导类型为array<double,6>
+                                                              // C++17及以后自动推导类型为array<double,6>
         std::vector<std::string> names{"Charles Dickens", "Emily Bronte",
                                     "Jane Austen", "Henry James", "Arthur Miller"};
         std::cout << "The largest of array is " << largest(array) << std::endl;
@@ -264,6 +291,20 @@ Found an early i at index 4
     }
     ```
 
+    以上程序运行结果如下：
+
+    ---
+
+    ```cpp
+    The largest of array is 44.6
+    The largest of numbers is 44
+    The largest of data is 8.7
+    The largest of array_data is (also) 8.7
+    The largest of names is Jane Austen
+    ```
+
+    ---
+
 ### 9.3.1 span与视图
 
 1. std::span<>与std::string_view一样，都不会复制底层数组的元素
@@ -285,3 +326,102 @@ Found an early i at index 4
     `double average10(std::span<const double,10>values)`  
     `double average10(const double (&values)[10]);`  
     `double average10(const std::array& values);`  
+
+    ```cpp
+    // Ex9_04.cpp
+    // 使用span<T,N>替代T(&)[N]
+    #include <iostream>
+
+    double average10(std::span<double, 10> values);
+
+    int main()
+    {
+        double values[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
+        std::cout << "Average = " << average10(values) << std::endl;
+    }
+
+    double average10(std::span<double, 10> values)
+    {
+        double sum{};
+        for (auto value : values)
+            sum += value;
+        return sum / 10;
+    }
+    ```
+
+    上面示例程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Average = 5.5
+    ```
+
+    ---
+
+## 9.4 本章小结
+
+## 9.5 练习
+
+1. 第1题
+
+    ```cpp
+    /*************************第9章_练习_第1题************************
+    修改Ex9_01，在其中使用std::string_view。
+    *****************************************************************/
+    #include <iostream>
+    #include <optional>
+    #include <string_view>
+
+    std::optional<size_t> find_last(std::string_view string,
+                                    char to_find,
+                                    std::optional<size_t> start_index = std::nullopt);
+
+    int main()
+    {
+        const auto string{"Growing old is mandatory; growing up is optional."};
+        // 此处可以用列表初始化，不用‘=’号了，因为std::string_view已经包含size()等属性
+
+        const std::optional<size_t> found_a{find_last(string, 'a')};
+        if (found_a)
+            std::cout << "Found the last a at index " << *found_a << std::endl;
+
+        const auto found_b{find_last(string, 'b')};
+        if (found_b.has_value())
+            std::cout << "Found the last b at index " << found_b.value() << std::endl;
+
+        const auto found_early_i{find_last(string, 'i', 10)};
+        if (found_early_i != std::nullopt) // 此句有没有"!= std::nullopt"效果都是一样的
+            std::cout << "Found an early i at index " << *found_early_i << std::endl;
+    }
+
+    std::optional<size_t> find_last(std::string_view string,
+                                    char to_find,
+                                    std::optional<size_t> start_index)
+    {
+        if (string.empty())
+            return std::nullopt;
+
+        size_t index = start_index.value_or(string.size() - 1);
+        while (true)
+        {
+            if (string[index] == to_find)
+                return index;
+            if (index == 0)
+                return std::nullopt;
+            --index;
+        }
+    }
+    ```
+
+    以上程序运行效果如下：
+
+    ---
+
+    ```cpp
+    Found the last a at index 46
+    Found an early i at index 4
+    ```
+
+    ---
+

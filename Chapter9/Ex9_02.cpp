@@ -55,6 +55,7 @@ void list_words(const std::vector<std::string> &words,
     }
 
     size_t count{};
+    std::cout << "\n字符串分解单词列举如下：\n";
     for (const auto &word : words)
     {
         std::cout << std::format("{:<{}}", word, maxStr + 1);
