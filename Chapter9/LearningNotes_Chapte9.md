@@ -425,3 +425,201 @@ Found an early i at index 4
 
     ---
 
+2. 第2题
+
+    ```cpp
+    /*************************第9章_练习_第2题************************
+    修改Ex8_11，在其中使用std::string_view和std::span<>。
+    *****************************************************************/
+    #include <iostream>
+    #include <string_view>
+    #include <span>
+    #include <format>
+
+    void show_data(std::span<int> data,
+                std::string_view title = "Data Values",
+                size_t width = 10, size_t perline = 5);
+
+    int main()
+    {
+        int samples[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+        int dataItem{-99};
+        show_data(std::span{&dataItem, 1});
+
+        dataItem = 13;
+        show_data(std::span{&dataItem, 1}, "Unlucky for some!");
+
+        show_data(samples);
+        show_data(samples, "Samples");
+        show_data(samples, "Samples", 6);
+        show_data(samples, "Samples", 8, 4);
+    }
+
+    void show_data(std::span<int> data,
+                std::string_view title,
+                size_t width, size_t perline)
+    {
+        std::cout << title << std::endl;
+        size_t size{};
+        for (auto value : data)
+        {
+            std::cout << std::format("{:{}}", value, width);
+            if (++size % perline == 0)
+                std::cout << '\n';
+        }
+        std::cout << std::endl;
+    }
+    ```
+
+    以上程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Data Values
+       -99
+    Unlucky for some!
+            13
+    Data Values
+            1         2         3         4         5
+            6         7         8         9        10
+            11        12
+    Samples
+            1         2         3         4         5
+            6         7         8         9        10
+            11        12
+    Samples
+        1     2     3     4     5
+        6     7     8     9    10
+        11    12
+    Samples
+        1       2       3       4
+        5       6       7       8
+        9      10      11      12
+    ```
+
+    ---
+
+3. 第3题
+
+    ```cpp
+    /*************************第9章_练习_第3题************************
+    修改Ex8_13，在其中使用词汇类型。
+    *****************************************************************/
+    #include <iostream>
+    #include <format>
+    #include <span>
+    #include <string_view>
+    #include <optional>
+
+    void show_data(std::span<const double> data,
+                std::string_view title = "Data Values",
+                size_t width = 10, size_t perLine = 5);
+    std::optional<double> largest(std::span<const double> data);
+    std::optional<double> smallest(std::span<const double> data);
+    std::span<double> shift_range(std::span<double> data, double delta);
+    std::span<double> scale_range(std::span<double> data, double divisor);
+    std::span<double> normalize_range(std::span<double> data);
+
+    int main()
+    {
+        double samples[]{
+            11.0, 23.0, 13.0, 4.0,
+            57.0, 36.0, 317.0, 88.0,
+            9.0, 100.0, 121.0, 12.0};
+        show_data(samples, "Original Values");       // Output original values
+        normalize_range(samples);                    // Normalize the values
+        show_data(samples, "Normalized Values", 12); // Output normalized values
+    }
+
+    // Output an array of double values
+    void show_data(std::span<const double> data,
+                std::string_view title, size_t width, size_t perLine)
+    {
+        std::cout << title << std::endl; // Display the title
+        // Output the data value
+        size_t count{};
+        for (auto currentValue : data)
+        {
+            std::cout << std::format("{:{}.6g}", currentValue, width);
+            if (++count % perLine == 0)
+                std::cout << '\n';
+        }
+        std::cout << std::endl;
+    }
+
+    std::optional<double> smallest(std::span<const double> data)
+    {
+        if (data.empty())
+            return std::nullopt; // There is no smallest in an empty array
+
+        double minValue{data[0]};
+        for (auto currentValue : data)
+            if (minValue > currentValue)
+                minValue = currentValue;
+        return minValue;
+    }
+
+    std::span<double> shift_range(std::span<double> data, double delta)
+    {
+        for (auto &currentValue : data) // 注意！必须是&引用才能改变数据，否则是值拷贝，不能改变数据
+            currentValue += delta;
+        return data;
+    }
+
+    std::optional<double> largest(std::span<double> data)
+    {
+        if (data.empty())
+            return std::nullopt; // There is no largest in an empty array
+
+        double maxValue{data[0]};
+        for (auto currentValue : data)
+            if (maxValue < currentValue)
+                maxValue = currentValue;
+
+        return maxValue;
+    }
+
+    std::span<double> scale_range(std::span<double> data, double divisor)
+    {
+        if (!divisor)
+            return data; // Do nothing for a zero divisor
+
+        for (auto &currentValue : data)
+            currentValue /= divisor;
+        return data;
+    }
+
+    std::span<double> normalize_range(std::span<double> data)
+    {
+        if (data.empty()) // 空数据直接返回，防止后面*解引用出错
+            return data;
+
+        //此题教材答案有bug
+        // 先取出最小和最大值，因为shift_range()函数会改变原数据
+        // 后面scale_range()的参数得到的是修改后的数据
+        auto minValue = smallest(data);
+        auto maxValue = largest(data);
+
+        shift_range(data, -*minValue); // std::optional的值需要*取出
+        return scale_range(data, *maxValue);
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Original Values
+        11        23        13         4        57
+        36       317        88         9       100
+       121        12
+    Normalized Values
+        0.022082   0.0599369   0.0283912           0    0.167192
+        0.100946    0.987382    0.264984   0.0157729    0.302839
+        0.369085   0.0252366
+    ```
+
+    ---
