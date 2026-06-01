@@ -13,9 +13,6 @@
 // int largest(const std::vector<int>& data);
 // std::string largest(const std::vector<std::string>& words);
 
-// 新的函数原型
-// （这些函数适用于任何连续输入，不仅限于数组或向量）
-/* 注意：这些签名还不是理想的：请参见 Ex9_03A */
 double largest(std::span<const double> data);
 int largest(std::span<const int> data);
 std::string largest(std::span<const std::string> words);

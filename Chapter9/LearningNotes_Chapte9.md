@@ -623,3 +623,189 @@ Found an early i at index 4
     ```
 
     ---
+
+4. 第4题
+
+    ```cpp
+    /*************************第9章_练习_第4题************************
+    无论何时阅读代码或编写代码，首先要考虑的一个问题是“如果……怎么办？”例如，
+    思考一下Ex9_03中的largest()函数，该函数先访问data[0]，但如果data为空
+    怎么办？针对这样的问题，有如下几种选择方案：
+    首先，可以添加代码注释，指明data不能为空。这称为设置先决条件
+    (precondition)。调用者违反先决条件会导致不确定的行为。若违背了先决条件，
+    那什么都玩法确定，正好Ellie Goulding的歌曲所言：一切皆可能发生(包括系统
+    崩溃)。
+    其次，可以对这样的边缘用例设计合理的行为。例如，设计一些结果，使函数为空
+    输入计算出这些结果。例如，对于空数组，让largest()函数返回非数值？
+    这两种选择方案有时候都是可行的，但按照本章的精神，还可以提出第三种方案吗？
+    *****************************************************************/
+    #include <iostream>
+    #include <string_view>
+    #include <optional>
+    #include <vector>
+    #include <array>
+    #include <string>
+
+    std::optional<double> largest(std::span<const double> data);
+    std::optional<int> largest(std::span<const int> data);
+    std::optional<std::string> largest(std::span<const std::string> words);
+    int main()
+    {
+        const double array[]{1.5, 44.6, 13.7, 21.2, 6.7};//传统数组必须显式声明类型
+        const std::vector numbers{15, 44, 13, 21, 6, 8, 5, 2};//容器可以自动推导类型
+        const std::vector data{3.5, 5.0, 6.0, -1.2, 8.7, 6.4};//容器可以自动推导类型
+        const std::array array_data{3.5, 5.0, 6.0, -1.2, 8.7, 6.4};//容器可以自动推导类型
+        const std::vector<std::string> names{"Charles Dickens", "Emily Bronte",//此变量如果不显式声明，会推导为"const char*"类型
+                                            "Jane Austen", "Henry James", "Arthur Miller"};
+        std::cout << "The largest of array is " << *largest(array) << std::endl;
+        std::cout << "The largest of numbers is " << largest(numbers).value() << std::endl;
+        std::cout << "The largest of data is " << largest(data).value() << std::endl;
+        std::cout << "The largest of array_data is (also) " << largest(array_data).value() << std::endl;
+        std::cout << "The largest of names is " << largest(names).value_or("<null>") << std::endl;
+    }
+
+    std::optional<double> largest(std::span<const double> data)
+    {
+        if (data.empty())
+            return {};
+
+        double maxValue{data[0]};
+        for (auto value : data)
+            if (maxValue < value)
+                maxValue = value;
+
+        return maxValue;
+    }
+
+    std::optional<int> largest(std::span<const int> data)
+    {
+        if (data.empty())
+            return {};
+
+        int maxValue{};
+        for (auto value : data)
+            if (maxValue < value)
+                maxValue = value;
+
+        return maxValue;
+    }
+
+    std::optional<std::string> largest(std::span<const std::string> words)
+    {
+        if (words.empty())
+            return {};
+
+        std::string maxWord{words[0]};
+        for (const auto &word : words) // 注意，此处应是"const auto& word:words"引用
+                                       // 而不是简单的"auto word:words"复制值
+            if (maxWord < word)
+                maxWord = word;
+
+        return maxWord;
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    The largest of array is 44.6
+    The largest of numbers is 44
+    The largest of data is 8.7
+    The largest of array_data is (also) 8.7
+    The largest of names is Jane Austen
+    ```
+
+    ---
+
+5. 第5题
+
+    ```cpp
+    /*************************第9章_练习_第5题************************
+    为Ex8_09A、Ex8_09B、Ex8_09C编写另外一个版本，这次让average10()函数
+    使用本章介绍的词汇类型。证明能够对大小固定的C风格数组和std::array<>
+    容器调用该函数，并且只能对包含10个元素的数组调用。
+    *****************************************************************/
+    #include <iostream>
+    #include <span>
+    #include <array>
+
+    double average10(std::span<const double, 10> data);
+
+    int main()
+    {
+        double values[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
+        std::array<double, 10> data{11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0};
+        // double values3[]{1.0, 2.0, 3.0};
+        std::cout << "Average_values = " << average10(values) << std::endl;
+        std::cout << "Average_data = " << average10(data) << std::endl;
+        // std::cout << "Average_value3 = " << average10(values3) << std::endl;
+        //不存在从 "double [3]" 转换到 "std::span<const double, 10ULL>" 的适当构造函数
+    }
+
+    double average10(std::span<const double, 10> data)
+    {
+        double sum{};
+        for (auto value : data)
+            sum += value;
+
+        return sum / data.size();
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Average_values = 5.5
+    Average_data = 15.5 
+    ```
+
+    ---
+
+6. 第6题
+
+    ```cpp
+    /*************************第9章_练习_第6题************************
+    假定有一个vector<>，它包含10个元素（或至少10个元素）。可以调用第5题中
+    的average10()函数来计算这10个元素（或前10个元素）的平均数吗？显然，不
+    能直接调用，但确实可以实现调用。毕竟，向量中已给出了所胡必需的数据（10
+    个连续的元素）。可以参阅标准库文档来寻求思路。
+    *****************************************************************/
+    #include <iostream>
+    #include <span>
+    #include <vector>
+
+    double average10(std::span<const double, 10> data);
+
+    int main()
+    {
+        std::vector<double> values{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
+                                11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0};
+        std::span<const double, 10> values_first_10{values.data() + 10, 10};
+        // 手动构造span（values.data()是data[0]的指针，+10是查看向量后10个元素）
+        //参阅访问 cppreference.com，搜索std::span，可以得知first
+        std::cout << "Average_values = " << average10(values_first_10) << std::endl;
+    }
+
+    double average10(std::span<const double, 10> data)
+    {
+        double sum{};
+        for (auto value : data)
+            sum += value;
+
+        return sum / data.size();
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Average_values = 15.5
+    ```
+
+    ---
