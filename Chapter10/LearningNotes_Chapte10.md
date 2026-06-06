@@ -424,3 +424,167 @@ return sum / N;
 ```
 
 ---
+
+## 10.11 缩写的函数模板
+
+1. `template<typename T> auto sqrt(T x) {return x*x;}`与`auto sqrt{auto x} {return x*x;}`等效
+
+    ```cpp
+    // Test10_03.cpp
+    // 测试缩写的函数模板
+    #include <iostream>
+
+    auto sqrt(auto x) { return x * x; } //省略template和typename关键字
+
+    int main() { std::cout << "Sqrt(1.5) = " << sqrt(1.5) << std::endl; }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Sqrt(1.5) = 2.25
+    ```
+
+    ---
+
+2. 返回类型使用 auto 是 C++14 引入的返回类型推导特性，与 C++20 的缩写模板是两个独立的特性
+
+    ```cpp
+    // 传统写法（C++98+）
+    template<typename T>
+    T sqrt(T x) { return x * x; }
+
+    // 结合返回类型推导（C++14+）
+    template<typename T>
+    auto sqrt(T x) { return x * x; }
+
+    // 缩写模板（C++20）
+    auto sqrt(auto x) { return x * x; }
+    ```
+
+**缩写函数模板的局限性**  
+
+1. 希望使用模板来实例化具有多个相同类型或相关类型的参数的函数，仍然必须使用旧语法
+
+    ```cpp
+    template<typename T> const T& larger(const T& a, const T& b);
+    ```
+
+2. 在其他地方（如函数体中）引用一个参数类型名称，通常使用旧语法更容易一些
+
+    ```cpp
+    template<typename T> auto createConsecutiveVector(const T& from, const T& to)
+    {
+        std::vector<T> result;
+        for(T t=from;t<to;++t)
+            result.push_back(t);
+        return result;
+    }
+    ```
+
+## 10.12 本章小结
+
+## 10.13 练习
+
+1. 第1题
+
+    ```cpp
+    /*************************第10章_练习_第1题************************
+    在C++17中，标准库的<algorithm>模块提供了方便的std::clamp()函数。表达式
+    clamp(a,b,c)用来将值a夹紧到闭区间[b,c]。即，如果a小于b，则表达式的结果
+    将为b；如果a大于c，则表达式的结果将为c；否则，如果a位于[b,c]区间内，
+    clamp()将返回a。编写自己的my_clamp()函数模板，并用一个小的测试程序测试
+    该函数模板。
+    *****************************************************************/
+    #include <iostream>
+
+    template <typename T> auto my_clamp(const T &a, const T &b, const T &c)
+    {
+    if (a < b)
+        return b;
+    if (a > c)
+        return c;
+    return a;
+    }
+
+    int main()
+    {
+    int a{}, b{}, c{};
+    std::cout << "请输入a,b,c的值，以空格分开：";
+    std::cin >> a >> b >> c;
+
+    std::cout << "Clamp(" << a << ',' << b << ',' << c
+                << ") = " << my_clamp(a, b, c) << std::endl;
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    请输入a,b,c的值，以空格分开：2 5 3
+    Clamp(2,5,3) = 5
+    ```
+
+    ---
+
+2. 第2题
+
+    ```cpp
+    /*************************第10章_练习_第2题************************
+    将Ex10_01中main()函数的最后几行修改如下：
+    const auto a_string = "A", z_string = "Z";
+    std::cout<<"Larger of "<<a_string<<" and "<<z_string
+    <<" is "<<larger(a_string, z_string)<<std::endl;
+    如果现在运行程序，很可能会得到如下输出（如果输出不同，则尝试改变a_string
+    和z_string的声明顺序）：
+    ——————————————————————————————————————————————————————————————————
+    Larger of 1.5 and 2.5 is 2.5
+    Larger of 3.5 and 4.5 is 4.5
+    Larger of 17011983 and 10 is 17011983
+    Larger of A and Z is A
+    ——————————————————————————————————————————————————————————————————
+    为什么"A"比"Z"大？读者能够解释这里发生了什么问题吗？是否能够修改该问题？
+    注意，要比较两个字符数组，可以先把它们转换为另一种字符串表示形式。
+    *****************************************************************/
+    #include <format>
+    #include <iostream>
+    #include <string>
+
+    template <typename T> T larger(T a, T b);
+    int main()
+    {
+    std::cout << "Larger of 1.5 and 2.5 is " << larger(1.5, 2.5) << std::endl;
+    std::cout << "Larger of 3.5 and 4.5 is " << larger(3.5, 4.5) << std::endl;
+
+    int big_int{17011983}, small_int{10};
+    std::cout << std::format("Larger of {} and {} is {}\n", big_int, small_int,
+                            larger(big_int, small_int));
+
+    //   const auto z_string = "Z", a_string = "a";
+    // T 被推断为 const char*
+    // a > b 比较的是指针地址，不是字符串内容！
+    std::string z_string{"Z"}, a_string{"A"};
+    std::cout << "Larger of " << a_string << " and " << z_string << " is "
+                << larger(a_string, z_string) << std::endl;
+    }
+
+    // Template for functions to return the larger of two values
+    template <typename T> T larger(T a, T b) { return a > b ? a : b; }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Larger of 1.5 and 2.5 is 2.5
+    Larger of 3.5 and 4.5 is 4.5
+    Larger of 17011983 and 10 is 17011983
+    Larger of A and Z is Z
+    ```
+
+    ---
