@@ -214,3 +214,65 @@ const T& larger(const T& a, const T& b)
 
 ## 10.8 模板的返回类型推断
 
+1. 采用auto返回模板实例化类型。注意！使用auto推断返回类型，  
+    函数模板定义和声明必须在一起，并且要在实例化之前定义！如下例：
+
+    ```cpp
+    // Ex10_03.cpp
+    // auto自动推断返回函数模板实例化类型
+    #include <iostream>
+    // template <typename T1, typename T2>
+    // auto larger(const T1 &a, const T2 &b);
+    template <typename T1, typename T2>
+    auto larger(const T1 &a, const T2 &b) // 采用auto推断必须放到函数引用的位置之前
+                                        // （本例为main函数之前），不能作为函数模板声明
+    {
+        return a > b ? a : b; // 返回类型取决于 a > b 的结果！
+    }
+
+    int main()
+    {
+        int small_int{10};
+        std::cout << "Larger of " << small_int << " and 9.6 is "
+                << larger(small_int, 9.6) << std::endl;
+
+        std::string a_string{"A"};
+        std::cout << "Larger of \"" << a_string << "\" and \"Z\" is \""
+                << larger(a_string, "Z") << '"' << std::endl;
+    }
+    ```
+
+2. `decltype(auto) // 点位符类型`
+    - 使用auto或const auto&会导致返回结果的副本（复制），而不是引用&（string和向量等类型需引用），与设想不符。
+    - 可以使用decltype(auto)点位符类型，此类型会计算为return语句中表达式的确切类型
+
+    ```cpp
+    // Ex10_3A.cpp
+    #include <iostream>
+    #include <vector>
+    #include<string>
+
+    template <typename T1, typename T2>
+    decltype(auto) larger(const T1 &a, const T2 &b)
+    {
+        return a > b ? a : b;
+    }
+
+    int main()
+    {
+        const int small_int{10};
+        std::cout << "Larger of " << small_int << " and 9.6 is "
+                << larger(small_int, 9.6) << std::endl;
+
+        const std::string a_string{"A"};
+        std::cout << "Larger of \"" << a_string << "\" and \"Z\" is \""
+                << larger(a_string, "Z") << '"' << std::endl;
+
+        const std::vector<int> v1{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        const std::vector<int> v2{1, 2, 3, 4, 5, 6, 7, 8, 9, 11};
+        std::cout << "The larger of our two vectors ends with "
+                << larger(v1, v2).back(); // 返回const std::vector<int>&类型
+    }
+    ```
+
+3. 注意！只应该在模板中能使用decltype(auto)。在非通用代码中，总是应该显式选择使用更具体的auto或(const)auto。
