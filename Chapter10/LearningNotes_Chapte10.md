@@ -242,6 +242,17 @@ const T& larger(const T& a, const T& b)
     }
     ```
 
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Larger of 10 and 9.6 is 10
+    Larger of "A" and "Z" is "Z"
+    ```
+
+    ---
+
 2. `decltype(auto) // 点位符类型`
     - 使用auto或const auto&会导致返回结果的副本（复制），而不是引用&（string和向量等类型需引用），与设想不符。
     - 可以使用decltype(auto)点位符类型，此类型会计算为return语句中表达式的确切类型
@@ -249,17 +260,15 @@ const T& larger(const T& a, const T& b)
     ```cpp
     // Ex10_3A.cpp
     #include <iostream>
+    #include <string>
     #include <vector>
-    #include<string>
 
     template <typename T1, typename T2>
-    decltype(auto) larger(const T1 &a, const T2 &b)
-    {
+    decltype(auto) larger(const T1 &a, const T2 &b) {
         return a > b ? a : b;
     }
 
-    int main()
-    {
+    int main() {
         const int small_int{10};
         std::cout << "Larger of " << small_int << " and 9.6 is "
                 << larger(small_int, 9.6) << std::endl;
@@ -271,8 +280,147 @@ const T& larger(const T& a, const T& b)
         const std::vector<int> v1{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         const std::vector<int> v2{1, 2, 3, 4, 5, 6, 7, 8, 9, 11};
         std::cout << "The larger of our two vectors ends with "
-                << larger(v1, v2).back(); // 返回const std::vector<int>&类型
+                << larger(v1, v2).back() << std::endl;
+        // 返回const std::vector<int>&类型
+        // 向量比较大小基本与字符串比较相同：逐元素比较;遇到不等元素即停止;长度决定
     }
     ```
 
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Larger of 10 and 9.6 is 10
+    Larger of "A" and "Z" is "Z"
+    The larger of our two vectors ends with 11
+    ```
+
+    ---
+
 3. 注意！只应该在模板中能使用decltype(auto)。在非通用代码中，总是应该显式选择使用更具体的auto或(const)auto。
+
+## 10.9 模板参数的默认值
+
+1. 可以为模板参数指定默认值，如下：
+
+    ```cpp
+    //Template with default value for the first parameter
+    template<typename RreturnType=double,typename T1,typename T2>
+    ReturnType larger(const T1&,const T2&); 
+    ```
+
+2. 指定模板参数的默认值不一定是好主意
+3. 模板参数默认值与普通函数参数默认值要求不一样，模板参数默认值可以放在前、中、后参数。 但是，在参数列表末尾指定模板实参的默认值仍是常见的做法。
+
+## 10.10 非类型的模板参数
+
+1. 一个案例：  
+
+    ```cpp
+    // Text10_01.cpp
+    // 非类型的模板参数
+    #include <iostream>
+
+    template <typename T, int lower, int upper>
+    bool is_in_range(const T& value) {
+        return value >= lower && value <= upper;
+    }
+
+    int main() {
+        double value{200.0};
+        // std::cout<<is_in_range(value)<<std::endl;//无法编译，因为少了参数
+        std::cout << is_in_range<double, 0, 100>(value) << std::endl;  // OK!
+        //<double, 0,
+        //100>是模板参数列表，必须是编译期常量，(value)是函数参数列表，可以运行时提供
+
+        // int i{5};//不是常量，不能编译
+        const int i{5};//有const，是常量，可以编译
+        std::cout << is_in_range<double, i, i * 100>(value) << std::endl;
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    0
+    1
+    ```
+
+    ---
+
+2. 最佳的做法是将类型参数T置于最后（这样可以推断出该类型），并为lower和upper使用auto（为了避免硬编码其类型）
+
+    ```cpp
+    // Test10_02.cpp
+    // 非类型模板参数的最佳做法
+    #include <iostream>
+
+    template <auto lower, auto upper, typename T>
+    bool is_in_range(const T& value) {
+        return value >= lower && value <= upper;
+    }
+
+    int main() {
+        double value{100.0};
+        std::cout << is_in_range<0, 50>(value)
+                << std::endl;  // 类型T可以通过value推断出来
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    0
+    ```
+
+    ---
+
+**使用固定大小数组实参的函数模板**  
+
+```cpp
+// Ex10_04.cpp
+// 使用固定大小的数组实参的函数模板
+#include <iostream>
+
+template <typename T, size_t N> T average(const T (&array)[N]);
+
+int main()
+{
+double doubles[2]{1.0, 2.0};
+std::cout << average(doubles) << std::endl;
+
+double moreDoubles[]{1.0, 2.0, 3.0, 4.0};
+std::cout << average(moreDoubles) << std::endl;
+
+std::cout << average({1.0, 2.0, 3.0, 4.0}) << std::endl; // 有大括号
+
+int ints[]{1, 2, 3, 4};
+std::cout << average(ints) << std::endl;
+}
+
+template <typename T, size_t N> T average(const T (&array)[N])
+{
+T sum{};
+for (size_t i{}; i < N; ++i)
+    sum += array[i];
+return sum / N;
+}
+```
+
+上面程序运行结果如下：
+
+---
+
+```cpp
+1.5
+2.5
+2.5
+2
+```
+
+---

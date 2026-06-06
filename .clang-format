@@ -1,0 +1,3 @@
+language:		Cpp
+BasedOnStyle		LLVM
+BreakBeforeBraces:	Allman
