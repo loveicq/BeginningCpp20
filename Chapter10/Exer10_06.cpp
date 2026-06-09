@@ -85,7 +85,7 @@ template <typename T> void sort(std::vector<T> &data, size_t start, size_t end)
         if (data[i] < data[start])
             swap(data, ++current, i);
 
-    swap(data, start, current);
+    swap(data, start, current); // 将基准数data[start]放到它准确的位置current
 
     if (current > start)
         sort(data, start, current - 1);
