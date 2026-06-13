@@ -1,4 +1,0 @@
-language:		Cpp
-BasedOnStyle		LLVM
-BreakBeforeBraces:	Allman
-IndentWidth:     4 
