@@ -212,7 +212,7 @@ E:\cpp\Gitee\cpp20\                 # 工作区根目录（可根据需要调整
 |start.bat 双击后一闪而过|路径错误或 VsDevCmd.bat 不存在。请检查脚本中的路径是否正确，在脚本末尾加 pause 查看错误。|
 |编译错误 C2230: 无法找到模块"std"|未生成 tmp_build\std.obj。请确保首次运行 start.bat 时已成功执行 cl ... std.ixx 命令，检查 tmp_build 文件夹下是否有 std.obj。|
 |链接错误 LNK1104: 无法打开文件"libcpmt.lib"|环境变量未正确加载。请务必从 start.bat 启动 VS Code，不要直接双击 VS Code 图标。|
-|VS Code 中 import std; 有红色波浪线|IntelliSense 对 C++23 模块支持不完善，不影响编译。可尝试 C/C++: Reset IntelliSense Database，但无法根治，建议忽略。|
+|VS Code 中 import std; 有红色波浪线|IntelliSense 对`C++`模块支持不完善，不影响编译。可尝试 `C/C++: Reset IntelliSense Database`，但无法根治，建议忽略。|
 |按 F5 弹出黑框报“参数格式不正确 - /c”|修改 launch.json 中 "console": "integratedTerminal" 即可。|
 |根目录出现 vc140.pdb, Test11_02.obj 等|已在 tasks.json 中用 /Fo 和 /Fd 指定到 bin 目录。如果仍有残留，手动删除即可，新编译不会再生成。|
 
@@ -230,9 +230,9 @@ E:\cpp\Gitee\cpp20\                 # 工作区根目录（可根据需要调整
 
 ## 🎉 最终效果
 
-✅ 成功编译运行 import std; 和 std::println
-✅ 所有输出文件自动归类到 bin 子目录
-✅ 调试正常运行（VS Code 内部终端）
-✅ 每次开发只需双击 start.bat，之后按 F5 即可
+✅ 成功编译运行 import std; 和 std::println  
+✅ 所有输出文件自动归类到 bin 子目录  
+✅ 调试正常运行（VS Code 内部终端）  
+✅ 每次开发只需双击 start.bat，之后按 F5 即可  
 
 **祝你 C++23 模块编程愉快！**  
