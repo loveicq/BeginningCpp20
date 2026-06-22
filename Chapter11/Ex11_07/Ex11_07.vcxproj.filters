@@ -15,10 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Ex11_01.cpp">
+    <ClCompile Include="math.ixx">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="math.ixx">
+    <ClCompile Include="math.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Ex11_07.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

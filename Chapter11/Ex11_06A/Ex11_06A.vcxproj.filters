@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Ex11_01.cpp">
+    <ClCompile Include="squaring.ixx">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="math.ixx">
+    <ClCompile Include="Ex11_06A.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

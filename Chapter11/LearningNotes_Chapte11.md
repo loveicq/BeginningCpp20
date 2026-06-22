@@ -9,7 +9,122 @@
 
 ### 11.1.1 第一个模块
 
+1. 模块命名：`module 模块名称;`，如`module math;`，如果要导出模块里面的实体，则module前面再加关键字`export`。如果module前面带有export关键字，则该文件是**模块接口文件**
+2. 模块名称中允许使用点号"."，用作子模块的连接符号：`math.polynomials`
+3. 在编译.cpp文件前，一般要先编译它导入的所有模块的接口文件
 
+    ```cpp
+    // Ex11_01.cpp - Consuming your own module
+    import<iostream>;
+    import<format>;
+    import math;
+
+    int main()
+    {
+        std::cout << "Lambda squared: " << square(lambda) << std::endl;
+
+        int number;
+        std::cout << "\nPlease enter an odd number: ";
+        std::cin >> number;
+        std::cout << std::endl;
+
+        switch (getOddity(number))
+        {
+            using enum Oddity;
+        case Odd:
+            std::cout
+                << "Well done! And remember: you have to be odd to be number one!";
+            break;
+        case Even:
+            std::cout << std::format("Odd, {} seems to be even?", number);
+            break;
+        }
+        std::cout << std::endl;
+
+        std::cin.ignore();
+        std::cin.get();
+    }
+    ```
+
+    ```cpp
+    //math.cppm - Your first module
+    export module math;
+
+    export auto square(const auto& x) { return x * x; }//An abbreviated function template
+
+    export const double lambda{ 1.303577269034296391257 };//Conway's constant
+
+    export enum class Oddity { Even, Odd };
+
+    bool isOdd(int x) { return x % 2 != 0; }//Module-local function (not exported)
+    export auto getOddity(int x) { return isOdd(x) ? Oddity::Odd : Oddity::Even; }
+    ```
+
+    以上程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Lambda squared: 1.69931
+
+    Please enter an odd number: 555
+
+    Well done! And remember: you have to be odd to be number one!
+    ```
+
+    ---
+
+### 11.1.2 导出块
+
+- 通过把多个实体放到一个导出块中，也可以一次性导出多个实体
+
+    ```cpp
+    //math.cppm - Exporting multiple entities at once
+    export module math;
+
+    bool isOdd(int x){return x%2 != 0;}//Module-local function (not exported)
+
+    export
+    {
+        auto square(const auto& x){return x*x;}
+        const module lambda{1.303577269034296391257};//Conway's constant
+
+        enum class Oddity{Even,Odd};
+        auto getOddity(int x){return isOdd(x) ? Oddity::Odd : Oddity::Even;}
+    }
+    ```
+
+### 11.1.3 将接口与实现分开
+
+- 如果在第一次声明实体时，没有使用export，那么就不能在后面声明该实体时添加export
+
+    ```cpp
+    //math.cppm - Exporting multiple entities at once
+    export module math;
+
+    export
+    {
+        auto square(const auto& x);
+        const module lambda{1.303577269034296391257};//Conway's constant
+
+        enum class Oddity{Even,Odd};
+        auto getOddity(int x);
+    }
+
+    //The implementation of the module's function (+ local helpers)
+    auto square(const auto&x){return x*x;}
+
+    bool isOdd(int x){return x%2 != 0;}
+    auto getOddity(int x){return isOdd(x) ? Oddity::Odd : Oddity::Even;}
+    ```
+
+**1. 模块实现文件**  
+
+- 在一个模块文件中，所有import声明必须出现在module声明之后，其他任何声明之前
+
+```cpp
+
+```
 
 ## 11.2 名称空间
 

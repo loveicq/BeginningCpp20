@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{97ffade6-df72-4ca9-81f1-c8587161414f}</ProjectGuid>
-    <RootNamespace>Ex1101</RootNamespace>
+    <ProjectGuid>{120294fa-541f-4d3f-ab59-3c71f32a5162}</ProjectGuid>
+    <RootNamespace>Ex1106B</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -127,8 +127,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Ex11_01.cpp" />
-    <ClCompile Include="math.ixx" />
+    <ClCompile Include="Ex11_06B.cpp" />
+    <ClCompile Include="squaring.ixx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
