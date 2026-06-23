@@ -4,7 +4,7 @@ gcm.cache/
 bin/
 images/
 mindmap/
-others/
+#others/
 logs/
 MyCpp20Modules/
 .vs/
