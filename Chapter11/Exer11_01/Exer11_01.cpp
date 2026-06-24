@@ -1,16 +1,16 @@
-//Move all functions from Ex8_17.cpp (and not Ex8_18.cpp as the text says...)
-// to a words function,exporting only the functions used by main().
-import<string>;
-import<iostream>;
+// 将 Ex8_17.cpp 中的所有函数（而非文中所说的 Ex8_18.cpp）
+//  移到 words 模块中，只导出 main() 函数使用的函数。
+import <string>;
+import <iostream>;
 import words;
 
 int main()
 {
-	words::Words the_words;//Renamed to sidestep name clash with words namespace! 
-	std::string text;//The string to be sorted
-	const auto separators{ " ,.!?\"\n" };//Word delimiters
+	words::Words the_words;				// 重命名以避免与 words 命名空间冲突！
+	std::string text;					// 要排序的字符串
+	const auto separators{" ,.!?\"\n"}; // 单词分隔符
 
-	//Read the string to be processed from the keyboard
+	// 从键盘读取要处理的字符串
 	std::cout << "Enter a string terminated by *:" << std::endl;
 	std::getline(std::cin, text, '*');
 
@@ -21,8 +21,8 @@ int main()
 		return 0;
 	}
 
-	words::sort(the_words);//Sort the words
-	words::show_words(the_words);//Output the words
+	words::sort(the_words);		  // 对单词进行排序
+	words::show_words(the_words); // 输出单词
 
 	std::cin.get();
 }
