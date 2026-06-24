@@ -1,5 +1,6 @@
 # 你原有的忽略项
 .vscode/
+.github
 gcm.cache/
 bin/
 images/
