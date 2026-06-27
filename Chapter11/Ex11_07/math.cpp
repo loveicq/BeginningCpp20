@@ -1,4 +1,5 @@
-﻿module;//全局模块片段
+﻿//math.cpp
+module;//全局模块片段
 #include<cmath>// For std::pow(), std::sqrt(), ...
 module math;
 

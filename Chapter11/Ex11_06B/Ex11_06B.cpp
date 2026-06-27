@@ -1,4 +1,4 @@
-// Defining and using a namespace
+// Ex11_06B.cpp
 import <iostream>;
 import <numbers>;
 import squaring;

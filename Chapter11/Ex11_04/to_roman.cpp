@@ -1,6 +1,4 @@
-// Implementation of the to_roman() function
-// 模块实现单元（implementation unit）：`module roman;`
-// 该单元实现 `to_roman(unsigned int)`，并与其他实现单元一起组成 `roman` 模块的实现部分。
+//to_roman.cpp
 module roman;
 
 std::string to_roman(unsigned int i)

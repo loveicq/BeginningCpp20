@@ -1,6 +1,4 @@
-// Module implementation partitions
-// 模块使用者（module consumer）示例：
-// 通过 `import roman;` 使用模块导出的 API（`to_roman`、`from_roman`）。
+//Ex11_04.cpp
 import <iostream>;
 import <string>;
 import roman;

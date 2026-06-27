@@ -1,3 +1,4 @@
+//squaring.ixx
 export module squaring;
 
 export namespace math

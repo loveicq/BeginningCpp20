@@ -1,5 +1,4 @@
-//Separating declarations and definitions of functions
-//declared in a namespace.
+//Ex11_07.cpp
 import <iostream>;
 import math;
 

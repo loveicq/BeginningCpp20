@@ -1,7 +1,4 @@
-// Implementation of the internal from_roman() function
-// 模块分区（module partition）：`module roman:internals;`
-// 这是模块的内部实现细节。该分区未被 `export`，因此对模块外部不可见。
-// 只有同一模块的实现单元可以 `import :internals;` 来使用这里的辅助函数。
+//roman-internals.cpp
 module roman:internals;
 
 unsigned int from_roman(char c)
