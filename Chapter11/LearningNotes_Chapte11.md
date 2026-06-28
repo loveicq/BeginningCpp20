@@ -1228,7 +1228,7 @@ int fancyNumber{ v2::doFancyComputation(MyGroup::queryUserInput()) };
 
 ## 11.4 练习
 
-1. 第一题
+1. 第1题
     - Exer11_01.cpp
 
         ```cpp
