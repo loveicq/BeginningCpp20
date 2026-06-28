@@ -1,4 +1,4 @@
-//Using using declarations and using directives
+//Ex11_08.cpp
 // 注意：示例在正文中没有命名
 import<iostream>;
 import squaring;

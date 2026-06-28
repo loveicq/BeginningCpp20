@@ -1,3 +1,4 @@
+//words.ixx
 export module words;
 
 export import words.sorting;

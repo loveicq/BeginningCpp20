@@ -979,13 +979,16 @@ roman.to，import roman就相当于同时import后两者了
             export namespace math
             {
                 auto square(const auto &x) { return x * x; }
+                //函数模板，不会自动导出，如果要导出，需要前面加export显式导出
 
                 namespace averages
                 {
-                    double arithmetic_mean(std::span<const double> data);
+                    double arithmetic_mean(std::span<const double> data); //普通函数，会自动导出
                     double geometric_mean(std::span<const double> data);
                     double rms(std::span<const double> data);
                     double median(std::span<const double> data);
+                    //此处可以复习一下span的用法，已经封装了指向数据起始位置的指针和数据长度
+                    //所以它天然具有引用语义，不需要再额外加 &
                 } // namespace averages
             } // namespace math
             ```
@@ -1001,7 +1004,8 @@ roman.to，import roman就相当于同时import后两者了
             import <limits>;//用于 std::numeric_limits<double>::quiet_NaN()
             import<vector>;//用于 std::vector 容器
 
-            void quicksort(std::vector<double>& data);//参见第8章
+            void quicksort(std::vector<double>& data);
+            //这是前向声明，因为下面在定义之前已经使用了此函数，参见第8章
 
             //选项1：在嵌套命名空间块中定义（紧凑语法）
             namespace math::averages
@@ -1121,11 +1125,93 @@ roman.to，import roman就相当于同时import后两者了
             }
             ```
 
+        - 上面程序运行结果如下：
+
+            ---
+
+            ```cpp
+            Arithmetic mean: 5.5
+            Geometric mean: 4.52873
+            Root mean square: 6.20484
+            Median: 5.5 
+            ```
+
+            ---
+
+2. 要导出函数模板（如上例square()），其**定义**必须是模块接口的一部分，定义不能放到模块实现文件中
+3. export namespace math{}中的函数模板如果要导出，前面得加export显式导出。普通函数在里面已经默认自动导出
+
 ### 11.2.6 using使用指令和声明
 
 - 使用using指令可以引用一个名称空间中的任意名称
 - 声明或指令会一直应用到包含它们的块的末尾
 - 应尽量少使用using指令和声明，并且尽量总是局部使用它们
+- 案例Ex11_08
+    - Ex11_08.cpp
+
+        ```cpp
+        //Ex11_08.cpp
+        // 注意：示例在正文中没有命名
+        import<iostream>;
+        import squaring;
+
+        /* 使得 math 命名空间中的名称在本地可用 */
+        // 注意：正文使用 hypot()，但在 Visual Studio 中这会与 <cmath> 的 hypot() 函数冲突导致二义性
+        auto hypotenuse(const auto& x, const auto& y)
+        {
+            using namespace math;
+        // 或者：
+        // using math::square;
+        // using math::sqrt; /* 当然，这与 using std::sqrt; 相同 */
+            return sqrt(square(x) + square(y));//此处直接使用sqrt,不用再std::开头
+        }
+
+        int main()
+        {
+            std::cout << "math::sqrt2 has the value " << math::sqrt2 << std::endl;
+            std::cout << "This should be 0: " 
+                    << math::sqrt2 - std::numbers::sqrt2 << std::endl;
+            /* 其实math::sqrt2和std::numbers::sqrt2指向同一个实体，值相同 */
+            std::cout << "This should be 2: " << math::square(math::sqrt2) << std::endl;
+            std::cout << "This should be 5: " << hypotenuse(3, 4) << std::endl;
+
+            std::cin.get();
+        }
+        ```
+
+    - squaring.ixx
+
+        ```cpp
+        //squaring.ixx
+        module;//Start of the blobal module fragment (for #include directives)
+        // 为了使用 std::sqrt()
+        #include<cmath>
+        export module squaring;
+        import <numbers>;//For std::numbers::sqrt2
+
+        /* 使用 using 声明从 math 命名空间重新导出两个已有实体 */
+        export namespace math// 导出所有嵌套声明
+        {
+        using std::numbers::sqrt2;// 切勿写成 'using std::sqrt();' 或 'using std::sqrt(double);'！
+        using std::sqrt;// 切勿写成 'using std::sqrt();' 或 'using std::sqrt(double);'！
+        /* 此处using std::sqrt 在其它import math 的地方就可以直接写sqrt，而不用写std::sqrt了 */
+        auto square(const auto& x) { return x * x; }// 计算平方
+        auto pow4(const auto& x) { return square(square(x)); }// 计算四次方
+        }
+        ```
+
+    - 上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        math::sqrt2 has the value 1.41421
+        This should be 0: 0
+        This should be 2: 2
+        This should be 5: 5  
+        ```
+
+        ---
 
 ### 11.2.7 名称空间别名
 
@@ -1137,3 +1223,1329 @@ namespace MyGroup = MyCompany::MyModule::MySubmodule::MyGrouping;
 
 int fancyNumber{ v2::doFancyComputation(MyGroup::queryUserInput()) };
 ```
+
+## 11.3 本章小结
+
+## 11.4 练习
+
+1. 第一题
+    - Exer11_01.cpp
+
+        ```cpp
+        /*************************第11章_练习_第1题************************
+        截止到现在，Ex8_17.cpp是我们看过的一个较大程序。提取该程序的所有函数，
+        把它们放到只有一个文件的words模块中，并让所有的函数都包含在words名称
+        空间中。该模块只应该导出与main()函数相关的那些函数，而main()函数基本上
+        应该保持不变。其他函数，特别是sort()的三参数重载，只是为支持导出的函数
+        而存在的。
+        *****************************************************************/
+        // 将 Ex8_17.cpp 中的所有函数（而非书中所说的 Ex8_18.cpp）
+        //  移到 words 模块中，只导出 main() 函数使用的函数。
+        import <string>;
+        import <iostream>;
+        import words;
+
+        int main()
+        {
+            words::Words the_words;// 重命名以避免与 words 命名空间冲突！
+            std::string text;// 要排序的字符串
+            const auto separators{" ,.!?\"\n"}; // 单词分隔符
+
+            // 从键盘读取要处理的字符串
+            std::cout << "Enter a string terminated by *:" << std::endl;
+            std::getline(std::cin, text, '*');
+
+            words::extract_words(the_words, text, separators);
+            if (the_words.empty())
+            {
+                std::cout << "No words in text." << std::endl;
+                return 0;
+            }
+
+            words::sort(the_words);  // 对单词进行排序
+            words::show_words(the_words); // 输出单词
+
+            std::cin.get();
+        }
+        ```
+
+    - words.ixx
+
+        ```cpp
+        // words.ixx
+        export module words;
+
+        import <iostream>;
+        import <format>;
+        import <memory>;
+        import <string>;
+        import <vector>;
+
+        export namespace words
+        {
+        using Words = std::vector<std::shared_ptr<std::string>>;
+
+        void sort(Words &words);
+        void extract_words(Words &words, const std::string &text,
+                        const std::string &separators);
+        void show_words(const Words &words);
+        } // namespace words
+
+        namespace words
+        {
+        size_t max_word_length(const Words &words);
+        }
+
+        void words::extract_words(Words &words, const std::string &text,
+                                const std::string &separators)
+        {
+            size_t start{text.find_first_not_of(separators)}; // 第一个单词的起始索引
+
+            while (start != std::string::npos)
+            {
+                size_t end{
+                    text.find_first_of(separators, start + 1)}; // 查找单词的结束位置
+                if (end == std::string::npos)                   // 找到分隔符了吗？
+                    end = text.length(); // 是的，所以设置为文本末尾
+                words.push_back(
+                    std::make_shared<std::string>(text.substr(start, end - start)));
+                start = text.find_first_not_of(separators,
+                                            end + 1); // 查找下一个单词的起始位置
+            }
+        }
+
+        /* word::sort(Words&) 的附加辅助函数 */
+        namespace words
+        {
+        void swap(Words &words, size_t first, size_t second)
+        {
+            auto temp{words[first]};
+            words[first] = words[second];
+            words[second] = temp;
+        }
+
+        void sort(Words &words, size_t start, size_t end);
+        } // namespace words
+
+        // 按升序对字符串排序
+
+        void words::sort(Words &words)
+        {
+            if (!words.empty())
+                sort(words, 0, words.size() - 1);
+        }
+
+        void words::sort(Words &words, size_t start, size_t end)
+        {
+            // 对于2个或更多元素，起始索引必须小于结束索引
+            if (!(start < end))
+                return;
+
+            // 选择中间位置来分割集合
+            swap(words, start, (start + end) / 2); // 将中间位置与起始位置交换
+
+            // 将单词与选中的单词进行比较
+            size_t current{start};
+            for (size_t i{start + 1}; i <= end; i++)
+            {
+                if (*words[i] < *words[start]) // 该单词是否小于选中的单词？
+                    swap(words, ++current, i); // 是的，所以交换到左边
+            }
+
+            swap(words, start, current); // 交换选中的单词和最后交换的单词
+
+            if (current > start)
+                sort(words, start, current - 1); // 如果存在左子集则排序
+            if (end > current + 1)
+                sort(words, current + 1, end); // 如果存在右子集则排序
+        }
+
+        size_t words::max_word_length(const Words &words)
+        {
+            size_t max{};
+            for (auto &pword : words)
+                if (max < pword->length())
+                    max = pword->length();
+            return max;
+        }
+
+        void words::show_words(const Words &words)
+        {
+            const size_t field_width{max_word_length(words) + 1};
+            const size_t words_per_line{8};
+            std::cout << std::format("{:{}}", *words[0], field_width); // 输出第一个单词
+
+            size_t words_in_line{}; // 当前行的单词数
+            for (size_t i{1}; i < words.size(); ++i)
+            {
+                // 当初始字母改变或每行达到8个单词时输出换行
+                if ((*words[i])[0] != (*words[i - 1])[0] ||
+                    ++words_in_line == words_per_line)
+                {
+                    words_in_line = 0;
+                    std::cout << std::endl;
+                }
+                std::cout << std::format("{:{}}", *words[i],
+                                        field_width); // 输出一个单词
+            }
+            std::cout << std::endl;
+        }
+        ```
+
+    - 上面程序运行结果如下（因行宽MD报错原因，每行8个单词硬回车变成了6个）：
+
+        ---
+
+        ```cpp
+        Enter a string terminated by *:
+        The old lighthouse stood on the cliff, its beam a silent guardian 
+        against the raging sea. For decades, it had witnessed storms that 
+        could splinter ships and fogs that could swallow the moon. The 
+        keeper, a man with salt-crusted skin and weary eyes, maintained the 
+        flame with a ritual precision. He knew every groan of the ancient 
+        structure, every whisper of the wind. One night, the light flickered
+        and died, plunging the world into absolute blackness. He climbed 
+        the spiral stairs, his heart pounding against the rising tide of 
+        panic, and found a single, stubborn spark waiting to be reborn. *
+        For
+        He           He
+        One
+        The          The          
+        a            a            a            a            absolute     
+        against      against      ancient      
+        and          and          and          and          
+        be           beam         blackness    
+        cliff        climbed      could        could        
+        decades      died         
+        every        every        eyes         
+        flame        flickered    fogs         found        
+        groan        guardian     
+        had          heart        his          
+        into         it           its          
+        keeper       knew         
+        light        lighthouse   
+        maintained   man          moon         
+        night        
+        of           of           of           old          on           
+        panic        plunging     pounding     precision    
+        raging       reborn       rising       ritual       
+        salt-crusted sea          ships        silent       single       
+        skin         spark        spiral       
+        splinter     stairs       stood        storms       structure    
+        stubborn     swallow      
+        that         that         the          the          the          
+        the          the          the          
+        the          the          the          the          tide         
+        to           
+        waiting      weary        whisper      wind         with         
+        with         witnessed    world 
+        ```
+
+        ---
+
+2. 第2题
+    - Exer11_02.cpp
+
+        ```cpp
+        // Exer11_02.cpp
+        /*************************第11章_练习_第2题************************
+        对于第1题的解决方案，通过把所有函数定义移动到一个实现文件中，将模块的接口
+        与实现分开。在实现文件中，不要使用名称空间块。在练习时，将所有未导出的
+        函数从words名称空间中移出来，放到全局名称空间内，然后想清楚在导出单参数
+        sort()函数中如何仍然能够调用三参数的sort()函数。
+        *****************************************************************/
+        import <string>;
+        import <iostream>;
+        import words;
+
+        int main()
+        {
+            words::Words the_words;
+            std::string text;
+            const auto separators{" ,.!?\"\n"};
+            std::cout << "Enter a string terminated by *:" << std::endl;
+            std::getline(std::cin, text, '*');
+
+            words::extract_words(the_words, text, separators);
+            if (the_words.empty())
+            {
+                std::cout << "No words in text." << std::endl;
+                return 0;
+            }
+
+            words::sort(the_words);
+            words::show_words(the_words);
+        }
+        ```
+
+    - words.ixx
+
+        ```cpp
+        //words.ixx
+        export module words;
+
+        import<memory>;
+        import<string>;
+        import<vector>;
+
+        export namespace words
+        {
+            using Words = std::vector<std::shared_ptr<std::string>>;
+
+            void sort(Words& words);
+            void extract_words(Words& words, const std::string& text, 
+                const std::string& separators);
+            void show_words(const Words& words);
+        }
+        ```
+
+    - words.cpp
+
+        ```cpp
+        //words.cpp
+        module words;
+
+        import<iostream>;
+        import<format>;
+
+        size_t max_word_length(const words::Words& words);
+
+        void words::extract_words(Words& words, const std::string& text, 
+            const std::string& separators)
+        {
+            size_t start{ text.find_first_not_of(separators) };//Start index of 
+                first word
+
+            while (start != std::string::npos)
+            {
+                size_t end{ text.find_first_of(separators,start + 1) };
+                //Find end of a word
+                if (end == std::string::npos)
+                    end = text.length();
+                words.push_back(std::make_shared<std::string>
+                    (text.substr(start, end - start)));
+                start = text.find_first_not_of(separators, end + 1);
+                //Find start next word
+            }
+        }
+
+        void swap(words::Words& words, size_t first, size_t second)
+        {
+            auto temp{ words[first] };
+            words[first] = words[second];
+            words[second] = temp;
+        }
+
+        void sort(words::Words& words, size_t start, size_t end);
+
+        void words::sort(Words& words)
+        {
+            if (!words.empty())
+                ::sort(words, 0, words.size() - 1);
+        }
+
+        void sort(words::Words& words, size_t start, size_t end)
+        {
+            if (!(start < end))
+                return;
+
+            swap(words, start, (start + end) / 2);
+
+            size_t current{ start };
+            for (size_t i{ start + 1 };i <= end;i++)
+            {
+                if (*words[i] < *words[start])
+                    swap(words, ++current, i);
+            }
+
+            swap(words, start, current);
+
+            if (current > start) sort(words, start, current - 1);
+            if (end > current + 1) sort(words, current + 1, end);
+        }
+
+        size_t max_word_length(const words::Words& words)
+        {
+            size_t max{};
+            for (auto& pword : words)
+                if (max < pword->length()) max = pword->length();
+            return max;
+        }
+
+        void words::show_words(const Words& words)
+        {
+            const size_t field_width{ max_word_length(words) + 1 };
+            const size_t words_per_line{ 8 };
+            std::cout << std::format("{:{}}", *words[0], field_width);
+
+            size_t words_in_line{};
+            for (size_t i{1};i < words.size();++i)
+            {
+                if ((*words[i])[0] != (*words[i - 1])[0] || ++words_in_line == words_per_line)
+                {
+                    words_in_line = 0;
+                    std::cout << std::endl;
+                }
+
+                std::cout << std::format("{:{}}", *words[i], field_width);
+            }
+            std::cout  << std::endl;
+        }
+        ```
+
+    - 上面程序运行结果如下（因MD文件行宽80报错，部分单词有硬回车换行）：
+
+        ---
+
+        ```cpp
+        Enter a string terminated by *:
+        The old lighthouse stood on the cliff, its beam a silent guardian 
+        against the raging sea. For decades, it had witnessed storms that could 
+        splinter ships and fogs that could swallow the moon. The keeper, a man 
+        with salt-crusted skin and weary eyes, maintained the flame with a 
+        ritual precision. He knew every groan of the ancient structure, every 
+        whisper of the wind. One night, the light flickered and died, plunging 
+        the world into absolute blackness. He climbed the spiral stairs, his 
+        heart pounding against the rising tide of panic, and found a single, 
+        stubborn spark waiting to be reborn. *
+        For
+        He           He
+        One
+        The          The          
+        a            a            a            a            absolute     
+        against      against      ancient      
+        and          and          and          and          
+        be           beam         blackness    
+        cliff        climbed      could        could        
+        decades      died         
+        every        every        eyes         
+        flame        flickered    fogs         found        
+        groan        guardian     
+        had          heart        his          
+        into         it           its          
+        keeper       knew         
+        light        lighthouse   
+        maintained   man          moon         
+        night        
+        of           of           of           old          on           
+        panic        plunging     pounding     precision    
+        raging       reborn       rising       ritual       
+        salt-crusted sea          ships        silent       single       
+        skin         spark        spiral       
+        splinter     stairs       stood        storms       structure    
+        stubborn     swallow      
+        that         that         the          the          the          
+        the          the          the          
+        the          the          the          the          tide         
+        to           
+        waiting      weary        whisper      wind         with         
+        with         witnessed    world 
+        ```
+
+        ---
+
+3. 第3题
+    - Exer11_03.cpp
+
+        ```cpp
+        // Exer11_03.cpp
+        /*************************第11章_练习_第3题************************
+        将第2题的words模块拆分为两个恰当命名的子模块：一个子模块包含所有排序
+        功能，另一个子模块包含剩余的实用工具（程序员常用utils表示实用工具）。
+        另外，将函数放到嵌套的名称空间中，其名称与子模块的名称对应。
+        *****************************************************************/
+        import words;
+        import <string>;
+        import <iostream>;
+
+        int main()
+        {
+            words::Words the_words;
+            std::string text;
+            const auto separators{" ,.!?\"\n"};
+
+            std::cout << "Enter a string terminated by *:" << std::endl;
+            getline(std::cin, text, '*');
+
+            words::utils::extract_words(the_words, text, separators);
+            if (the_words.empty())
+            {
+                std::cout << "No words in text." << std::endl;
+                return 0;
+            }
+
+            words::sorting::sort(the_words);
+            words::utils::show_words(the_words);
+        }
+        ```
+
+    - words.ixx
+
+        ```cpp
+        //words.ixx
+        export module words;
+
+        export import words.sorting;
+        export import words.utils;
+        ```
+
+    - words.sorting.ixx
+
+        ```cpp
+        //words.sorting.ixx
+        export module words.sorting;
+
+        import<memory>;
+        import<string>;
+        import<vector>;
+
+        export namespace words
+        {
+            using Words = std::vector<std::shared_ptr<std::string>>;
+
+            namespace sorting
+            {
+                void sort(Words& words);
+            }
+        }
+        ```
+
+    - words.sorting.cpp
+
+        ```cpp
+        //words.sorting.cpp
+        module words.sorting;
+
+        void swap(words::Words& words, size_t first, size_t second)
+        {
+            auto temp{ words[first] };
+            words[first] = words[second];
+            words[second] = temp;
+        }
+
+        void sort(words::Words& words, size_t start, size_t end);
+
+        void words::sorting::sort(Words& words)
+        {
+            if (!words.empty())
+                ::sort(words, 0, words.size() - 1);
+        }
+
+        void sort(words::Words& words, size_t start, size_t end)
+        {
+            if (!(start < end))
+                return;
+
+            swap(words, start, (start + end) / 2); 
+
+            size_t current{ start };
+            for (size_t i{ start + 1 }; i <= end; i++)
+            {
+                if (*words[i] < *words[start]) 
+                    swap(words, ++current, i); 
+            }
+
+            swap(words, start, current);  
+
+            if (current > start) sort(words, start, current - 1); 
+            if (end > current + 1) sort(words, current + 1, end); 
+        }
+        ```
+
+    - words.utils.ixx
+
+        ```cpp
+        //words.utils.ixx
+        export module words.utils;
+
+        import<memory>;
+        import<string>;
+        import<vector>;
+
+        namespace words
+        {
+            export using Words = std::vector<std::shared_ptr<std::string>>;
+
+        }
+
+        export namespace words::utils
+        {
+            void extract_words(Words& words, const std::string& text, 
+            const std::string& separators);
+            void show_words(const Words& words);
+        }
+        ```
+
+    - words.utils.cpp
+
+        ```cpp
+        // words.utils.cpp
+        export module words.utils;
+
+        import <memory>;
+        import <string>;
+        import <vector>;
+
+        namespace words
+        {
+        export using Words = std::vector<std::shared_ptr<std::string>>;
+
+        }
+
+        export namespace words::utils
+        {
+        void extract_words(Words &words, const std::string &text,
+                        const std::string &separators);
+        void show_words(const Words &words);
+        } // namespace words::utils
+        module words.utils;
+
+        import <iostream>;
+        import <format>;
+
+        size_t max_word_length(const words::Words &words)
+        {
+            size_t max{};
+            for (auto &pword : words)
+                if (max < pword->length())
+                    max = pword->length();
+            return max;
+        }
+
+        void words::utils::extract_words(Words &words, const std::string &text,
+                                        const std::string &separators)
+        {
+            size_t start{text.find_first_not_of(separators)};
+
+            while (start != std::string::npos)
+            {
+                size_t end{text.find_first_of(separators, start + 1)};
+                if (end == std::string::npos)
+                    end = text.length();
+                words.push_back(
+                    std::make_shared<std::string>(text.substr(start, end - start)));
+                start = text.find_first_not_of(separators, end + 1);
+            }
+        }
+
+        void words::utils::show_words(const Words &words)
+        {
+            const size_t field_width{max_word_length(words) + 1};
+            const size_t words_per_line{8};
+            std::cout << std::format("{:{}}", *words[0], field_width);
+
+            size_t words_in_line{};
+            for (size_t i{1}; i < words.size(); ++i)
+            {
+                if ((*words[i])[0] != (*words[i - 1])[0] ||
+                    ++words_in_line == words_per_line)
+                {
+                    words_in_line = 0;
+                    std::cout << std::endl;
+                }
+                std::cout << std::format("{:{}}", *words[i], field_width);
+            }
+            std::cout << std::endl;
+        }
+        ```
+
+    - 上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Enter a string terminated by *:
+        The old lighthouse stood on the cliff, its beam a silent guardian 
+        against the raging sea. For decades, it had witnessed storms that could 
+        splinter ships and fogs that could swallow the moon. The keeper, a man 
+        with salt-crusted skin and weary eyes, maintained the flame with a 
+        ritual precision. He knew every groan of the ancient structure, every 
+        whisper of the wind. One night, the light flickered and died, plunging 
+        the world into absolute blackness. He climbed the spiral stairs, his 
+        heart pounding against the rising tide of panic, and found a single, 
+        stubborn spark waiting to be reborn. *
+        For
+        He           He
+        One
+        The          The          
+        a            a            a            a            absolute     
+        against      against      ancient      
+        and          and          and          and          
+        be           beam         blackness    
+        cliff        climbed      could        could        
+        decades      died         
+        every        every        eyes         
+        flame        flickered    fogs         found        
+        groan        guardian     
+        had          heart        his          
+        into         it           its          
+        keeper       knew         
+        light        lighthouse   
+        maintained   man          moon         
+        night        
+        of           of           of           old          on           
+        panic        plunging     pounding     precision    
+        raging       reborn       rising       ritual       
+        salt-crusted sea          ships        silent       single       
+        skin         spark        spiral       
+        splinter     stairs       stood        storms       structure    
+        stubborn     swallow      
+        that         that         the          the          the          
+        the          the          the          
+        the          the          the          the          tide         
+        to           
+        waiting      weary        whisper      wind         with         
+        with         witnessed    world 
+        ```
+
+        ---
+
+4. 第4题
+    - Exer11_04.cpp
+
+        ```cpp
+        // Exer11_04.cpp
+        /*************************第11章_练习_第4题************************
+        仍然将第2题的解决方案作为起点，将swap()和max_word_length()函数移动到
+        一个internals模块实现分区中。
+        *****************************************************************/
+        import <string>;
+        import <iostream>;
+        import words;
+
+        int main()
+        {
+            words::Words the_words;
+            std::string text;
+            const auto separators{" ,.!?\"\n"};
+
+            std::cout << "Enter a string terminated by *:" << std::endl;
+            getline(std::cin, text, '*');
+
+            words::extract_words(the_words, text, separators);
+            if (the_words.empty())
+            {
+                std::cout << "No words in text." << std::endl;
+                return 0;
+            }
+
+            words::sort(the_words);
+            words::show_words(the_words);
+        }
+        ```
+
+    - words.ixx
+
+        ```cpp
+        //words.ixx
+        export module words;
+
+        import<memory>;
+        import<string>;
+        import<vector>;
+
+        export namespace words
+        {
+            using Words = std::vector<std::shared_ptr<std::string>>;
+
+            void sort(Words& words);
+            void extract_words(Words& words, const std::string& text, 
+                const std::string& separators);
+            void show_words(const Words& words);
+        }
+        ```
+
+    - words.cpp
+
+        ```cpp
+        //words.cpp
+        module words;
+
+        import<iostream>;
+        import<format>;
+        import :internals;
+
+        void words::extract_words(Words& words, const std::string& text, 
+            const std::string& separators)
+        {
+            size_t start{ text.find_first_not_of(separators) };
+            while (start != std::string::npos)
+            {
+                size_t end{ text.find_first_of(separators,start + 1) };
+                if (end == std::string::npos)
+                    end = text.length();
+                words.push_back(std::make_shared<std::string>(text.substr
+                    (start, end - start)));
+                start = text.find_first_not_of(separators, end + 1);
+            }
+        }
+
+        void sort(words::Words& words, size_t start, size_t end);
+
+        void words::sort(Words& words)
+        {
+            if (!words.empty())
+                ::sort(words, 0, words.size() - 1);
+        }
+
+        void sort(words::Words& words, size_t start, size_t end)
+        {
+            if (!(start < end))
+                return;
+
+            swap(words, start, (start + end) / 2);
+
+            size_t current{ start };
+            for (size_t i{ start + 1 }; i <= end; i++)
+            {
+                if (*words[i] < *words[start])
+                    swap(words, ++current, i);
+            }
+
+            swap(words, start, current);
+
+            if (current > start) sort(words, start, current - 1);
+            if (end > current + 1) sort(words, current + 1, end);
+        }
+
+        void words::show_words(const Words& words)
+        {
+            const size_t field_width{ max_word_length(words) + 1 };
+            const size_t words_per_line{ 8 };
+            std::cout << std::format("{:{}}", *words[0], field_width);
+
+            size_t words_in_line{};
+            for (size_t i{ 1 }; i < words.size(); ++i)
+            {
+                if ((*words[i])[0] != (*words[i - 1])[0] || ++words_in_line == words_per_line)
+                {
+                    words_in_line = 0;
+                    std::cout << std::endl;
+                }
+                std::cout << std::format("{:{}}", *words[i], field_width);
+            }
+            std::cout << std::endl;
+        }
+        ```
+
+    - nternals.cpp
+
+        ```cpp
+        // nternals.cpp
+        module words:internals;
+
+        import words;
+
+        void swap(words::Words &words, size_t first, size_t second)
+        {
+            auto temp{words[first]};
+            words[first] = words[second];
+            words[second] = temp;
+        }
+
+        size_t max_word_length(const words::Words &words)
+        {
+            size_t max{};
+            for (auto &pword : words)
+            {
+                if (max < pword->length())
+                    max = pword->length();
+            }
+            return max;
+        }
+        ```
+
+    - 上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Enter a string terminated by *:
+        The old lighthouse stood on the cliff, its beam a silent guardian 
+        against the raging sea. For decades, it had witnessed storms that could 
+        splinter ships and fogs that could swallow the moon. The keeper, a man 
+        with salt-crusted skin and weary eyes, maintained the flame with a 
+        ritual precision. He knew every groan of the ancient structure, every 
+        whisper of the wind. One night, the light flickered and died, plunging 
+        the world into absolute blackness. He climbed the spiral stairs, his
+        heart pounding against the rising tide of panic, and found a single, 
+        stubborn spark waiting to be reborn. *
+        For
+        He           He
+        One
+        The          The          
+        a            a            a            a            absolute     
+        against      against      ancient      
+        and          and          and          and          
+        be           beam         blackness    
+        cliff        climbed      could        could        
+        decades      died         
+        every        every        eyes         
+        flame        flickered    fogs         found        
+        groan        guardian     
+        had          heart        his          
+        into         it           its          
+        keeper       knew         
+        light        lighthouse   
+        maintained   man          moon         
+        night        
+        of           of           of           old          on           
+        panic        plunging     pounding     precision    
+        raging       reborn       rising       ritual       
+        salt-crusted sea          ships        silent       single       
+        skin         spark        spiral       
+        splinter     stairs       stood        storms       structure    
+        stubborn     swallow      
+        that         that         the          the          the          
+        the          the          the          
+        the          the          the          the          tide         
+        to           
+        waiting      weary        whisper      wind         with         
+        with         witnessed    world   
+        ```
+
+        ---
+
+5. 第5题
+    - Ex11_05.cpp
+
+        ```cpp
+        // Exer11_05.cpp
+        /*************************第11章_练习_第5题************************
+        回到第1题的解决方案，但这一次不是像第2题那样创建实现文件，而是创建多个
+        接口分区文件，让每个分区文件仍然包含它们的函数定义。一个分区仍然包含所有
+        排序功能，另一个分区仍然包含剩余的实用工具(utils)。另外，重用第4题的
+        internals分区。
+        *****************************************************************/
+        import <string>;
+        import <iostream>;
+        import words;
+
+        int main()
+        {
+            words::Words the_words;
+            std::string text;
+            const auto separators{" ,.!?\"\n"};
+
+            std::cout << "Enter a string terminated by *:" << std::endl;
+            getline(std::cin, text, '*');
+
+            words::extract_words(the_words, text, separators);
+            if (the_words.empty())
+            {
+                std::cout << "No words in text." << std::endl;
+                return 0;
+            }
+
+            words::sort(the_words);
+            words::show_words(the_words);
+        }
+        ```
+
+    - words.ixx
+
+        ```cpp
+        //words.ixx
+        export module words;
+
+        export import :alias;
+        export import :sorting;
+        export import :utils;
+        ```
+
+    - utils.ixx
+
+        ```cpp
+        //utils.ixx
+        export module words:utils;
+
+        import :alias; 
+        import :internals;
+
+        import <iostream>;
+        import <format>;
+
+        export namespace words
+        {
+            void extract_words(Words& words, const std::string& text, 
+                const std::string& separators);
+            void show_words(const Words& words);
+        }
+
+        void words::extract_words(Words& words, const std::string& text, 
+            const std::string& separators)
+        {
+            size_t start{ text.find_first_not_of(separators) };
+
+            while (start != std::string::npos)
+            {
+                size_t end{ text.find_first_of(separators, start + 1) };
+                if (end == std::string::npos)
+                    end = text.length();
+                words.push_back(std::make_shared<std::string>
+                    (text.substr(start, end - start)));
+                start = text.find_first_not_of(separators, end + 1);
+            }
+        }
+
+        void words::show_words(const Words& words)
+        {
+            const size_t field_width{ max_word_length(words) + 1 };
+            const size_t words_per_line{ 8 };
+            std::cout << std::format("{:{}}", *words[0], field_width);
+
+            size_t words_in_line{};
+            for (size_t i{ 1 }; i < words.size(); ++i)
+            {
+                if ((*words[i])[0] != (*words[i - 1])[0] || ++words_in_line == words_per_line)
+                {
+                    words_in_line = 0;
+                    std::cout << std::endl;
+                }
+                std::cout << std::format("{:{}}", *words[i], field_width);
+            }
+            std::cout << std::endl;
+        }
+        ```
+
+    - sorting.ixx
+
+        ```cpp
+        //sorting.ixx
+        export module words:sorting;
+
+        import :alias;
+        import:internals;
+
+        export namespace words
+        {
+            void sort(Words& words);
+        }
+
+        namespace words
+        {
+            void sort(Words& words, size_t start, size_t end);
+        }
+
+        void words::sort(Words& words)
+        {
+            if (!words.empty())
+                sort(words, 0, words.size() - 1);
+        }
+
+        void words::sort(Words& words, size_t start, size_t end)
+        {
+            if (!(start < end))
+                return;
+
+            swap(words, start, (start + end) / 2);
+
+            size_t current{ start };
+            for (size_t i{ start + 1 }; i <= end; i++)
+            {
+                if (*words[i] < *words[start])
+                    swap(words, ++current, i);
+            }
+
+            swap(words, start, current);
+
+            if (current > start) sort(words, start, current - 1);
+            if (end > current + 1) sort(words, current + 1, end);
+        }
+        ```
+
+    - internals.ixx
+
+        ```cpp
+        //internals.ixx
+        export module words:internals;
+
+        import :alias;
+
+        void swap(words::Words& words, size_t first, size_t second)
+        {
+            auto temp{ words[first] };
+            words[first] = words[second];
+            words[second] = temp;
+        }
+
+        size_t max_word_length(const words::Words& words)
+        {
+            size_t max{};
+            for (auto& pword : words)
+                if (max < pword->length()) max = pword->length();
+            return max;
+        }
+        ```
+
+    - alias.ixx
+
+        ```cpp
+        //alias.ixx
+        export module words:alias;
+
+        import<iostream>;
+        import<string>;
+        import<vector>;
+
+        namespace words
+        {
+            export using Words = std::vector<std::shared_ptr<std::string>>;
+        }
+        ```
+
+    - 上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Enter a string terminated by *:
+        The old lighthouse stood on the cliff, its beam a silent guardian 
+        against the raging sea. For decades, it had witnessed storms that could 
+        splinter ships and fogs that could swallow the moon. The keeper, a man 
+        with salt-crusted skin and weary eyes, maintained the flame with a 
+        ritual precision. He knew every groan of the ancient structure, every 
+        whisper of the wind. One night, the light flickered and died, plunging 
+        the world into absolute blackness. He climbed the spiral stairs, his 
+        heart pounding against the rising tide of panic, and found a single, 
+        stubborn spark waiting to be reborn. *
+        For
+        He           He
+        One
+        The          The          
+        a            a            a            a            absolute     
+        against      against      ancient      
+        and          and          and          and          
+        be           beam         blackness    
+        cliff        climbed      could        could        
+        decades      died         
+        every        every        eyes         
+        flame        flickered    fogs         found        
+        groan        guardian     
+        had          heart        his          
+        into         it           its          
+        keeper       knew         
+        light        lighthouse   
+        maintained   man          moon         
+        night        
+        of           of           of           old          on           
+        panic        plunging     pounding     precision    
+        raging       reborn       rising       ritual       
+        salt-crusted sea          ships        silent       single       
+        skin         spark        spiral       
+        splinter     stairs       stood        storms       structure    
+        stubborn     swallow      
+        that         that         the          the          the          
+        the          the          the          
+        the          the          the          the          tide         
+        to           
+        waiting      weary        whisper      wind         with         
+        with         witnessed    world  
+        ```
+
+        ---
+
+6. 第6题
+    - Exer11_06.cpp
+
+        ```cpp
+        //Exer11_06.cpp
+        /*************************第11章_练习_第6题************************
+        仍然将第2题的解决方案作为起点，确保也能够使用wrds和w限定这个名称空间中
+        的所有名称。应该使用两种不同的方法。需要注意，在生产质量的代码中，不应该
+        使用晦涩难懂的缩写词（如wrds）或只有一个字母的标识符（如w）：清晰性总是
+        比简洁性更重要。
+        *****************************************************************/
+        import<string>;
+        import<iostream>;
+        import words;
+
+        namespace wrds
+        {
+            using namespace words;
+        }
+
+        int main()
+        {
+            wrds::Words the_words;
+            std::string text;
+            const auto separators{ " ,.!?\"\n" };
+
+            std::cout << "Enter a string terminated by *:" << std::endl;
+            getline(std::cin, text, '*');
+
+            w::extract_words(the_words, text, separators);
+            if (the_words.empty())
+            {
+                std::cout << "No words in text." << std::endl;
+                return 0;
+            }
+
+            wrds::sort(the_words);
+            w::show_words(the_words);
+        }
+        ```
+
+    - words.ixx
+
+        ```cpp
+        //words.ixx
+        export module words;
+
+        import <memory>;
+        import <string>;
+        import <vector>;
+
+        export namespace words
+        {
+            using Words = std::vector<std::shared_ptr<std::string>>;
+
+            void sort(Words& words);
+            void extract_words(Words& words, const std::string& text, 
+                const std::string& separators);
+            void show_words(const Words& words);
+        }
+
+        export namespace w = words;
+        ```
+
+    - words.cpp
+
+        ```cpp
+        //words.cpp
+        module words;
+
+        import <iostream>;
+        import <format>;
+
+        size_t max_word_length(const words::Words& words);
+
+        void words::extract_words(Words& words, const std::string& text, 
+            const std::string& separators)
+        {
+            size_t start{ text.find_first_not_of(separators) };
+
+            while (start != std::string::npos)
+            {
+                size_t end{ text.find_first_of(separators, start + 1) };
+                if (end == std::string::npos)
+                    end = text.length();
+                words.push_back(std::make_shared<std::string>
+                    (text.substr(start, end - start)));
+                start = text.find_first_not_of(separators, end + 1);
+            }
+        }
+
+        void swap(words::Words& words, size_t first, size_t second)
+        {
+            auto temp{ words[first] };
+            words[first] = words[second];
+            words[second] = temp;
+        }
+
+        void sort(words::Words& words, size_t start, size_t end);
+
+        void words::sort(Words& words)
+        {
+            if (!words.empty())
+                ::sort(words, 0, words.size() - 1);
+        }
+
+        void sort(words::Words& words, size_t start, size_t end)
+        {
+            if (!(start < end))
+                return;
+
+            swap(words, start, (start + end) / 2);
+
+            size_t current{ start };
+            for (size_t i{ start + 1 }; i <= end; i++)
+            {
+                if (*words[i] < *words[start])
+                    swap(words, ++current, i);
+            }
+
+            swap(words, start, current);
+
+            if (current > start) sort(words, start, current - 1);
+            if (end > current + 1) sort(words, current + 1, end);
+        }
+
+        size_t max_word_length(const words::Words& words)
+        {
+            size_t max{};
+            for (auto& pword : words)
+                if (max < pword->length()) max = pword->length();
+            return max;
+        }
+
+        void words::show_words(const Words& words)
+        {
+            const size_t field_width{ max_word_length(words) + 1 };
+            const size_t words_per_line{ 8 };
+            std::cout << std::format("{:{}}", *words[0], field_width);
+
+            size_t words_in_line{};
+            for (size_t i{ 1 }; i < words.size(); ++i)
+            {
+                if ((*words[i])[0] != (*words[i - 1])[0] || ++words_in_line == words_per_line)
+                {
+                    words_in_line = 0;
+                    std::cout << std::endl;
+                }
+                std::cout << std::format("{:{}}", *words[i], field_width);
+            }
+            std::cout << std::endl;
+        }
+        ```
+
+    - 上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Enter a string terminated by *:
+        The old lighthouse stood on the cliff, its beam a silent guardian 
+        against the raging sea. For decades, it had witnessed storms that could 
+        splinter ships and fogs that could swallow the moon. The keeper, a man 
+        with salt-crusted skin and weary eyes, maintained the flame with a 
+        ritual precision. He knew every groan of the ancient structure, every 
+        whisper of the wind. One night, the light flickered and died, plunging 
+        the world into absolute blackness. He climbed the spiral stairs, his 
+        heart pounding against the rising tide of panic, and found a single, 
+        stubborn spark waiting to be reborn. *
+        For
+        He           He
+        One
+        The          The          
+        a            a            a            a            absolute     
+        against      against      ancient      
+        and          and          and          and          
+        be           beam         blackness    
+        cliff        climbed      could        could        
+        decades      died         
+        every        every        eyes         
+        flame        flickered    fogs         found        
+        groan        guardian     
+        had          heart        his          
+        into         it           its          
+        keeper       knew         
+        light        lighthouse   
+        maintained   man          moon         
+        night        
+        of           of           of           old          on           
+        panic        plunging     pounding     precision    
+        raging       reborn       rising       ritual       
+        salt-crusted sea          ships        silent       single       
+        skin         spark        spiral       
+        splinter     stairs       stood        storms       structure    
+        stubborn     swallow      
+        that         that         the          the          the          
+        the          the          the          
+        the          the          the          the          tide         
+        to           
+        waiting      weary        whisper      wind         with         
+        with         witnessed    world 
+        ```
+
+        ---
