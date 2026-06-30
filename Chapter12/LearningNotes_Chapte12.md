@@ -39,3 +39,66 @@
     - 不允许直接访问数据变量，是为了使调试变得更加容易。大部分开发环境都支持断点，为函数调用或者函数内的具体代码行添加断点要简单得多
 
 ### 12.1.2 继承
+
+1. 基类（Base Class）：被继承的原始类，也称为父类
+2. 派生类（Derived Class）：从基类继承属性和方法的新类，也称为子类
+3. 派生类包含基类所有的成员，也可以有新成员，还可以重新定义继承的函数。在派生类中重新定义基类的函数被称为重写
+    - 基类:BankAccount
+        - 数据成员
+            - balance
+            - interestRate
+        - 函数成员
+            - calcInterest()
+            - credit()
+            - debit()
+    - 派生类：LoanAccount
+        - 数据成员
+            - balance
+            - interestRate
+        - 函数成员
+            - calcInterest()
+            - credit()
+            - debit()
+    - 派生类：CheckingAccount
+        - 数据成员
+            - balance
+            - interestRate
+            - **overdraftFacility(新增成员)**
+        - 函数成员
+            - calcInterest()
+            - credit()
+            - debit()
+
+### 12.1.3 多态性
+
+1. 多态性表示在不同的时刻有不同的形式
+2. C++中的多态性总是涉及使用指针或引用来调用对象的成员函数
+3. 向上转型：基类指针可以指向派生类对象，指针实际上指向的是派生类对象中基类部分的起始地址
+    - 隐式转换：不需要显式类型转换，编译器自动完成
+    - 安全性：总是安全的，因为派生类对象肯定包含基类部分
+    - 访问限制：通过基类指针只能访问基类中定义的成员（除非使用虚函数实现多态）
+4. 向下转型：派生类指针不能直接指向基类对象，除非使用显式类型转换，但这通常是不案例的
+
+```cpp
+BankAccount* pAcc{};    //Pointer to base class
+LoanAccount debt;
+CheckingAccount cash;
+
+pAcc = & cash;  //Pointer to check a/c
+pAcc->calcInterest();   //Adds interest
+
+pAcc = &debt;   //Pointer to loan a/c
+pAcc->calcInterest();   //Debits interest
+
+/*
+BankAccount* pAcc{};    // 定义基类指针，初始化为空
+LoanAccount debt;       // 创建贷款账户对象
+CheckingAccount cash;   // 创建支票账户对象(存款账户)
+
+pAcc = &cash;           // 基类指针指向支票账户
+pAcc->calcInterest();   // 根据实际对象类型调用支票账户的 calcInterest()，存：余额+利息
+
+pAcc = &debt;           // 基类指针指向贷款账户  
+pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInterest()，贷：余额-利息
+*/
+```
