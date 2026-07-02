@@ -102,3 +102,76 @@ pAcc = &debt;           // 基类指针指向贷款账户
 pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInterest()，贷：余额-利息
 */
 ```
+
+## 12.2 术语
+
+- 类是用户定义的数据类型
+- 在类中定义的变量和函数称为类的成员。变量称为成员变量，函数称为成员函数。类的成员函数有时也称为方法；成员变量也称为数据成员、成员字段，或直接称为字段
+- 类类型的变量用于存储对象。对象有时称为类的实例。定义类的实例称为实例化
+- 面向对象编程是一种编程样式，基于的思想是把自己的数据类型定义为类。其中涉及刚才讨论的数据封装、数据隐藏、类的继承和多态性
+- 面向对象编程就是根据针对问题的对象来编程。类的主要作用就是使这个过程尽可能完备和灵活
+
+## 12.3 定义类
+
+1. 定义类时要使用**class**关键字
+
+    ```cpp
+    class ClassName
+    {
+        //Code that defines the members of the class...
+    };
+    ```
+
+2. 给用户定义的类型使用大写名称，常常便于区分类类型和变量名
+3. 类定义的右花括号后面必须有分号
+4. 类的所有成员都默认为私有，这表示不能在类的外部访问它们
+5. **public**和**private**都是类成员的**访问修饰符**，还有一个访问修饰符**protected**
+
+    ```cpp
+    class ClassName
+    {
+        private:
+            //Code that specifies members that are not accessible from outside 
+            //the class...
+        public:
+            //Code that specifies members that are accessible from outside the class...
+    };
+    ```
+
+6. **public**和**private**将被应用到其后的所有成员上，除非有另一个访问修饰符
+7. 成员函数仅使用名称，就可以引用同一个类的任何其他成员，无论访问修饰符是什么
+
+    ```cpp
+    class Box
+    {
+        public:
+            //Function to calculate the volume of a box
+            double volume()
+            {
+                return m_length * m_width * m_height;
+            }
+
+        private:
+            double m_length {1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+    };
+    ```
+
+8. 按照惯例，成员变量名称之前都添加前缀m_，如上面示例代码。成员变量的值没有通过某种机制初始化，它们就会包含垃圾值
+
+9. 可以根据需要交替使用public和private部分（即可以在一个类定义中多次出现这些部分），但应该对类的相关成员进行一致的分组并在所有的类中进行一致的排序
+    - 将所有公共成员放在所有私有成员之前
+    - 对类的相关成员进行分组，并将函数放在变量之后
+    - 构造函数和析构函数总是出现在任何其他成员函数之前
+10. 在C++中还可以定义结构作为新类型，与类的成员不同，结构的成员默认为公共的。除非是想聚合数据，否则对于其他用途，一般约定应使用类
+
+    **创建类的对象**  
+
+    ```cpp
+    Box myBox;  //A box object with all dimensions equal to 1.0
+    std::cout << "Volume of myBox is " << myBox.volume() << std::endl;
+    //Volume is 1
+    ```
+
+11. 可以通过**构造函数**来初始化对象的私有成员变量
