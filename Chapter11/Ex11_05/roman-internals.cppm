@@ -1,4 +1,4 @@
-//roman-internals.cpp
+//roman-internals.cppm
 module roman:internals;
 
 unsigned int from_roman(char c)

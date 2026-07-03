@@ -1,5 +1,5 @@
 # 你原有的忽略项
-.vscode/
+# .vscode/
 .github
 gcm.cache/
 bin/
