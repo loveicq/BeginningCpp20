@@ -2,7 +2,11 @@
     "files.associations": {
         "*.cppm": "cpp",
         "*.ixx": "cpp",
-        "*.mpp": "cpp"
+        "*.mpp": "cpp",
+        "bitset": "cpp",
+        "string_view": "cpp",
+        "rope": "cpp",
+        "regex": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++20",
     "C_Cpp.default.compilerPath": "D:/msys64/ucrt64/bin/g++.exe",
@@ -60,5 +64,7 @@
         ]
     },
     "files.defaultLanguage": "cpp",
-    "editor.semanticHighlighting.enabled": true
+    "editor.semanticHighlighting.enabled": true,
+    "task.statusbar.show": "active",
+    "task.statusbar.hideWhenRunning": false
 }

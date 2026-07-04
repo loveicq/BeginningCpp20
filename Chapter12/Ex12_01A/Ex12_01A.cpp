@@ -1,12 +1,13 @@
-// Ex12_01.cpp
-// Defining a class constructor
+// Ex12_01A
 import <iostream>;
 
-// Class to represent a box
 class Box
 {
   public:
-    // Constructor
+    // Box(){}    //显式定义的默认构造函数
+    Box() = default; // 默认构造函数
+
+    // 构造函数
     Box(double length, double width, double height)
     {
         std::cout << "Box constructor called." << std::endl;
@@ -15,7 +16,6 @@ class Box
         m_height = height;
     }
 
-    // Function to calculate the volume of a box
     double volume() { return m_length * m_width * m_height; }
 
   private:
@@ -26,8 +26,9 @@ class Box
 
 int main()
 {
-    Box firstBox{80.0, 50.0, 40.0};           // Create a box
-    double firstBoxVolume{firstBox.volume()}; // Calculate the box volume
+    Box firstBox{80.0, 50.0, 40.0};
+    double firstBoxVolume{firstBox.volume()};
     std::cout << "Volume of Box object is " << firstBoxVolume << std::endl;
-    // Box secondbox;   //Causes a compiler error message
+
+    Box secondBox; // 不再导致编译器错误消息
 }

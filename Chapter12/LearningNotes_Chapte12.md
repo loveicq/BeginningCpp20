@@ -175,3 +175,249 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
     ```
 
 11. 可以通过**构造函数**来初始化对象的私有成员变量
+
+## 12.4 构造函数
+
+- 类的构造函数可以在创建新对象时初始化新对象，确保成员变量包含有效的值。它是类中的一种特殊函数，与普通的成员函数在一些重要方面有所不同。
+- 构造函数总是与包含它的类同名。
+- 另外，构造函数没有返回值，因此没有返回类型。为构造函数指定返回类型是错误的。
+- 无论何时定义类的新实例，都会调用构造函数，没有例外。
+- 类类型的对象仅可以通过构造函数来创建。
+
+### 12.4.1 默认构造函数
+
+1. 如果没有给类定义构造函数，编译器就会提供默认的默认构造函数
+
+    ```cpp
+    class Box
+    {
+        public:
+            // The default constructor that was supplied by the compiler...
+            Box()
+            {
+                //Empty body so it does nothing...
+            }
+
+            //Function to calculate the volume of a box
+            double volume()
+            {
+                return m_length * m_width * m_height;
+            }
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+    };
+    ```
+
+2. 如果不通过给定的实参显式地调用构造函数，那么会调用该构造参数
+3. 编译器生成的默认构造函数没有参数，其唯一的作用是创建对象
+4. 用户定义构造函数后，编译器就不提供默认的构造函数了。有时候我们需要没有参数的构造函数和自己定义的、带参数的构造函数，此时就必须确保类中定义了默认的构造函数
+
+### 12.4.2 定义类的构造函数
+
+1. 案例Ex12_01
+
+    ```cpp
+    // Ex12_01.cpp
+    // Defining a class constructor
+    import <iostream>;
+
+    // Class to represent a box
+    class Box
+    {
+    public:
+        // Constructor
+        Box(double length, double width, double height) //构造函数也是函数，但无返回类型
+        {
+            std::cout << "Box constructor called." << std::endl;
+            m_length = length;  //类内函数可以直接写private内的变量，类外不行
+            m_width = width;
+            m_height = height;
+        }
+
+        // Function to calculate the volume of a box
+        double volume() { return m_length * m_width * m_height; }
+
+    private:
+        double m_length{1.0};
+        double m_width{1.0};
+        double m_height{1.0};
+    };
+
+    int main()
+    {
+        Box firstBox{80.0, 50.0, 40.0};           // Create a box
+        double firstBoxVolume{firstBox.volume()}; // Calculate the box volume
+        std::cout << "Volume of Box object is " << firstBoxVolume << std::endl;
+        // Box secondbox;//Causes a compiler error message
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Box constructor called.
+    Volume of Box object is 160000
+    ```
+
+    ---
+
+2. 上面示例程序在构造函数中添加一行输出信息，其它函数调用类对象时，会调用构造函数，就会输出这行信息。这行信息的作用就是证明的确调用了构造函数
+
+### 12.4.3 使用default关键字
+
+1. 添加了自定义构造函数，如果还想要默认的函数体为空的构造函数，除了定义一个函数体为空的默认构造函数，还可以使用default关键字
+
+    ```cpp
+    Box()=default;  //Defaulted default constructor
+    ```
+
+2. 在现代C++代码中，优先使用default关键字，因为编译器生成的版本更好
+
+3. 案例Ex12_01A
+
+    ```cpp
+    import <iostream>;
+
+    class Box
+    {
+    public:
+        // Box(){}    //显式定义的默认构造函数
+        Box() = default; // 默认构造函数
+
+        // 构造函数
+        Box(double length, double width, double height)
+        {
+            std::cout << "Box constructor called." << std::endl;
+            m_length = length;
+            m_width = width;
+            m_height = height;
+        }
+
+        double volume() { return m_length * m_width * m_height; }
+
+    private:
+        double m_length{1.0};
+        double m_width{1.0};
+        double m_height{1.0};
+    };
+
+    int main()
+    {
+        Box firstBox {80.0, 50.0, 40.0};
+        double firstBoxVolume{firstBox.volume()};
+        std::cout << "Volume of Box object is " << firstBoxVolume << std::endl;
+
+        Box secondBox; // 不再导致编译器错误消息
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Box constructor called.
+    Volume of Box object is 160000
+    ```
+
+    ---
+
+### 12.4.4 在类的外部定义函数
+
+1. 类的成员函数的定义可以放在类定义的外部。类的构造函数也是这样。对于函数体较长的成员函数，或者包含大量成员的类而言，这样做非常有意义
+
+    ```cpp
+    //Class to represent a box
+    class Box
+    {
+        public:
+            Box()=default;
+            Box(double length,double width,double height);
+
+            double volume();
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+    }
+    ```
+
+2. 可将Box成员的定义放在其类定义之后，每个成员的名称都必须用类名来限定
+
+    ```cpp
+    //  Constructor definition
+    Box::Box(double length,double width,double height)
+    {
+        std::cout << "Box constructor called." << std::endl;
+        m_length = length;
+        m_width = width;
+        m_height = height;
+    }
+
+    //Member function definition
+    double Box::volume()
+    {
+        return m_length * m_width * m_height;
+    }
+    ```
+
+3. 从动机和技术方面讲，类的接口和实现的这种分享完全类似于第11章中介绍的模块。也可以将**类外部的成员函数的定义**移到实现文件中，仅让**类的定义**保留在接口文件（头文件或模块接口文件）中
+
+4. 案例Ex12_02
+
+    ```cpp
+    // Ex12_02.cpp
+    import <iostream>;
+
+    class Box
+    {
+    public:
+        Box() = default;
+        Box(double length, double width, double height);
+
+        double volume();
+
+    private:
+        double m_length{1.0};
+        double m_width{1.0};
+        double m_height{1.0};
+    };
+
+    int main()
+    {
+        Box firstBox{80.0, 50.0, 40.0}; // 初始化列表赋值给构造函数
+        double firstBoxVolume{firstBox.volume()};
+
+        std::cout << "Volume of Box object is " << firstBoxVolume << std::endl;
+
+        Box secondBox;
+    }
+
+    Box::Box(double length, double width, double height)
+    {
+        std::cout << "Box constructor called." << std::endl;
+
+        m_length = length;
+        m_width = width;
+        m_height = height;
+    }
+
+    double Box::volume() { return m_length * m_width * m_height; }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Box constructor called.
+    Volume of Box object is 160000
+    ```
+
+    ---
