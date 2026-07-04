@@ -421,3 +421,91 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
     ```
 
     ---
+
+### 12.4.5 默认构造函数的参数值
+
+1. 构造函数也可以指定参数的默认值
+
+    ```cpp
+    class Box
+    {
+        public:
+            Box() = default;    //此行应删除，因为下面带实参的构造函数可以充当默认构造函数
+            Box(double length = 1.0, double width = 1.0, double height = 1.0);
+            //上面这个带三实参的构造函数也可以"Box();"的形式调用，所以可以充当默认构造函数，会与上一行产生调用歧义
+
+            double volume();
+
+        private:
+            //Same member variables as always...
+
+    };
+    ```
+
+2. 构造函数和成员函数的默认实参值总是放在类中，不放在外部构造函数和成员函数中。这一点与普通函数的声明和定义规定是一样的，默认参数都只能放在声明中，不能放在定义中
+
+### 12.4.6 使用成员初始化列表
+
+1. 更高效地设置成员变量的值的方法：成员初始化列表，构造函数的初始化列表与参数列表用冒号分隔开，每个初始值用逗号分开开
+
+    ```cpp
+    Box::Box(double length, double width, double height)
+    : m_length{length}, m_width{width}, m_height{height}
+    {
+        std::cout << "Box constructor called." << std::endl;
+    }
+    ```
+
+2. 案例Ex12_03
+
+    ```cpp
+    // Ex12_03.cpp
+    import <iostream>;
+
+    class Box
+    {
+    public:
+        // Box() = default;
+        Box(double length = 1.0, double width = 1.0, double height = 1.0);
+
+        double volume();
+
+    private:
+        double m_length;
+        double m_width;
+        double m_height;
+    };
+
+    int main()
+    {
+        Box firstBox{80.0, 50.0, 40.0};
+        double firstBoxVolume{firstBox.volume()};
+
+        std::cout << "Volume of Box object is " << firstBoxVolume << std::endl;
+
+        Box secondBox; // 会调用默认构造函数创建对象secondBox
+    }
+
+    Box::Box(double length, double width, double height)
+        : m_length{length}, m_width{width}, m_height{height}
+    {
+        std::cout << "Box constructor called." << std::endl;
+    }
+
+    double Box::volume() { return m_length * m_width * m_height; }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Box constructor called.
+    Volume of Box object is 160000
+    Box constructor called.  //因为创建secondBox对象，第二次调用默认构造函数了
+    ```
+
+    ---
+
+3. 在构造函数中初始化参数之所以非常重要除了更高效，还有一个原因是因为它是某些类型的成员变量设置值的唯一方式
+4. 一般来说，首选在构造函数的成员初始化列表中初始化所有成员变量。这样做一般**更高效**。为了避免产生混淆，最好按照类定义中成员变量的声明顺序，在初始化列表中列举成员变量。只有当需要更复杂的逻辑时，或者当初始化成员变量的顺序很重要时，才应该在构造函数体内初始化成员变量

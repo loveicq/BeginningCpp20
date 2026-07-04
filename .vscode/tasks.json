@@ -51,6 +51,7 @@
             "args": [
                 "-std=c++20",
                 "-fmodules-ts",
+                "-g",
                 "-c",
                 "${file}",
                 "-o",
