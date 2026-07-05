@@ -19,11 +19,24 @@
     "C_Cpp.autocompleteAddParentheses": true,
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.dimInactiveRegions": false,
-    "C_Cpp.excludePath": [
-        "**/node_modules/**",
-        "**/.vscode/**"
-    ],
-    "C_Cpp.autoAddFileAssociations": true,
+    "C_Cpp.autoAddFileAssociations": false,
+    "C_Cpp.inactiveRegionOpacity": 1.0,
+    "files.exclude": {
+        "**/node_modules/**": true,
+        "**/*.o": true,
+        "**/*.exe": true,
+        "**/*.obj": true,
+        "**/*.dll": true,
+        "**/out/**": true,
+        "**/bin/**": true
+    },
+    "search.exclude": {
+        "**/node_modules/**": true,
+        "**/.vscode/**": true,
+        "**/build/**": true,
+        "**/*.o": true,
+        "**/*.exe": true
+    },
     "editor.tokenColorCustomizations": {
         "textMateRules": [
             {
@@ -64,7 +77,13 @@
         ]
     },
     "files.defaultLanguage": "cpp",
-    "editor.semanticHighlighting.enabled": true,
-    "task.statusbar.show": "active",
-    "task.statusbar.hideWhenRunning": false
+    "editor.semanticHighlighting.enabled": false,
+    "editor.quickSuggestions": {
+        "other": false,
+        "comments": false,
+        "strings": false
+    },
+    "editor.wordBasedSuggestions": "off",
+    "editor.suggestOnTriggerCharacters": false,
+    "workbench.editor.enablePreview": false
 }

@@ -2,6 +2,36 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "create build dir",
+            "type": "process",
+            "command": "cmd.exe",
+            "args": [
+                "/c",
+                "if not exist ${fileDirname}\\build mkdir ${fileDirname}\\build"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": false,
+                "reveal": "never"
+            }
+        },
+        {
+            "label": "clean build",
+            "type": "process",
+            "command": "cmd.exe",
+            "args": [
+                "/c",
+                "del /f /q ${fileDirname}\\build\\*.o 2>nul"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": false,
+                "reveal": "never"
+            }
+        },
+        {
             "label": "build std headers",
             "type": "process",
             "command": "D:/msys64/ucrt64/bin/g++.exe",
@@ -56,6 +86,10 @@
                 "${file}",
                 "-o",
                 "${fileDirname}\\build\\${fileBasenameNoExtension}.o"
+            ],
+            "dependsOn": [
+                "create build dir",
+                "clean build"
             ],
             "group": "build",
             "problemMatcher": [
