@@ -24,7 +24,6 @@
     "files.exclude": {
         "**/node_modules/**": true,
         "**/*.o": true,
-        "**/*.exe": true,
         "**/*.obj": true,
         "**/*.dll": true,
         "**/out/**": true,

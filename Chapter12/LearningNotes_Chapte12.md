@@ -659,3 +659,21 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 编译器会提供一个默认的副本构造函数，它通过复制已有对象来创建对象。默认的副本构造函数会把实参对象的成员变量值复制给新对象，但是当类的一个或多个成员变量是指针时，就会产生不良后果。
 
 **1. 实现副本构造函数**  
+
+- 错误的副本构造函数定义--按值传递实参，造成无限递归调用
+
+    ```cpp
+    Box::Box(Box box)
+    : m_length{box.m_length},m_width{box.m_width}, m_height{box.m_height}
+    {}
+    ```
+
+- 正确的副本构造函数--const引用参数定义（这样的定义与编译器提供的默认副本构造函数等效）
+
+    ```cpp
+    Box::Box(const Box& box)
+    : m_length{box.m_length},m_width{box.m_width}, m_height{box.m_height}
+    {}
+    ```
+
+- 通常，不应该自己编写这样的副本构造函数，编译器提供的默认副本构造函数就足够了
