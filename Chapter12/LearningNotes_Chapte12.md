@@ -509,3 +509,153 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
 3. 在构造函数中初始化参数之所以非常重要除了更高效，还有一个原因是因为它是某些类型的成员变量设置值的唯一方式
 4. 一般来说，首选在构造函数的成员初始化列表中初始化所有成员变量。这样做一般**更高效**。为了避免产生混淆，最好按照类定义中成员变量的声明顺序，在初始化列表中列举成员变量。只有当需要更复杂的逻辑时，或者当初始化成员变量的顺序很重要时，才应该在构造函数体内初始化成员变量
+
+### 12.4.7 使用explicit关键字
+
+1. 类的构造函数只有一个参数是有问题的，因为编译器可以使用这种构造函数把参数的类型隐式转换为类类型。在某些情况下，这会产生不良的后果
+
+    ```cpp
+    // Ex12_04.cpp
+    import <iostream>;
+
+    class Cube
+    {
+    public:
+        /*explicit*/ Cube(double side);      // Constructor
+        double volume();                     // Calculate volume of a sube
+        bool hasLargerVolumeThan(Cube cube); // Compare volume of a cube with another
+
+    private:
+        double m_side;
+    };
+
+    Cube::Cube(double side) : m_side{side}
+    {
+        std::cout << "Cube constructor called." << std::endl;
+    }
+
+    double Cube::volume()
+    {
+        return m_side * m_side * m_side;
+    }
+
+    bool Cube::hasLargerVolumeThan(Cube cube)
+    {
+        return volume() > cube.volume();
+    }
+
+    int main()
+    {
+        Cube box1{7.0};
+        Cube box2{3.0};
+        if (box1.hasLargerVolumeThan(box2))
+            std::cout << "box1 is larger than box2." << std::endl;
+        else
+            std::cout << "Volume of box1 is less than or equal to that of box2."
+                 << std::endl;
+
+        std::cout << "Volume of box1 is " << box1.volume() << std::endl;
+        if (box1.hasLargerVolumeThan(50.0)) //此处的(50)相当于(Cube{50})，因为类型隐式转换
+            std::cout << "Volume of box1 is greater than 50" << std::endl;
+        else
+            std::cout << "Volume of box1 is less than or equal to 50" << std::endl;
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Cube constructor called.
+    Cube constructor called.
+    box1 is larger than box2. 
+    Volume of box1 is 343
+    Cube constructor called.
+    Volume of box1 is less than or equal to 50  
+    ```
+
+    ---
+
+2. 一般单参数构造函数都需要加上`explicit`，除非是特意要使用构造函数的隐式转换功能，如下：
+
+   ```cpp
+    void print(const std::string& s) { ... }
+
+    print("hello");  // 隐式把 const char* 转换成 std::string
+   ```
+
+3. 不仅单个实参，任何构造函数都可以声明为explicit。假设有构造函数
+`Box(double length, double width, double height);`和`processBox(Box box);`函数，则调用processBox({1.0,2.0,3.0})就会隐式转换。为了强制在每次创建实例时显式指定Box类型，
+可以将三元Box(double,double,double)构造函数声明为explicit
+
+### 12.4.8 委托构造函数
+
+1. 一个构造函数的代码可以在**初始化列表**中调用同一个类的另一个构造函数，这被称为委托构造函数，因为它把构造工作委托给了另一个构造函数
+
+    ```cpp
+    // Ex12_05.cpp
+    import <iostream>;
+
+    class Box
+    {
+    public:
+        Box() = default;
+        Box(double length, double width, double height);
+        Box(double side);
+
+        double volume();
+
+    private:
+        double m_length{1.0};
+        double m_width{1.0};
+        double m_height{1.0};
+    };
+
+    int main()
+    {
+        Box box1{2.0, 3.0, 4.0};
+        Box box2{5.0};
+        std::cout << "box1 volume = " << box1.volume() << std::endl;
+        std::cout << "box2 volume = " << box2.volume() << std::endl;
+    }
+
+    Box::Box(double length, double width, double height)
+        : m_length{length}, m_width{width}, m_height{height}
+    {
+        std::cout << "Box constructor 1 called." << std::endl;
+    }
+
+    Box::Box(double side) : Box{side, side, side}   //在初始化列表调用另一个构造函数来构造对象
+    {
+        std::cout << "Box constructor 2 called." << std::endl;
+    }
+
+    double Box::volume()
+    {
+        return m_length * m_width * m_height;
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Box constructor 1 called.
+    Box constructor 1 called.
+    Box constructor 2 called.
+    box1 volume = 24
+    box2 volume = 125
+    ```
+
+    ---
+
+2. 在构造函数的初始化列表中，应只调用一次同一个类的构造函数
+3. 在委托构造函数**体**中调用同一个类的构造函数是不同的，而且不能在委托构造函数的初始化列表中初始化成员变量，否则代码不会编译成功
+
+### 12.4.9 副本构造函数
+
+编译器会提供一个默认的副本构造函数，它通过复制已有对象来创建对象。默认的副本构造函数会把实参对象的成员变量值复制给新对象，但是当类的一个或多个成员变量是指针时，就会产生不良后果。
+
+**1. 实现副本构造函数**  
