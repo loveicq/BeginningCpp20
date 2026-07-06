@@ -947,41 +947,184 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 案例Ex12_06
     - Box.cppm
 
-    ```cpp
-    // Ex12_06.cpp
-    import <iostream>;
-    import box;
+        ```cpp
+        // Box.cppm
+        export module box;
+        import <iostream>;
 
-    int main()
-    {
-        Box myBox{6.0, 6.0, 18.5};
-        std::cout << "Volume of the first Box object is " << myBox.volume() 
-            << std::endl;
-    }
-    ```
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height);
+
+            double volume();
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        Box::Box(double length, double width, double height)
+            : m_length{length}, m_width{width}, m_height{height}
+        {
+            std::cout << "Box constructor called." << std::endl;
+        }
+
+        double Box::volume()
+        {
+            return m_length * m_width * m_height;
+        }
+        ```
 
     - Ex12_06.cpp
 
-    ```cpp
-    // Ex12_06.cpp
-    import <iostream>;
-    import box;
+        ```cpp
+        // Ex12_06.cpp
+        import <iostream>;
+        import box;
 
-    int main()
-    {
-        Box myBox{6.0, 6.0, 18.5};
-        std::cout << "Volume of the first Box object is " << myBox.volume() 
-            << std::endl;
-    }
-    ```
+        int main()
+        {
+            Box myBox{6.0, 6.0, 18.5};
+            std::cout << "Volume of the first Box object is " << myBox.volume() 
+                << std::endl;
+        }
+        ```
 
-    上面程序运行结果如下：
+        上面程序运行结果如下：
 
-    ---
+        ---
 
-    ```cpp
-    Box constructor called.
-    Volume of the first Box object is 666
-    ```
+        ```cpp
+        Box constructor called.
+        Volume of the first Box object is 666
+        ```
 
-    ---
+        ---
+
+- 案例Ex12_06A
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module Box;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height);
+
+            double volume();
+
+        private:
+            double m_length{ 1.0 };
+            double m_width{ 1.0 };
+            double m_height{ 1.0 };
+        };
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        //Box.cpp
+        module Box;
+        import <iostream>;
+
+        Box::Box(double length, double width, double height)
+            : m_length{ length }, m_width{ width }, m_height{ height }
+        {
+            std::cout << "Box constructor called." << std::endl;
+        }
+
+        double Box::volume()
+        {
+            return m_length * m_width * m_height;
+        }
+        ```
+
+    - Ex12_06A.cpp
+
+        ```cpp
+        //Ex12_06A.cpp
+        import <iostream>;
+        import Box;
+
+        int main()
+        {
+            Box myBox{ 6.0, 6.0, 18.5 };
+            std::cout << "Volume of the first Box object is " 
+                << myBox.volume() << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructor called.
+        Volume of the first Box object is 666 
+        ```
+
+        ---
+
+- 案例Ex12_06B
+    - Box.cppm
+
+        ```cpp
+        //Box.cppm
+        export module Box;
+        import<iostream>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{ length }, m_width{ width }, m_height{ height }
+            {
+                std::cout << "Box constructor called." << std::endl;
+            }
+
+            double volume()
+            {
+                return m_length * m_width * m_height;
+            }
+
+        private:
+            double m_length{ 1.0 };
+            double m_width{ 1.0 };
+            double m_height{ 1.0 };
+        };
+        ```
+
+    - Ex12_06B.cpp
+
+        ```cpp
+        //Ex12_06B.cpp
+        import <iostream>;
+        import Box;
+
+        int main()
+        {
+            Box myBox{ 6.0, 6.0, 18.5 };
+            std::cout << "Volume of the first Box object is " << myBox.volume() 
+                << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructor called.
+        Volume of the first Box object is 666 
+        ```
+
+        ---
+
+- 总结：在模块接口中声明并定义的类，其成员函数在类外定义（案例Ex12_06）和类内定义（案例Ex12_06B），甚至在模块实现文件中定义（案例Ex12_06A）都是可以的。类的完整定义必须在模块接口文件中（.cppm），这样其他模块才能看到完整的类型信息。成员函数的定义可以分离到实现文件中（.cpp），但类本身必须在接口中定义完整。

@@ -85,7 +85,7 @@
                 "-c",
                 "${file}",
                 "-o",
-                "${fileDirname}\\build\\${fileBasenameNoExtension}.o"
+                "${fileDirname}\\build\\${fileBasename}.o"
             ],
             "dependsOn": [
                 "create build dir"
