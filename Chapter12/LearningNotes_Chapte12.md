@@ -676,4 +676,312 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
     {}
     ```
 
-- 通常，不应该自己编写这样的副本构造函数，编译器提供的默认副本构造函数就足够了
+- 通常，不应该自己编写这样的副本构造函数，编译器提供的默认副本构造函数就足够了。但是构造函数有指针的情况下就必须要自定义副本构造函数，否则会导致编译错误！
+
+- 案例Ex12_05A
+
+    ```cpp
+    import <iostream>;
+
+    class Box
+    {
+    public:
+        Box() = default;
+        Box(double length, double width, double height);
+        Box(const Box &box);
+        explicit Box(double side);
+
+        double volume();
+
+    private:
+        double m_length{1.0};
+        double m_width{1.0};
+        double m_height{1.0};
+    };
+
+    Box::Box(const Box &box)
+        : m_length{box.m_length}, m_width{box.m_width}, m_height{box.m_height}
+    {
+        std::cout << "Copy constructor called." << std::endl;
+    }
+
+    int main()
+    {
+        Box box1{2.0, 3.0, 4.0};
+        Box box2{5.0};
+        std::cout << "box1 volume = " << box1.volume() << std::endl;
+        std::cout << "box2 volume = " << box2.volume() << std::endl;
+
+        Box box3{box2};
+        std::cout << "box3 volume = " << box3.volume() << std::endl;
+    }
+
+    Box::Box(double length, double width, double height)
+        : m_length{length}, m_width{width}, m_height{height}
+    {
+        std::cout << "Box constructor 1 called." << std::endl;
+    }
+
+    double Box::volume()
+    {
+        return m_length * m_width * m_height;
+    }
+
+    Box::Box(double side) : Box{side, side, side}
+    {
+        std::cout << "Box constructor 2 called." << std::endl;
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Box constructor 1 called.
+    Box constructor 1 called.
+    Box constructor 2 called.24
+    box2 volume = 125 
+    Copy constructor called.
+    box3 volume = 125
+    ```
+
+    ---
+
+    - **拓展：副本构造函数演示案例**
+
+        以下代码演示了副本构造函数的工作原理、浅拷贝问题及深拷贝解决方案：
+
+        ```cpp
+        #include <iostream>
+        #include <cstring>
+
+        // 演示1：简单的盒子类（没有指针成员）
+        class Box {
+        public:
+            double length{1.0};
+            double width{1.0};
+            double height{1.0};
+            
+            Box(double l, double w, double h) : length(l), width(w), height(h) {
+                std::cout << "构造函数: 创建盒子 " << this << std::endl;
+            }
+            
+            // 自定义副本构造函数（const引用参数）
+            Box(const Box& other) 
+                : length(other.length), width(other.width), height(other.height)
+                {
+                std::cout << "副本构造函数: 从 " << &other << " 复制到 " << this << std::endl;
+            }
+            
+            double volume() const {
+                return length * width * height;
+            }
+        };
+
+        // 演示2：有指针成员的类（浅拷贝问题）
+        class StringBad {
+        private:
+            char* str;
+        public:
+            StringBad(const char* s) {
+                str = new char[std::strlen(s) + 1];
+                std::strcpy(str, s);
+                std::cout << "构造函数: 创建字符串 " << str << " (" << this << ")" << std::endl;
+            }
+            
+            // 默认副本构造函数（编译器生成）会简单复制指针
+            // 这会导致两个对象指向同一块内存！
+            
+            ~StringBad() {
+                std::cout << "析构函数: 销毁字符串 " << str << " (" << this << ")" << std::endl;
+                delete[] str;
+            }
+            
+            void print() const {
+                std::cout << str << std::endl;
+            }
+        };
+
+        // 演示3：有指针成员但实现了深拷贝的类
+        class StringGood {
+        private:
+            char* str;
+        public:
+            StringGood(const char* s) {
+                str = new char[std::strlen(s) + 1];
+                std::strcpy(str, s);
+                std::cout << "构造函数: 创建字符串 " << str << " (" << this << ")" << std::endl;
+            }
+            
+            // 自定义副本构造函数 - 深拷贝
+            StringGood(const StringGood& other) {
+                str = new char[std::strlen(other.str) + 1];  // 分配新内存
+                std::strcpy(str, other.str);                 // 复制内容
+                std::cout << "副本构造函数: 深拷贝 " << other.str << " 到 " << this << std::endl;
+            }
+            
+            ~StringGood() {
+                std::cout << "析构函数: 销毁字符串 " << str << " (" << this << ")" << std::endl;
+                delete[] str;
+            }
+            
+            void print() const {
+                std::cout << str << std::endl;
+            }
+        };
+
+        void test_box() {
+            std::cout << "\n=== 测试1: 简单盒子类 ===" << std::endl;
+            Box box1{2.0, 3.0, 4.0};
+            Box box2 = box1;  // 调用副本构造函数
+            std::cout << "box1体积: " << box1.volume() << std::endl;
+            std::cout << "box2体积: " << box2.volume() << std::endl;
+        }
+
+        void test_string_bad() {
+            std::cout << "\n=== 测试2: 有指针但没有副本构造函数（浅拷贝问题）===" << std::endl;
+            StringBad str1{"Hello"};
+            StringBad str2 = str1;  // 编译器默认副本构造函数 - 只复制指针！
+            
+            str1.print();
+            str2.print();
+            
+            // 注意：程序结束时会崩溃，因为两个对象指向同一块内存，会被delete两次
+        }
+
+        void test_string_good() {
+            std::cout << "\n=== 测试3: 有指针且实现了深拷贝 ===" << std::endl;
+            StringGood str1{"World"};
+            StringGood str2 = str1;  // 调用自定义副本构造函数 - 深拷贝
+            
+            str1.print();
+            str2.print();
+        }
+
+        int main() {
+            test_box();
+            // test_string_bad();  // 取消注释会崩溃！
+            test_string_good();
+            
+            return 0;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        === 测试1: 简单盒子类 ===
+        构造函数: 创建盒子 0x5ffe20
+        副本构造函数: 从 0x5ffe20 复制到 0x5ffe00
+        box1体积: 24
+        box2体积: 24
+
+        === 测试3: 有指针且实现了深拷贝 ===
+        构造函数: 创建字符串 World (0x5ffe38)
+        副本构造函数: 深拷贝 World 到 0x5ffe30
+        World
+        World
+        析构函数: 销毁字符串 World (0x5ffe30)
+        析构函数: 销毁字符串 World (0x5ffe38)
+        ```
+
+        ---
+
+    - 重点须知
+
+        - Q1：为什么副本构造函数必须用 `const` 引用参数？
+
+            - **按值传递的问题**：如果参数是 `Box box`，调用 `Box box2 = box1` 时需要先把 `box1` 复制给
+  参数 `box`，而复制参数又需要调用副本构造函数，形成**无限递归**！
+            - **引用传递的优势**：引用只是传递对象的地址，不需要复制对象，完美避免了递归问题。
+            - **`const` 的作用**：保证不会修改源对象，符合"复制"的语义。
+
+        - Q2：每个类都必须有副本构造函数吗？
+
+            | 情况 | 是否有副本构造函数？ |
+            | ---- | ------------------ |
+            | 默认情况 | ✅ 编译器自动生成 |
+            | 显式定义了移动构造/赋值 | ❌ 编译器不会生成 |
+            | 显式删除副本构造函数 | ❌ 被禁用 |
+            | 有未初始化的引用成员 | ❌ 编译器无法生成 |
+
+            - **不是必须有**副本构造函数
+            - 如果没有，对象就**不能被复制**（无法按值传递、返回或赋值）
+            - **禁用副本构造函数的场景**：管理独占资源的类（如文件句柄）、单例类等
+
+        - Q3：什么时候需要自己编写副本构造函数？
+
+            | 情况 | 是否需要自定义？ |
+            | ---- | -------------- |
+            | 类只有基本类型成员（int, double等） | ❌ 不需要，编译器默认的就够了 |
+            | 类有指针成员，且指向堆内存 | ✅ **必须写！** 否则会浅拷贝导致崩溃 |
+            | 类管理其他资源（文件句柄、网络连接等） | ✅ 需要写 |
+
+        - 核心要点：
+            - 现代 C++ 推荐使用 `std::string`、`std::vector` 等标准库类型，它们已正确实现深拷贝
+            - 日常编程中很少需要自己写副本构造函数，但必须理解其原理以避免内存错误
+
+**2.删除副本构造函数**  
+
+- 通过在类定义中向其声明添加`=delete;`，就可以指示编译器不生成副本构造函数
+
+    ```cpp
+    class Box
+    {
+        public:
+            Box()=default;
+            Box(double length, double width, double height);
+            Box(const Box& box) = delete;   //  Prohibit copy construction
+
+            //Reset of the class as always
+    };
+    ```
+
+- 如果类的任何一个成员变量有一个`deleted` 或`private`副本构造函数，那么该类的默认副本构造函数会自动地隐式删除。实际上，即使是显式的默认副本构造函数（可以使用`=default;`定义）也会被删除
+
+**3.定义模块中的类**  
+
+- 案例Ex12_06
+    - Box.cppm
+
+    ```cpp
+    // Ex12_06.cpp
+    import <iostream>;
+    import box;
+
+    int main()
+    {
+        Box myBox{6.0, 6.0, 18.5};
+        std::cout << "Volume of the first Box object is " << myBox.volume() 
+            << std::endl;
+    }
+    ```
+
+    - Ex12_06.cpp
+
+    ```cpp
+    // Ex12_06.cpp
+    import <iostream>;
+    import box;
+
+    int main()
+    {
+        Box myBox{6.0, 6.0, 18.5};
+        std::cout << "Volume of the first Box object is " << myBox.volume() 
+            << std::endl;
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    Box constructor called.
+    Volume of the first Box object is 666
+    ```
+
+    ---

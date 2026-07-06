@@ -88,8 +88,7 @@
                 "${fileDirname}\\build\\${fileBasenameNoExtension}.o"
             ],
             "dependsOn": [
-                "create build dir",
-                "clean build"
+                "create build dir"
             ],
             "group": "build",
             "problemMatcher": [
