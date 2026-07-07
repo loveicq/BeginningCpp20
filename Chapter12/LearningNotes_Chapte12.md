@@ -1351,6 +1351,259 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 案例Ex12_08A
     - Box.cppm
 
-```cpp
+        ```cpp
+        // Box.cppm
+        export module Box;
 
-```
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height);
+
+            double volume();
+
+            double getLength() { return m_length; }
+            double getWidth() { return m_width; }
+            double getHeight() { return m_height; }
+
+            Box& setLength(double length);
+            Box& setWidth(double width);
+            Box& setHeight(double height);
+
+        private:
+            double m_length;
+            double m_width;
+            double m_height;
+        };
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        // Box.cpp
+        module Box;
+        import <iostream>;
+
+        Box::Box(double length, double width, double height)
+            : m_length{length}, m_width{width}, m_height{height}
+        {
+            std::cout << "Box constructor called." << std::endl;
+        }
+
+        double Box::volume()
+        {
+            return m_length * m_width * m_height;
+        }
+
+        Box &Box::setLength(double length)
+        {
+            if (length > 0)
+                m_length = length;
+            return *this;
+        }
+        Box &Box::setWidth(double width)
+        {
+            if (width > 0)
+                m_width = width;
+            return *this;
+        }
+        Box &Box::setHeight(double height)
+        {
+            if (height > 0)
+                m_height = height;
+            return *this;
+        }
+
+        ```
+
+    - Ex12_08A.cpp
+
+        ```cpp
+        // Ex12_08A.cpp
+        import <iostream>;
+        import Box;
+
+        int main()
+        {
+            Box myBox{3.0, 4.0, 5.0};
+
+            std::cout << "myBox dimensions are "
+                    << myBox.getLength()
+                    << " by " << myBox.getWidth()
+                    << " by " << myBox.getHeight()
+                    << std::endl;
+
+            myBox.setLength(-20.0).setWidth(40.0).setHeight(10.0);
+
+            std::cout << "myBox dimensions are now "
+                    << myBox.getLength()
+                    << " by " << myBox.getWidth()
+                    << " by " << myBox.getHeight()
+                    << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructor called.
+        myBox dimensions are 3 by 4 by 5
+        myBox dimensions are now 3 by 40 by 10  
+        ```
+
+        ---
+
+    - 链式调用，重点在于声明函数时是`Box&`，而函数定义时返回解引用`return *this;`
+    - 重点注意，一般使用引用返回Box&而不是指针Box*，因为：
+        - 更安全：不会有空指针问题
+        - 更直观：语法上和普通对象调用一致
+        - 效率更高：不需要额外的指针解引用
+    - 引用与指针的区别：  
+
+        | 操作符 | 使用场景 | 含义 | 备注 |
+        | --- | --- | --- | --- |
+        | . | 对象或引用 | 直接访问对象的成员 | 引用相当于对象（即变量）的别名，访问对象成员直接用"." |
+        | -> | 指针 | 解引用指针后访问成员（等价于 (*p).） | 对象（即变量）指针须解引用才能访问成员 |
+
+## 12.7 const对象和const成员函数
+
+- 类类型的const变量称为**const对象**，构成const对象状态的任何成员变量都不能被修改  
+`const Box myBox{3.0, 4.0, 5.0}; //注意const关键字`
+- 当通过const指针或const引用访问对象时，具有与直接访问const对象相同的限制  
+如`void printBox(const Box& box);`，这个函数无法修改对象box的成员
+
+### 12.7.1 const成员函数
+
+- const对象既不能调用setter函数，也不能调用getter函数  
+`const Box myBox{3.0, 4.0, 5.0};`，这个myBox对象既不能调用setLength()，也不能调用getLength()，也不能调用volume()函数，这样的对象等于没什么用
+- 要使用const对象，须在定义类的时候把不修改对象的函数指定为const
+- 案例Ex12_09
+
+    - Box.cppm
+
+        ```cpp
+        //Box.cppm
+        export module Box;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height);
+
+            double volume() const;
+
+            double getLength() const;
+            double getWidth() const;
+            double getHeight() const;
+
+            void setLength(double length);
+            void setWidth(double width);
+            void setHeight(double height);
+
+        private:
+            double m_length{ 1.0 };
+            double m_width{ 1.0 };
+            double m_height{ 1.0 };
+        };
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        //Box.cpp
+        module Box;
+        import <iostream>;
+
+        Box::Box(double length, double width, double height)
+            : m_length{ length }, m_width{ width }, m_height{ height }
+        {
+            std::cout << "Box constructor called." << std::endl;
+        }
+
+        double Box::volume() const
+        {
+            return m_length * m_width * m_height;
+        }
+
+        double Box::getLength() const
+        {
+            return m_length;
+        }
+
+        double Box::getWidth() const
+        {
+            return m_width;
+        }
+
+        double Box::getHeight() const
+        {
+            return m_height;
+        }
+
+        void Box::setLength(double length)
+        {
+            if (length > 0)
+                m_length = length;
+        }
+
+        void Box::setWidth(double width)
+        {
+            if (width > 0)
+                m_width = width;
+        }
+
+        void Box::setHeight(double height)
+        {
+            if (height > 0)
+                m_height = height;
+        }
+        ```
+
+    - Ex12_09.cpp
+
+        ```cpp
+        //Ex12_09.cpp
+        import <iostream>;
+        import Box;
+
+        int main()
+        {
+            const Box myBox{ 3.0, 4.0, 5.0 };
+
+            std::cout << "myBox dimensions are " << myBox.getLength()
+                << " by " << myBox.getWidth()
+                << " by " << myBox.getHeight()
+                << std::endl;
+
+            //由于myBox对象是const对象，而下面三个函数声明时都没有const，所以都无法调用，编译不能通过
+            // myBox.setLength(-20.0);
+            // myBox.setWidth(40.0);
+            // myBox.setHeight(10.0);
+
+            std::cout << "myBox dimensions are " << myBox.getLength()
+                << " by " << myBox.getWidth()
+                << " by " << myBox.getHeight()
+                << std::endl;
+
+            std::cout << "myBox's volume is " << myBox.volume() << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructor called.
+        myBox dimensions are 3 by 4 by 5
+        myBox dimensions are 3 by 4 by 5
+        myBox's volume is 60 
+        ```
+
+        ---
+
+- 对于const对象，只能调用const成员函数，因此，应该将不修改对象的所有成员函数指定为const。注意，const是在函数名的小括号后面！

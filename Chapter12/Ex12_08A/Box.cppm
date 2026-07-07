@@ -9,13 +9,13 @@ public:
 
     double volume();
 
-    double getLength();
-    double getWidth();
-    double getHeight();
+    double getLength() { return m_length; }
+    double getWidth() { return m_width; }
+    double getHeight() { return m_height; }
 
-    Box &setLength(double length);
-    Box &setWidth(double width);
-    Box &setHeight(double height);
+    Box& setLength(double length);
+    Box& setWidth(double width);
+    Box& setHeight(double height);
 
 private:
     double m_length;
