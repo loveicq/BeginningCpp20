@@ -1473,11 +1473,12 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 类类型的const变量称为**const对象**，构成const对象状态的任何成员变量都不能被修改  
 `const Box myBox{3.0, 4.0, 5.0}; //注意const关键字`
 - 当通过const指针或const引用访问对象时，具有与直接访问const对象相同的限制  
-如`void printBox(const Box& box);`，这个函数无法修改对象box的成员
+    - `const Box* boxPointer = &myBox;`，这个boxPointer指针无法修改myBox对象的任何成员
+    - `void printBox(const Box& box);`，这个printBox函数无法修改box对象的任何成员
 
 ### 12.7.1 const成员函数
 
-- const对象既不能调用setter函数，也不能调用getter函数  
+- 按照Ex12_07中的Box类定义，const对象既不能调用setter函数，也不能调用getter函数  
 `const Box myBox{3.0, 4.0, 5.0};`，这个myBox对象既不能调用setLength()，也不能调用getLength()，也不能调用volume()函数，这样的对象等于没什么用
 - 要使用const对象，须在定义类的时候把不修改对象的函数指定为const
 - 案例Ex12_09
