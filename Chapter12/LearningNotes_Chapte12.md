@@ -1128,3 +1128,229 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ---
 
 - 总结：在模块接口中声明并定义的类，其成员函数在类外定义（案例Ex12_06）和类内定义（案例Ex12_06B），甚至在模块实现文件中定义（案例Ex12_06A）都是可以的。类的完整定义必须在模块接口文件中（.cppm），这样其他模块才能看到完整的类型信息。成员函数的定义可以分离到实现文件中（.cpp），但类本身必须在接口中定义完整。
+
+## 12.5 访问私有类成员
+
+- 在类中只需要添加成员函数(public)，就可以访问私有成员变量的值
+- 提取成员变量的值的函数通常被称为访问器函数
+- 允许修改成员变量的成员函数常称为更改器成员函数
+- 按照流行约定，访问成员变量m_member的成员的函数常被命名为getMember()，更新该成员变量的函数被命名为setMember()。因此，这种成员函数常被简单地称为getter和setter。有一个例外，bool类型的成员变量的访问器常被命名为isMember()。布尔成员变量m_valid的getter常被命名为isValid()而不是getValid()
+- 案例Ex12_07
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module Box;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height);
+
+            double volume();
+
+            double getLength() { return m_length; }
+            double getWidth() { return m_width; }
+            double getHeight() { return m_height; }
+
+            void setLength(double length)
+            {
+                if (length > 0)
+                    m_length = length;
+            }
+            void setWidth(double width)
+            {
+                if (width > 0)
+                    m_width = width;
+            }
+            void setHeight(double height)
+            {
+                if (height > 0)
+                    m_height = height;
+            }
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        // Box.cpp
+        module Box;
+        import <iostream>;
+
+        Box::Box(double length, double width, double height)
+            : m_length{length}, m_width{width}, m_height{height}
+        {
+            std::cout << "Box constructor is called." << std::endl;
+        }
+
+        double Box::volume()
+        {
+            return m_length * m_width * m_height;
+        }
+        ```
+
+    - Ex12_07.cpp
+
+        ```cpp
+        // Ex12_07.cpp
+        import <iostream>;
+        import Box;
+
+        int main()
+        {
+            Box myBox{3.0, 4.0, 5.0};
+            std::cout << "myBox dimensions are " << myBox.getLength()
+                    << " by " << myBox.getWidth()
+                    << " by " << myBox.getHeight() << std::endl;
+
+            myBox.setLength(-20.0);
+            myBox.setWidth(40.0);
+            myBox.setHeight(10.0);
+
+            std::cout << "myBox dimensions are now " << myBox.getLength()
+                    << " by " << myBox.getWidth()
+                    << " by " << myBox.getHeight() << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructor is called.
+        myBox dimensions are 3 by 4 by 5
+        myBox dimensions are now 3 by 40 by 10
+        ```
+
+        ---
+
+## 12.6 this指针
+
+- 在执行任何成员函数时，该成员函数都会自动包含一个隐藏的指针，称为this指针，该指针包含调用该成员函数的对象的地址
+- 在执行volume()函数的过程中访问成员变量`m_length`，该成员变量就表示为`this->m_length`，这是完全限定的对象成员的引用
+
+**从函数中返回this指针**  
+
+- 可以从类对象函数成员返回this指针
+- 案例Ex12_08
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module Box;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height);
+
+            double volume();
+
+            double getLength() { return m_length; }
+            double getWidth() { return m_width; }
+            double getHeight() { return m_height; }
+
+            Box *setLength(double length);
+            Box *setWidth(double width);
+            Box *setHeight(double height);
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        // Box.cpp
+        module Box;
+        import <iostream>;
+
+        Box::Box(double length, double width, double height)
+            : m_length{length}, m_width{width}, m_height{height}
+        {
+            std::cout << "Box constructor is called." << std::endl;
+        }
+
+        double Box::volume()
+        {
+            return m_length * m_width * m_height;
+        }
+
+        Box *Box::setLength(double length)
+        {
+            if (length > 0)
+                m_length = length;
+            return this;
+        }
+        Box *Box::setWidth(double width)
+        {
+            if (width > 0)
+                m_width = width;
+            return this;
+        }
+        Box *Box::setHeight(double height)
+        {
+            if (height > 0)
+                m_height = height;
+            return this;
+        }
+        ```
+
+    - Ex12_08.cpp
+
+        ```cpp
+        // Ex12_08.cpp
+        import <iostream>;
+        import Box;
+
+        int main()
+        {
+            Box myBox{3.0, 4.0, 5.0};
+
+            std::cout << "myBox dimensions are "
+                    << myBox.getLength()
+                    << " by " << myBox.getWidth()
+                    << " by " << myBox.getHeight()
+                    << std::endl;
+
+            myBox.setLength(-20.0)->setWidth(40.0)->setHeight(10.0);
+
+            std::cout << "myBox dimensions are now "
+                    << myBox.getLength()
+                    << " by " << myBox.getWidth()
+                    << " by " << myBox.getHeight()
+                    << std::endl;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructor is called.
+        myBox dimensions are 3 by 4 by 5
+        myBox dimensions are now 3 by 40 by 10  
+        ```
+
+        ---
+
+- 可以从类对象函数成员返回引用
+- 案例Ex12_08A
+    - Box.cppm
+
+```cpp
+
+```
