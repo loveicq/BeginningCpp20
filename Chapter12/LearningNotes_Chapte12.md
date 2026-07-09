@@ -1608,3 +1608,55 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ---
 
 - 对于const对象，只能调用const成员函数，因此，应该将不修改对象的所有成员函数指定为const。注意，const是在函数名的小括号后面！
+
+### 12.7.2 const正确性
+
+- const对象只能调用const函数
+- 将成员函数指定为const，实际上会使该成员函数的this指针成为const指针
+- 在const成员函数内不能调用任何非const成员函数，但可以调用const成员函数
+
+### 12.7.3 重载const
+
+- 可以用const版本来重载一个非const版本的成员函数。这种重载有很用，对于返回某个对象封装的（部分）内部数据的指针或引用的函数，常常要进行重载
+
+    ```cpp
+    export class Box
+    {
+        public:
+            //Rest of the class definition as before
+
+            // 非 const 对象调用：返回引用，允许修改
+            double& length()    {return m_length;};
+            double& width() {return m_width;};
+            double& height()    {return m_height;};
+
+            //重载const函数，注意，引用必须加const限定
+            const double& length()   const   {return m_length;};
+            const double& width() const   {return m_width;};
+            const double& height()    const   {return m_height;};
+
+            // const 对象调用：返回值（副本），禁止修改
+            double length()   const   {return m_length;};
+            double width() const   {return m_width;};
+            double height()    const   {return m_height;};
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+    }
+    ```
+
+- 多数情况下不推荐用重载const的方式代替setter函数和getter函数
+    - 不符合常规做法  
+        `box.length() = 2;`没有`box.setLength(2);`清晰
+    - 添加public成员函数来返回对private成员变量的引用时，实际上就抛弃了数据隐藏的大部分优势
+- 在某些情形中，还是得用重载const，例如重载数组访问运算符
+
+### 12.7.4 常量的强制转换
+
+- `const_cast<>()`运算符
+
+    - `const_cast<Type*>(expression) //expression可以为const Type*或Type*`
+    - `const_cast<Type&>(expression)    //expression可以为const Type&、Type或Type&`
+- 几乎总是不建议使用`const_cast<>()`运算符，意外修改const对象很可能导致bug
