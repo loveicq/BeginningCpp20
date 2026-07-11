@@ -1647,6 +1647,105 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
     }
     ```
 
+- 案例Ex12_10
+    - Box.cppm
+
+        ```cpp
+        //Box.cppm
+        export module Box;
+        import <iostream>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height);
+
+            double volume() const;  //计算盒子体积的Const函数
+
+            //非const重载（返回对尺寸变量的引用）
+            double& length() { std::cout << "Non-const overload called.\n";
+                return m_length; }
+            double& width() { std::cout << "Non-const overload called.\n";
+                return m_width; }
+            double& height() { std::cout << "Non-const overload called.\n";
+                return m_height; }
+
+            // Const重载（返回对Const变量的引用）
+            const double& length() const 
+                { std::cout << "Const overload called.\n";return m_length; }
+            const double& width() const 
+                { std::cout << "Const overload called.\n";return m_width; }
+            const double& height() const 
+                { std::cout << "Const overload called.\n";return m_height; }
+
+            //尝试返回对const函数成员变量的非const引用
+            // double& length() const { return m_length; }    //不允许编译！
+            // double& width() const { return m_width; }
+            // double& height() const { return m_height; }
+
+        private:
+            double m_length{ 1.0 };
+            double m_width{ 1.0 };
+            double m_height{ 1.0 };
+        };
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        //Box.cpp
+        module Box;
+        import <iostream>;
+
+        Box::Box(double length, double width, double height)
+            : m_length{ length }, m_width{ width }, m_height{ height }
+        {
+            std::cout << "Box constructor called." << std::endl;
+        }
+
+        double Box::volume() const
+        {
+            return m_length * m_width * m_height;
+        }
+        ```
+
+    - Ex12_10.cpp
+
+        ```cpp
+        //Ex12_10.cpp
+        //重载const
+        import <iostream>;
+        import Box;
+
+        int main()
+        {
+            const Box constBox{ 1,2,3 };
+            //constBox.length() = 2;    //不编译：好！
+            std::cout << constBox.length() << std::endl;
+
+            Box nonConstBox{ 3,2,1 };
+            nonConstBox.length() *= 2;
+            std::cout << nonConstBox.length() << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructor called.
+        Const overload called.
+        1
+        Box constructor called.
+        Non-const overload called.
+        Non-const overload called.
+        6 
+        ```
+
+        ---
+
 - 多数情况下不推荐用重载const的方式代替setter函数和getter函数
     - 不符合常规做法  
         `box.length() = 2;`没有`box.setLength(2);`清晰
@@ -1660,3 +1759,271 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
     - `const_cast<Type*>(expression) //expression可以为const Type*或Type*`
     - `const_cast<Type&>(expression)    //expression可以为const Type&、Type或Type&`
 - 几乎总是不建议使用`const_cast<>()`运算符，意外修改const对象很可能导致bug
+
+### 12.7.5 使用mutable关键字
+
+- `mutable`可以让const类对象成员修改某个成员的值，任何成员函数（包括const和非const成员函数）总是可以修改用mutable声明的成员变量
+- 应该很少需要使用mutable成员变量。如果需要在const函数内修改一个对象，则很可能不应该将该函数声明为const
+- mutable成员变量的典型用途包括调试或日志记录、缓存和线程同步成员
+- 案例Ex12_11
+    - Box.cppm
+
+        ```cpp
+        //Box.cppm
+        export module Box;
+
+        export class Box
+        {
+        public:
+            //构造函数
+            Box() = default;
+            Box(double length, double width, double height);
+
+            double volume() const;  //计算盒子体积的函数
+            void printVolume() const;   ////输出盒子的体积（const!）
+
+            //提供访问成员变量值的函数（都是const!）
+            double getLength() const { return m_length; }
+            double getWidth()   const { return m_width; }
+            double getHeight() const { return m_height; }
+
+            //设置成员变量值的函数（不是const!）
+            void setLength(double length) { if (length > 0) m_length = length; }
+            void setWidth(double width) { if (width > 0)    m_width = width; }
+            void setHeight(double height) 
+                { if (height > 0)  m_height = height; }
+
+        private:
+            double m_length{ 1.0 };
+            double m_width{ 1.0 };
+            double m_height{ 1.0 };
+            mutable unsigned m_count{}; //计算调用printVolume（）的次数
+        };
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        //Box.cpp
+        module Box;
+        import <iostream>;
+
+        //构造函数定义
+        Box::Box(double length, double width, double height)
+        : m_length{length}, m_width{width}, m_height{height}
+        {
+            std::cout << "Box constructor called." << std::endl;
+        }
+
+        // Const成员函数定义
+        double Box::volume() const
+        {
+            return m_length * m_width * m_height;
+        }
+
+        //修改const成员函数的可变成员变量
+        void Box::printVolume() const
+        {
+            std::cout << "The volume of this box is " << volume() << std::endl;
+            std::cout << "printVolume has been called " << ++m_count 
+                << " time(s)" << std::endl;
+        }
+        ```
+
+    - Ex12_11.cpp
+
+        ```cpp
+        //Ex12_11.cpp
+        import <iostream>;
+        import Box;
+
+        int main()
+        {
+            const Box myBox{ 3.0,4.0,5.0 };   //const对象
+
+            std::cout << "myBox dimensions are " << myBox.getLength()
+                << " by " << myBox.getWidth()
+                << " by " << myBox.getHeight()
+                << std::endl;
+
+            myBox.printVolume();
+            myBox.printVolume();
+            myBox.printVolume();
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructor called.
+        myBox dimensions are 3 by 4 by 5
+        The volume of this box is 60
+        printVolume has been called 1 time(s)
+        The volume of this box is 60
+        printVolume has been called 2 time(s)
+        The volume of this box is 60
+        printVolume has been called 3 time(s)
+        ```
+
+        ---
+
+## 12.8 友元
+
+声明友元破坏了面向对象编程的一个基石：数据隐藏。因此，只有在绝对有必要时，才应该使用友元，而有这种需求的场合并不多见。
+
+- 友元函数：把一个函数指定为类的友元
+- 友元类：把整个类指定为另一个类的友元
+
+### 类的友元函数
+
+- 为了把函数看作类的友元函数，必须在类定义中用关键字`friend`来声明它。类决定了它的友元，无法在类定义的外部将函数设置为类的友元函数。类的友元函数可以是一个全局函数，也可以是另一个类的成员。但是，函数不能是包含它的类的友元函数，因此，访问修饰符不能被应用于类的友元函数
+- 案例Ex12_12
+    - box.cppm
+
+        ```cpp
+        //box.cppm
+        export module box;
+
+        export class Box
+        {
+        public:
+            Box() :Box{ 1.0,1.0,1.0 } {}    // 委托默认构造函数
+            Box(double length, double width, double height);
+
+            double volume() const;  // 计算盒子体积的函数
+
+            friend double surfaceArea(const Box& box);  // 用于表面积计算的友元函数
+
+        private:
+            double m_length, m_width, m_height;
+        };
+        ```
+
+    - box.cpp
+
+        ```cpp
+        //box.cpp
+        module box;
+
+        import <iostream>;
+
+        // 构造函数定义
+        Box::Box(double length, double width, double height)
+            : m_length{ length }, m_width{ width }, m_height{ height }
+        {
+            std::cout << "Box constructor called." << std::endl;
+        }
+
+        // 常量成员函数定义
+        double Box::volume() const
+        {
+            return m_length * m_width * m_height;
+        }
+
+        double surfaceArea(const Box& box)
+        {
+            return 2.0 * (box.m_length * box.m_width + box.m_length * box.m_height
+                + box.m_width * box.m_height);
+        }
+        ```
+
+    - Ex12_12.cpp
+
+        ```cpp
+        //Ex12_12.cpp
+        // Using a friend function of a class
+
+        import <iostream>;
+        import <memory>;
+        import box;
+
+        int main()
+        {
+            Box box1{ 2.2,1.1,0.5 };
+            Box box2;
+            auto box3{ std::make_unique<Box>(15.0,20.0,8.0) };
+
+            std::cout << "Volume of box1 = " << box1.volume() << std::endl;
+            std::cout << "Surface area of box1 = " << surfaceArea(box1) << std::endl;
+
+            std::cout << "Volume of box2 = " << box2.volume() << std::endl;
+            std::cout << "Surface area of box2 = " << surfaceArea(box2) << std::endl;
+
+            std::cout << "Volume of box3 = " << box3->volume() << std::endl;
+            std::cout << "Surface area of box3 = " << surfaceArea(*box3) << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructor called.
+        Box constructor called.
+        Box constructor called.
+        Volume of box1 = 1.21
+        Surface area of box1 = 8.14
+        Volume of box2 = 1
+        Surface area of box2 = 6
+        Volume of box3 = 2400
+        Surface area of box3 = 1160
+        ```
+
+        ---
+
+- 延伸阅读——友元函数总结
+    - 用途：突破封装边界，允许特定外部函数或类访问私有成员
+    - 三种友元关系：
+        - 类 A 的成员函数可以是类 B 的友元：
+
+            ```cpp
+            class ClassB;   //前向声明
+            class ClassA { public: void modifyB(ClassB& b); };
+            class ClassB {
+            private: int x = 10;
+            friend void ClassA::modifyB(ClassB& b);  // 声明成员函数为友元
+            };
+            void ClassA::modifyB(ClassB& b) { b.x = 20; }// ✅ 可访问私有成员
+            ```
+
+        - 类 A 可以是类 B 的友元（整个类）：
+
+            ```cpp
+            class ClassB {
+            private: int x = 10;
+            friend class ClassA;  // 声明整个类为友元
+            };
+            class ClassA { 
+            public: 
+                void modifyB(ClassB& b)
+                    { b.x = 20; } };    // ✅ 可以访问 ClassB 的私有成员
+            ```
+
+        - 模块内的自由函数可以是类的友元：
+
+            ```cpp
+            export module box;
+            export class Box {
+            private: double m_length, m_width, m_height;
+
+            // 声明自由函数为友元
+            friend double surfaceArea(const Box& box);
+            };
+            export double surfaceArea(const Box& box) 
+            {  // 同一模块内定义友元函数，也可以放到模块实现文件（.cpp）中
+                return 2.0 * (box.m_length * box.m_width + 
+                                box.m_length * box.m_height + 
+                                box.m_width * box.m_height);
+            }
+            ```
+
+    - C++20 模块规则：友元关系具有模块作用域限制，跨模块无效
+    - 特性：
+        - 友元关系是单向的：A 是 B 的友元 ≠ B 是 A 的友元
+        - 友元关系不传递：A 是 B 的友元，B 是 C 的友元 ≠ A 是 C 的友元
+        - C++20 模块限制：友元关系默认不跨模块边界
+        - 实现位置：友元函数的定义必须在同一模块内才能生效
+    - 使用建议：谨慎使用，明确意图，模块内定义

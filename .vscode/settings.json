@@ -23,7 +23,7 @@
     "C_Cpp.inactiveRegionOpacity": 1.0,
     "files.exclude": {
         "**/node_modules/**": true,
-        "**/*.o": true,
+        "**/*.o": false,
         "**/*.obj": true,
         "**/*.dll": true,
         "**/out/**": true,
