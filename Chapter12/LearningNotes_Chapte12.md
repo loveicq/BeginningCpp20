@@ -2027,3 +2027,125 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         - C++20 模块限制：友元关系默认不跨模块边界
         - 实现位置：友元函数的定义必须在同一模块内才能生效
     - 使用建议：谨慎使用，明确意图，模块内定义
+
+### 12.8.2 友元类
+
+- 可以把整个类声明为另一个类的友元。友元类的所有成员函数都可以不受限制地访问原有类的成员
+
+    ```cpp
+    class Box
+    {
+        //Public members of the class...
+        friend class Carton;
+        //Private members of the class...
+    };
+    ```
+
+- 友元类并不是一种互惠的关系（单向）
+- 类之间的友元关系是不能传递的（不传递）
+
+## 12.9 类的对象数组
+
+类的对象数组的每个元素都由构造函数创建，如果没有指定初始值，编译器会为每个元素调用无参构造函数
+
+- 案例Ex12_13
+    - Box.cppm
+
+        ```cpp
+        //Box.cppm
+        export module box;
+
+        export class Box
+        {
+        public:
+            Box();  //此处不能写成Box()=default;，因为函数定义时有std::...等自定义内容
+            Box(double length, double width, double height);
+            Box(double side);
+            Box(const Box& box);
+
+            double volume() const { return m_length * m_width * m_height; }
+
+        private:
+            double m_length{ 1.0 };
+            double m_width{ 1.0 };
+            double m_height{ 1.0 };
+        };
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        //Box.cpp
+        module box;
+
+        import <iostream>;
+
+        Box::Box(double length, double width, double height)
+            : m_length{ length }, m_width{ width }, m_height{ height }
+        {
+            std::cout << "Box constructor 1 called." << std::endl;
+        }
+
+        Box::Box(double side) : Box{ side,side,side }
+        {
+            std::cout << "Box constructor 2 called." << std::endl;
+        }
+
+        Box::Box()
+        {
+            std::cout << "Default Box constructor called." << std::endl;
+        }
+
+        Box::Box(const Box& box)
+            : m_length{ box.m_length }, m_width{ box.m_width }, 
+                m_height{ box.m_height }
+        {
+            std::cout << "Box copy constructor called." << std::endl;
+        }
+        ```
+
+    - Ex12_13.cpp
+
+        ```cpp
+        //Ex12_13.cpp
+        import <iostream>;
+        import box;
+
+        int main()
+        {
+            const Box box1{ 2.0,3.0,4.0 };
+            Box box2{ 5.0 };
+            std::cout << "box1 volume = " << box1.volume() << std::endl;
+            std::cout << "box2 volume = " << box2.volume() << std::endl;
+            Box box3{ box2 };
+            std::cout << "box3 volume = " << box3.volume() << std::endl;
+
+            std::cout << std::endl;
+
+            Box boxes[6]{ box1,box2,box3,Box{2.0} };    //最后两个函数没有指定初始值，所以编译器调用默认构造函数来创建它们
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructor 1 called.
+        Box constructor 1 called.
+        Box constructor 2 called.
+        box1 volume = 24
+        box2 volume = 125
+        Box copy constructor called.
+        box3 volume = 125
+
+        Box copy constructor called.
+        Box copy constructor called.
+        Box copy constructor called.
+        Box constructor 1 called.
+        Box constructor 2 called.
+        Default Box constructor called.
+        Default Box constructor called.
+        ```
+
+        ---
