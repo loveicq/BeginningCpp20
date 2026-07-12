@@ -2149,3 +2149,130 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ```
 
         ---
+
+## 12.10 类对象大小
+
+- 使用sizeof运算符可以获得类对象的大小
+- 因为内存边界对齐的原因，类对象占用的空间有可能大于各变量实际需要的字节总和
+
+## 12.11 类的静态成员
+
+- 类的成员可以声明为static（static在程序结束之前都有效）
+- 静态成员与类本身绑定在一起，而不是绑定到单独的对象
+
+### 12.11.1 静态成员变量
+
+- 类的静态成员变量可以在**类的范围内**存储数据，这种数据独立于类类型的任何对象，但可以由这些对象访问
+- 可以使用静态成员变量存储类的特定常量，或存储类中对象的一般信息，例如类有多少个对象等  
+`static inline size_t s_object_cont {};`
+- 静态成员一般声明为private，但是也可以声明为public或protected。
+- s_object_count变量还被声明为inline，在类定义和初始化静态成员变量时，必须添加这个额外的inline关键字
+- 案例Ex12_14
+    - Box.cppm
+
+        ```cpp
+        //Box.cppm
+        export module box;
+        import <iostream>;
+
+        export class Box
+        {
+        public:
+            Box();  //默认构造函数
+            Box(double side);   //立方体构造函数
+            Box(const Box& box);    //副本构造函数
+            Box(double length, double width, double height);
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            size_t getObjectCount() const { return s_object_count; }
+        private:
+            double m_length{ 1.0 };
+            double m_width{ 1.0 };
+            double m_height{ 1.0 };
+            static inline size_t s_object_count{};  //创建过的对象总数
+        };
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        //Box.cpp
+        module box;
+        import <iostream>;
+
+        Box::Box()  //默认构造函数
+        {
+            ++s_object_count;
+            std::cout << "Default Box constructor called." << std::endl;
+        }
+        Box::Box(double side) : Box{ side,side,side } //立方体构造函数
+        {
+            // 不要在委托构造函数中增加 s_object_count：
+            // 该计数器已在被委托的构造函数中增加过了！
+            std::cout << "Box constructor 2 called." << std::endl;
+        }
+        Box::Box(const Box& box)    //副本构造函数
+            : m_length{ box.m_length }, m_width{ box.m_width },
+                m_height{ box.m_height }
+        {
+            ++s_object_count;
+            std::cout << "Box copy constructor called." << std::endl;
+        }
+        Box::Box(double length, double width, double height)
+            : m_length{ length }, m_width{ width }, m_height{ height }
+        {
+            ++s_object_count;
+            std::cout << "Box constructor 1 called." << std::endl;
+        }
+        ```
+
+    - Ex12_14.cpp
+
+        ```cpp
+        //Ex12_14.cpp
+        import <iostream>;
+        import box;
+
+        int main()
+        {
+            const Box box1{ 2.0,3.0,4.0 };    // 一个任意尺寸的盒子
+            Box box2{ 5.0 };  // 一个立方体盒子
+            std::cout << "box1 volume = " << box1.volume() << std::endl;
+            std::cout << "box2 volume = " << box2.volume() << std::endl;
+            Box box3{ box2 };
+            std::cout << "box3 volume = " << box3.volume() << std::endl;
+
+            std::cout << std::endl;
+
+            Box boxes[6]{ box1,box2,box3,Box{2.0} };
+
+            std::cout << "\nThere are now " << box1.getObjectCount() << " Box objects.\n";
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructor 1 called.
+        Box constructor 1 called.
+        Box constructor 2 called.
+        box1 volume = 24
+        box2 volume = 125
+        Box copy constructor called.
+        box3 volume = 125
+
+        Box copy constructor called.
+        Box copy constructor called.
+        Box copy constructor called.
+        Box constructor 1 called.
+        Box constructor 2 called.
+        Default Box constructor called.
+        Default Box constructor called.
+
+        There are now 9 Box objects.
+        ```
+
+        ---
