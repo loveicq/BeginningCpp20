@@ -2503,3 +2503,237 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ```
 
         ---
+
+### 12.11.4 类类型的静态成员变量
+
+- 静态成员变量不是类对象的一部分，所以它可以与类具有相同的类型
+    - 静态成员常量声明
+
+        ```cpp
+        class Box
+        {
+            //Rest of the class as before
+            //此处声明包含三参数的构造函数
+
+        private:
+            const static Box s_reference_box;   //Standard reference box
+            // ...
+        };
+        ```
+
+    - 必须在**类的外部**定义和初始化静态成员  
+  `const Box Box::s_reference_box{10.0,10.0,10.0}; //Box构造函数包含三参数`
+    - 注意：static关键字仅用于类定义中的静态成员声明，而不能用于定义静态成员
+    - 类对象的任何静态和非静态成员函数都可以访问s_reference_box，但不能从类的外部访问它，因为它被声明为私有成员
+
+### 12.11.5 静态成员函数
+
+- 静态成员函数独立于任何单个类对象，任何类对象都可以调用静态成员函数。如果静态成员函数是一个公共成员，还可以从类的外部调用。
+- 静态成员函数的一个常见用法是无论是否声明了类的对象，都可以**操作静态成员变量**
+- 如果某个成员函数不访问任何非静态成员变量，则应该声明为静态成员函数
+- 即使没有创建类的对象，也可以调用公共的静态成员函数。声明类中的静态函数只需要使用关键字static即可
+- 调用静态成员函数时，将类名用作限定符  
+`std::cout << "Object count is " << Box::getObjectCount() << std::endl;`
+- 静态成员函数不能是const。因为静态成员函数与类对象无关，所以它没有this指针，也就不能使用const
+
+## 12.12 析构函数
+
+- 如果对类对象应用delete运算符(堆，new的对象，手动释放)，或者处在创建类对象的块末尾(栈，自动释放)，就会释放类对象，就像基本类型的变量一样
+
+    ```cpp
+    #include <iostream>
+    #include <string>
+
+    class MyClass {
+    private:
+        std::string name;
+    public:
+        // 构造函数 - 对象创建时调用
+        MyClass(const std::string& n) : name{n} {
+            std::cout << "[构造] " << name << " 被创建\n";
+        }
+        
+        // 析构函数 - 对象释放时调用
+        ~MyClass() {
+            std::cout << "[析构] " << name << " 被释放\n";
+        }
+    };
+
+    void testFunction() {
+        // 栈上创建对象 - 块作用域结束时自动释放
+        MyClass stackObj("栈上对象");
+        
+        // 堆上创建对象 - 需要手动delete释放
+        MyClass* heapObj = new MyClass("堆上对象");
+        
+        // 使用完堆对象后手动释放
+        delete heapObj;
+    } // 函数结束，栈对象 stackObj 自动释放
+
+    int main() {
+        std::cout << "进入main函数\n";
+        
+        testFunction();
+        
+        std::cout << "离开main函数\n";
+        return 0;
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    进入main函数
+    [构造] 栈上对象 被创建
+    [构造] 堆上对象 被创建
+    [析构] 堆上对象 被释放
+    [析构] 栈上对象 被释放
+    离开main函数
+    ```
+
+    ---
+
+- 释放类对象时，会执行类的一个特殊成员，称为**析构函数**，默认的析构函数：`~ClassName(){}`。
+- 类的析构函数与类同名，但名称前面有一个符号`~`
+- 类的析构函数没有参数，也没有返回类型
+- 如果该定义位于类的外部，析构函数的名称就要加上类名作为前缀  
+`Box::~Box(){}`
+- 如果析构函数的函数体为空，最好使用`default`关键字  
+`Box::~Box()=default; //让编译器生成一个默认的析构函数`
+- 类的析构函数总是在释放对象时自动调用，需要显式调用析构函数的情况很少见，可以忽略不计
+- 案例Ex12_16
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module Box;
+        import <iostream>;
+
+        export class Box
+        {
+        public:
+            Box();
+            Box(double side);
+            Box(const Box &box);
+            Box(double length, double width, double height);
+            ~Box();
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            static size_t getObjectCount() { return s_object_count; }
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+            static inline size_t s_object_count{};
+        };
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        // Box.cpp
+        module Box;
+        import <iostream>;
+
+        Box::Box(double length, double width, double height)
+            : m_length{length}, m_width{width}, m_height{height}
+        {
+            ++s_object_count;
+            std::cout << "Box constructor 1 called." << std::endl;
+        }
+
+        Box::Box(double side) : Box{side, side, side}
+        {
+            // 不要在转发构造函数中增加 s_object_count：
+            // 在被转发的构造函数中已经增加过了！
+            std::cout << "Box constructor 2 called." << std::endl;
+        }
+
+        Box::Box()
+        {
+            ++s_object_count;
+            std::cout << "Default Box constructor called." << std::endl;
+        }
+
+        Box::Box(const Box &box)
+            : m_length{box.m_length}, m_width{box.m_width}, m_height{box.m_height}
+        {
+            ++s_object_count;
+            std::cout << "Box copy constructor called." << std::endl;
+        }
+
+        Box::~Box()
+        {
+            std::cout << "Box destructor called." << std::endl;
+            --s_object_count;
+        }
+        ```
+
+    - Ex12_16.cpp
+
+        ```cpp
+        // Ex12_16.cpp
+        import <iostream>;
+        import <memory>;
+        import Box;
+
+        int main()
+        {
+            std::cout << "There are now " << Box::getObjectCount() 
+                << " Box objects." << std::endl;
+
+            const Box box1{2.0, 3.0, 4.0};
+            Box box2{5.0};
+
+            std::cout << "There are now " << Box::getObjectCount() 
+                << " Box objects." << std::endl;
+
+            for (double d{}; d < 3.0; ++d)
+            {
+                Box box{d, d + 1.0, d + 2.0};
+                std::cout << "Box volume is " << box.volume() << std::endl;
+            }
+
+            std::cout << "There are now " << Box::getObjectCount() 
+                << " Box objects." << std::endl;
+
+            auto pBox{std::make_unique<Box>(1.5, 2.5, 3.5)};
+            std::cout << "Box volume is " << pBox->volume() << std::endl;
+            std::cout << "There are now " << pBox->getObjectCount() 
+                << " Box objects." << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        There are now 0 Box objects.
+        Box constructor 1 called.
+        Box constructor 1 called.
+        Box constructor 2 called.
+        There are now 2 Box objects.
+        Box constructor 1 called.
+        Box volume is 0
+        Box destructor called.
+        Box constructor 1 called.
+        Box volume is 6
+        Box destructor called.
+        Box constructor 1 called.
+        Box volume is 24
+        Box destructor called.
+        There are now 2 Box objects.
+        Box constructor 1 called.
+        Box volume is 13.125
+        There are now 3 Box objects.
+        Box destructor called.
+        Box destructor called.
+        Box destructor called.
+        ```
+
+        ---
