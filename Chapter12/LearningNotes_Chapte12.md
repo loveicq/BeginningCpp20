@@ -1749,7 +1749,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 多数情况下不推荐用重载const的方式代替setter函数和getter函数
     - 不符合常规做法  
         `box.length() = 2;`没有`box.setLength(2);`清晰
-    - 添加public成员函数来返回对private成员变量的引用时，实际上就抛弃了数据隐藏的大部分优势
+    - 添加public成员函数来返回对private成员变量的**引用**时，实际上就抛弃了数据隐藏的大部分优势
 - 在某些情形中，还是得用重载const，例如重载数组访问运算符
 
 ### 12.7.4 常量的强制转换
@@ -2419,3 +2419,87 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 `std::cout << "Object count is " << Box::s_object_count << std::endl;`
 
 ### 12.11.3 静态常量
+
+- 静态成员变量常用于定义常量
+- 常常定义一些公共常量来包含函数参数的边界值或建议的默认值
+- 对关键字static、inline和const的出现没有顺序要求
+- 案例Ex12_15
+    - cylindrical.cppm
+
+        ```cpp
+        // cylindrical.cppm
+        export module cylindrical;
+
+        import <string_view>;
+        import <string>;
+
+        export class cylindricalBox
+        {
+        public:
+            const static inline float s_max_radius{35.0f};
+            const static inline float s_max_height{60.0f};
+            const static inline std::string_view s_default_material{"paperboard"};
+            cylindricalBox(float radius, float height,
+                        std::string_view material = s_default_material);
+            float volume() const;
+
+        private:
+            const static inline float PI{3.141592f};
+
+            float m_radius;
+            float m_height;
+            std::string m_material;
+        };
+        ```
+
+    - cylindrical.cpp
+
+        ```cpp
+        // cylindrical.cpp
+        module cylindrical;
+
+        import <iostream>;
+
+        cylindricalBox::cylindricalBox(float radius, float height, 
+            std::string_view material)
+            : m_radius{radius}, m_height{height}, m_material{material}
+        {
+            std::cout << "Box constructed consisting of " << material;
+            if (material == s_default_material)
+            {
+                std::cout << " (the default material!)";
+            }
+            std::cout << std::endl;
+        }
+
+        float cylindricalBox::volume() const
+        {
+            return PI * m_radius * m_radius * m_height;
+        }
+        ```
+
+    - Ex12_15.cpp
+
+        ```cpp
+        // Ex12_15.cpp
+        import <iostream>;
+        import cylindrical;
+
+        int main()
+        {
+            cylindricalBox bigBox{1.23f, cylindricalBox::s_max_height,
+                                cylindricalBox::s_default_material};
+            std::cout << "The volume of bigBox is " << bigBox.volume() << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box constructed consisting of paperboard (the default material!)  
+        The volume of bigBox is 285.175 
+        ```
+
+        ---
