@@ -2737,3 +2737,9 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ```
 
         ---
+
+## 使用指针作为类成员
+
+- `std::unique_ptr<>`确保不会意外忘记对自由存储区中分配的对象应用delete运算符
+- 当多个对象指向并不时地（甚至并发地）使用同一个对象，并且无法推断出什么时候全部使用完该共享对象时，`std::shared_ptr<>`非常有帮助
+- 总是应该使用智能指针来管理动态分配的对象。这种原则被称为“资源获取即初始化”(**RAII**)（Resource Acquisition Is Initialization）
