@@ -1,3 +1,4 @@
+// SharedBox.cppm
 export module truckload:shared_box;
 
 import <memory>;

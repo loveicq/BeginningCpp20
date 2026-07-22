@@ -45,6 +45,7 @@
                 "string_view",
                 "vector",
                 "algorithm",
+                "format",
                 "memory",
                 "utility",
                 "tuple",
