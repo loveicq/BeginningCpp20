@@ -2738,8 +2738,360 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
         ---
 
-## 使用指针作为类成员
+## 12.13 使用指针作为类成员
 
 - `std::unique_ptr<>`确保不会意外忘记对自由存储区中分配的对象应用delete运算符
 - 当多个对象指向并不时地（甚至并发地）使用同一个对象，并且无法推断出什么时候全部使用完该共享对象时，`std::shared_ptr<>`非常有帮助
 - 总是应该使用智能指针来管理动态分配的对象。这种原则被称为“资源获取即初始化”(**RAII**)（Resource Acquisition Is Initialization）
+- 案例Ex12_17(教材中使用模块分区在vscode和VS中均不能通过编译，故改为无模块分区方式)
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;          // 声明模块 box
+
+        import <iostream>;          // 导入标准库头文件作为模块
+        import <format>;
+
+        export class Box            // 导出 Box 类
+        {
+        public:
+            Box() = default;        // 默认构造函数，使用成员初始值 1.0
+            Box(double length, double width, double height)
+                : m_length{ length }, m_width{ width }, m_height{ height }
+            {
+            }
+
+            double volume() const   // 计算体积
+            {
+                return m_length * m_width * m_height;
+            }
+
+            int compare(const Box& box) const
+            {
+                if (volume() < box.volume())
+                    return -1;
+                if (volume() == box.volume())
+                    return 0;
+                return +1;
+            }
+
+            void listBox() const
+            {
+                // 使用 std::format 格式化输出（C++20 特性）
+                std::cout << std::format("Box({:.1f},{:.1f},{:.1f})",
+                    m_length, m_width, m_height);
+            }
+
+        private:
+            double m_length{ 1.0 };   // 默认尺寸均为 1.0
+            double m_width{ 1.0 };
+            double m_height{ 1.0 };
+        };
+        ```
+
+    - RandomBoxes.cppm
+
+        ```cpp
+        // RandomBoxes.cppm
+        export module box.random;
+        import box;
+        import <random>;            // 随机数库
+        import <functional>;        // std::bind()
+        import <memory>;            // std::make_shared<>(), std::shared_ptr<>
+
+        // 创建一个伪随机数生成器（PRNG），用于生成 [0, max) 之间的随机双精度数
+        auto createUniformPseudoRandomNumberGenerator(double max)
+        {
+            std::random_device seeder;                  // 真随机数生成器，提供种子（速度慢）
+            std::default_random_engine generator{ seeder() };   // 高效的伪随机数引擎
+            std::uniform_real_distribution distribution{ 0.0, max };
+            // 均匀分布 [0, max)
+            // 将生成器和分布绑定成一个可调用对象，每次调用返回一个随机数
+            return std::bind(distribution, generator);
+        }
+
+        export Box randomBox()
+        {
+            const int dimLimit{ 100 };   // 盒子尺寸上限
+            static auto random{ createUniformPseudoRandomNumberGenerator
+                (dimLimit) };
+            // 返回三个随机数作为长、宽、高
+            return { random(), random(), random() };
+        }
+
+        export auto randomSharedBox()
+        {
+            // 用随机 Box 创建一个 shared_ptr
+            return std::make_shared<Box>(randomBox());
+        }
+        ```
+
+    - Truckload.cppm
+
+        ```cpp
+        // Truckload.cppm
+        export module truckload;
+
+        import <memory>;
+        import <vector>;
+        import box;                  // 需要完整的 Box 定义
+
+        export using SharedBox = std::shared_ptr<Box>;   // 导出共享指针类型别名
+
+        class Package;              // 前置声明，隐藏内部链表节点的定义
+
+        export class Truckload      // 导出卡车装载类
+        {
+        public:
+            Truckload() = default;                          // 默认构造函数 - 空卡车
+            Truckload(SharedBox box);                       // 构造函数 - 添加单个箱子
+            Truckload(const std::vector<SharedBox>& boxes); // 构造函数 - 从向量初始化
+            Truckload(const Truckload& src);                // 拷贝构造函数
+
+            ~Truckload(); // 析构函数，负责释放链表
+
+            SharedBox getFirstBox();       // 获取第一个箱子，并重置遍历指针
+            SharedBox getNextBox();        // 获取下一个箱子
+            void addBox(SharedBox box);    // 向链表尾部添加箱子
+            bool removeBox(SharedBox box); // 从链表移除指定箱子（成功返回 true）
+            void listBoxes() const;        // 打印所有箱子
+
+        private:
+            Package* m_head{};    // 链表头节点
+            Package* m_tail{};    // 链表尾节点（用于快速追加）
+            Package* m_current{}; // 遍历时指向当前节点
+        };
+        ```
+
+    - Truckload.cpp
+
+        ```cpp
+        // Truckload.cpp
+        module truckload;          // 模块实现单元（无 export）
+
+        import <iostream>;
+        import <format>;
+
+        // 链表节点类：模块内部使用，外界不可见
+        class Package
+        {
+        public:
+            Package(SharedBox box) : m_box{ box }, m_next{ nullptr } {}
+            ~Package() { delete m_next; }   // 递归删除后续节点，实现整条链表清理
+
+            SharedBox getBox() const { return m_box; }   // 获取本节点箱子
+            Package* getNext() { return m_next; }        // 获取下一节点地址
+            void setNext(Package* package) { m_next = package; }
+
+        private:
+            SharedBox m_box;      // 指向共享 Box 的智能指针
+            Package* m_next;      // 原生指针指向下一个节点
+        };
+
+        // --- Truckload 成员函数实现 ---
+
+        // 构造函数：创建一个只包含一个箱子的链表
+        Truckload::Truckload(SharedBox box)
+        {
+            m_head = m_tail = new Package{ box };
+        }
+
+        // 构造函数：从 shared_ptr 向量批量添加
+        Truckload::Truckload(const std::vector<SharedBox>& boxes)
+        {
+            for (const auto& box : boxes)
+                addBox(box);
+        }
+
+        // 拷贝构造函数：遍历源链表，逐个添加箱子（深拷贝）
+        Truckload::Truckload(const Truckload& src)
+        {
+            for (Package* package{ src.m_head }; package; package = package->getNext())
+            {
+                addBox(package->getBox());
+            }
+        }
+
+        // 析构函数：只需删除头节点，Package 的析构函数会递归清理整个链表
+        Truckload::~Truckload()
+        {
+            delete m_head;
+        }
+
+        void Truckload::listBoxes() const
+        {
+            const size_t boxesPerLine{ 4 };    // 每行打印 4 个箱子
+            size_t count{};
+            for (Package* package{ m_head }; package; package = package->getNext())
+            {
+                std::cout << ' ';
+                package->getBox()->listBox();   // 调用 Box 的格式化输出
+                if (!(++count % boxesPerLine))  // 满 4 个换行
+                    std::cout << std::endl;
+            }
+            if (count % boxesPerLine)           // 最后一行不足 4 个也换行
+                std::cout << std::endl;
+        }
+
+        SharedBox Truckload::getFirstBox()
+        {
+            // 将当前遍历指针设为链表头，并返回其箱子（或空链表则返回 nullptr）
+            m_current = m_head;
+            return m_current ? m_current->getBox() : nullptr;
+        }
+
+        SharedBox Truckload::getNextBox()
+        {
+            if (!m_current)               // 若当前指针为空，从头开始
+                return getFirstBox();
+
+            m_current = m_current->getNext();  // 移动到下一节点
+            return m_current ? m_current->getBox() : nullptr;
+        }
+
+        void Truckload::addBox(SharedBox box)
+        {
+            auto package{ new Package{box} };   // 创建新节点
+
+            if (m_tail)                       // 链表非空
+                m_tail->setNext(package);     // 将新节点挂到尾节点之后
+            else                              // 链表为空
+                m_head = package;             // 新节点成为头节点
+
+            m_tail = package;                 // 更新尾节点
+        }
+
+        bool Truckload::removeBox(SharedBox boxToRemove)
+        {
+            Package* previous{ nullptr };       // 跟踪前驱节点
+            Package* current{ m_head };        // 从头开始搜索
+
+            while (current)
+            {
+                if (current->getBox() == boxToRemove)   // 找到目标箱子
+                {
+                    // 调整前驱节点的 next 指针，绕过当前节点
+                    if (previous)
+                        previous->setNext(current->getNext());
+
+                    // 更新头、尾、当前指针（如果它们指向被删除的节点）
+                    if (current == m_head)
+                        m_head = current->getNext();
+                    if (current == m_tail)
+                        m_tail = previous;
+                    if (current == m_current)
+                        m_current = current->getNext();
+
+                    current->setNext(nullptr);   // 断开与被删除节点的连接
+                    delete current;              // 删除节点（仅此一个，不递归删除后续）
+                    return true;
+                }
+
+                // 未找到，继续向后移动
+                previous = current;
+                current = current->getNext();
+            }
+            return false;   // 未找到
+        }
+        ```
+
+    - Ex12_17.cpp
+
+        ```cpp
+        // Ex12_17.cpp
+        // 使用链表管理卡车上的箱子
+        import box.random;
+        import truckload;
+        import <iostream>;
+        import <vector>;
+
+        int main()
+        {
+            Truckload load1;                // 创建一个空的卡车装载列表
+
+            // 向列表中添加 12 个随机 Box 对象
+            const size_t boxCount{12};
+            for (size_t i{}; i < boxCount; ++i)
+                load1.addBox(randomSharedBox());
+
+            std::cout << "The first list:\n";
+            load1.listBoxes();
+
+            // 拷贝整个卡车装载
+            Truckload copy{load1};
+            std::cout << "The copied truckload:\n";
+            copy.listBoxes();
+
+            // 寻找最大的箱子
+            SharedBox largestBox{load1.getFirstBox()};
+            SharedBox nextBox{load1.getNextBox()};
+            while (nextBox)
+            {
+                if (nextBox->compare(*largestBox) > 0)   // 调用 Box::compare
+                    largestBox = nextBox;
+                nextBox = load1.getNextBox();
+            }
+
+            std::cout << "\nThe largest box in the first list is ";
+            largestBox->listBox();
+            std::cout << std::endl;
+
+            load1.removeBox(largestBox);
+            std::cout << "\nAfter deleting the largest box, the list contains:\n";
+            load1.listBoxes();
+
+            // 用 std::vector 初始化第二个装载
+            const size_t nBoxes{20};
+            std::vector<SharedBox> boxes;
+            for (size_t i{}; i < nBoxes; ++i)
+                boxes.push_back(randomSharedBox());
+
+            Truckload load2{boxes};
+            std::cout << "\nThe second list:\n";
+            load2.listBoxes();
+
+            // 寻找最小的箱子
+            auto smallestBox{load2.getFirstBox()};
+            for (auto box{load2.getNextBox()}; box; box = load2.getNextBox())
+                if (box->compare(*smallestBox) < 0)
+                    smallestBox = box;
+
+            std::cout << "\nThe smallest box in the second list is ";
+            smallestBox->listBox();
+            std::cout << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        The first list:
+        Box(30.3,59.0,38.5) Box(97.8,63.7,7.4) Box(0.5,86.6,80.2) Box(76.0,9.9,87.0)
+        Box(79.1,11.5,84.2) Box(53.8,29.6,93.9) Box(58.0,14.6,11.7) Box(26.2,82.7,76.5)
+        Box(45.4,98.5,35.0) Box(43.4,95.8,34.0) Box(35.8,68.6,86.2) Box(51.3,92.5,97.3)
+        The copied truckload:
+        Box(30.3,59.0,38.5) Box(97.8,63.7,7.4) Box(0.5,86.6,80.2) Box(76.0,9.9,87.0)
+        Box(79.1,11.5,84.2) Box(53.8,29.6,93.9) Box(58.0,14.6,11.7) Box(26.2,82.7,76.5)
+        Box(45.4,98.5,35.0) Box(43.4,95.8,34.0) Box(35.8,68.6,86.2) Box(51.3,92.5,97.3)
+
+        The largest box in the first list is Box(51.3,92.5,97.3)
+
+        After deleting the largest box, the list contains:
+        Box(30.3,59.0,38.5) Box(97.8,63.7,7.4) Box(0.5,86.6,80.2) Box(76.0,9.9,87.0)
+        Box(79.1,11.5,84.2) Box(53.8,29.6,93.9) Box(58.0,14.6,11.7) Box(26.2,82.7,76.5)
+        Box(45.4,98.5,35.0) Box(43.4,95.8,34.0) Box(35.8,68.6,86.2)
+
+        The second list:
+        Box(24.4,83.8,54.6) Box(11.6,4.8,14.9) Box(89.4,73.1,67.5) Box(43.3,59.8,1.0)
+        Box(31.9,94.8,1.8) Box(76.5,30.0,34.7) Box(9.6,45.7,75.4) Box(49.5,93.9,19.4)
+        Box(10.0,43.1,53.6) Box(3.6,60.3,22.2) Box(19.3,47.5,66.7) Box(17.6,86.6,6.4)
+        Box(11.4,28.1,62.9) Box(83.9,43.3,68.1) Box(86.6,16.7,73.6) Box(92.1,76.3,95.0)
+        Box(15.8,73.7,36.6) Box(72.4,3.0,25.5) Box(26.1,67.1,13.7) Box(65.3,0.2,17.5)
+
+        The smallest box in the second list is Box(65.3,0.2,17.5)
+        ```
+
+        ---
