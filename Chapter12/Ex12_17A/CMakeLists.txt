@@ -1,37 +1,39 @@
-# 1. 设置 CMake 最低版本要求
-# C++20 Modules 的官方支持在 3.28 版本才趋于稳定，建议保持这个版本或更高。
+# ============================================================
+#  通用 CMakeLists.txt 模板 —— 适用于任意 ExXX_XX 案例目录
+#  自动检测当前目录下的 .cppm 模块文件和 .cpp 源文件
+#  无需修改即可用于其他案例（只需复制到对应目录）
+# ============================================================
 cmake_minimum_required(VERSION 3.28)
 
-# 2. 定义项目名称和语言
-# 这里我们告诉 CMake 这是一个 C++ 项目。
-project(Ex12_17A LANGUAGES CXX)
+# ---------- 项目名 = 当前文件夹名（自动获取，无硬编码） ----------
+get_filename_component(PROJECT_NAME "${CMAKE_CURRENT_SOURCE_DIR}" NAME)
+project(${PROJECT_NAME} LANGUAGES CXX)
 
-# 3. 强制开启 C++20 标准
-# 这一点至关重要，因为 .cppm 文件必须使用 C++20 或更新的标准才能编译。
+# ---------- C++20 标准 ----------
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON) # 如果编译器不支持 C++20，直接报错而不是降级
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# 4. 创建可执行文件目标
-# 我们将生成的程序命名为 Ex12_17A (你可以改成自己喜欢的名字)。
-# 在这里列出所有的源文件 (.cpp) 和模块接口文件 (.cppm)。
-add_executable(Ex12_17A
-    Ex12_17.cpp           # [主程序] 包含 main() 函数的入口文件
-    
-    # --- 模块接口文件 (.cppm) ---
-    # CMake 会自动扫描这些文件的 module 声明来构建依赖图。
-    
-    Box.cppm              # [模块 box] 定义 Box 类的基础接口
-    RandomBoxes.cppm      # [模块 box.random] 生成随机盒子的子模块
-    SharedBox.cppm        # [单元 truckload:shared_box] 定义 SharedBox 别名
-    Package.cppm          # [单元 truckload:package] 定义链表节点 Package
-    Truckload.cppm        # [模块 truckload] 导出 Truckload 类的主接口
-    Truckload-impl.cpp    # [实现文件] 注意后缀是 .cpp，包含 Truckload 的具体函数实现
-)
+# ---------- 自动收集源文件 ----------
+file(GLOB MODULE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cppm")
+file(GLOB CPP_FILES    CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
-# 5. 针对 MSVC (Visual Studio) 的特殊优化配置
-# 如果你使用的是 Visual Studio 2022 (MSVC 编译器)，这段代码能显著提升模块编译速度。
-if(MSVC)
-    # /experimental:module 开启实验性模块支持（VS2022 目前仍需此标志）
-    # /std:c++latest 启用最新的 C++ 特性支持
-    target_compile_options(Ex12_17A PRIVATE /experimental:module /std:c++latest)
+# ---------- 创建可执行目标 ----------
+add_executable(${PROJECT_NAME})
+
+# 模块接口/分区文件 → FILE_SET CXX_MODULES（CMake 自动处理依赖顺序）
+if(MODULE_FILES)
+    target_sources(${PROJECT_NAME} PRIVATE
+        FILE_SET CXX_MODULES
+        BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}"
+        FILES ${MODULE_FILES}
+    )
 endif()
+
+# 普通 .cpp 文件（模块实现单元 + main）
+if(CPP_FILES)
+    target_sources(${PROJECT_NAME} PRIVATE ${CPP_FILES})
+endif()
+
+# ---------- 可选：链接额外库（按需取消注释） ----------
+# target_link_libraries(${PROJECT_NAME} PRIVATE some_lib)
