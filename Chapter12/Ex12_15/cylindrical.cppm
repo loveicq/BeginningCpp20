@@ -7,7 +7,7 @@ import <string>;
 export class cylindricalBox
 {
 public:
-    const static inline float{35.0f};
+    // const static inline float s_max_radius{35.0f};
     const static inline float s_max_height{60.0f};
     const static inline std::string_view s_default_material{"paperboard"};
     cylindricalBox(float radius, float height,
