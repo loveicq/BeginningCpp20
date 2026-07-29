@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "H:/cpp20/Chapter12/Ex12_17A"
+    "cmake.sourceDirectory": "H:/cpp20/Chapter12/Ex12_17A",
+    "cmake.buildDirectory": "${sourceDir}/build"
 }
