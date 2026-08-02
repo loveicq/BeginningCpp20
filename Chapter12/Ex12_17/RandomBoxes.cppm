@@ -1,4 +1,4 @@
-// RandomBoxes.cppm
+﻿// RandomBoxes.cppm
 export module box.random;
 import box;
 import <random>;            // 随机数库

@@ -748,7 +748,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
     ---
 
-    - **拓展：副本构造函数演示案例**
+  - **拓展：副本构造函数演示案例**
 
         以下代码演示了副本构造函数的工作原理、浅拷贝问题及深拷贝解决方案：
 
@@ -890,16 +890,16 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
         ---
 
-    - 重点须知
+  - 重点须知
 
-        - Q1：为什么副本构造函数必须用 `const` 引用参数？
+    - Q1：为什么副本构造函数必须用 `const` 引用参数？
 
-            - **按值传递的问题**：如果参数是 `Box box`，调用 `Box box2 = box1` 时需要先把 `box1` 复制给
+      - **按值传递的问题**：如果参数是 `Box box`，调用 `Box box2 = box1` 时需要先把 `box1` 复制给
   参数 `box`，而复制参数又需要调用副本构造函数，形成**无限递归**！
-            - **引用传递的优势**：引用只是传递对象的地址，不需要复制对象，完美避免了递归问题。
-            - **`const` 的作用**：保证不会修改源对象，符合"复制"的语义。
+      - **引用传递的优势**：引用只是传递对象的地址，不需要复制对象，完美避免了递归问题。
+      - **`const` 的作用**：保证不会修改源对象，符合"复制"的语义。
 
-        - Q2：每个类都必须有副本构造函数吗？
+    - Q2：每个类都必须有副本构造函数吗？
 
             | 情况 | 是否有副本构造函数？ |
             | ---- | ------------------ |
@@ -908,11 +908,11 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
             | 显式删除副本构造函数 | ❌ 被禁用 |
             | 有未初始化的引用成员 | ❌ 编译器无法生成 |
 
-            - **不是必须有**副本构造函数
-            - 如果没有，对象就**不能被复制**（无法按值传递、返回或赋值）
-            - **禁用副本构造函数的场景**：管理独占资源的类（如文件句柄）、单例类等
+      - **不是必须有**副本构造函数
+      - 如果没有，对象就**不能被复制**（无法按值传递、返回或赋值）
+      - **禁用副本构造函数的场景**：管理独占资源的类（如文件句柄）、单例类等
 
-        - Q3：什么时候需要自己编写副本构造函数？
+    - Q3：什么时候需要自己编写副本构造函数？
 
             | 情况 | 是否需要自定义？ |
             | ---- | -------------- |
@@ -920,9 +920,9 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
             | 类有指针成员，且指向堆内存 | ✅ **必须写！** 否则会浅拷贝导致崩溃 |
             | 类管理其他资源（文件句柄、网络连接等） | ✅ 需要写 |
 
-        - 核心要点：
-            - 现代 C++ 推荐使用 `std::string`、`std::vector` 等标准库类型，它们已正确实现深拷贝
-            - 日常编程中很少需要自己写副本构造函数，但必须理解其原理以避免内存错误
+    - 核心要点：
+      - 现代 C++ 推荐使用 `std::string`、`std::vector` 等标准库类型，它们已正确实现深拷贝
+      - 日常编程中很少需要自己写副本构造函数，但必须理解其原理以避免内存错误
 
 **2.删除副本构造函数**  
 
@@ -945,7 +945,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 **3.定义模块中的类**  
 
 - 案例Ex12_06
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         // Box.cppm
@@ -978,7 +978,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_06.cpp
+  - Ex12_06.cpp
 
         ```cpp
         // Ex12_06.cpp
@@ -1005,7 +1005,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ---
 
 - 案例Ex12_06A
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         // Box.cppm
@@ -1026,7 +1026,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Box.cpp
+  - Box.cpp
 
         ```cpp
         //Box.cpp
@@ -1045,7 +1045,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_06A.cpp
+  - Ex12_06A.cpp
 
         ```cpp
         //Ex12_06A.cpp
@@ -1072,7 +1072,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ---
 
 - 案例Ex12_06B
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         //Box.cppm
@@ -1101,7 +1101,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Ex12_06B.cpp
+  - Ex12_06B.cpp
 
         ```cpp
         //Ex12_06B.cpp
@@ -1136,7 +1136,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 允许修改成员变量的成员函数常称为更改器成员函数
 - 按照流行约定，访问成员变量m_member的成员的函数常被命名为getMember()，更新该成员变量的函数被命名为setMember()。因此，这种成员函数常被简单地称为getter和setter。有一个例外，bool类型的成员变量的访问器常被命名为isMember()。布尔成员变量m_valid的getter常被命名为isValid()而不是getValid()
 - 案例Ex12_07
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         // Box.cppm
@@ -1177,7 +1177,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Box.cpp
+  - Box.cpp
 
         ```cpp
         // Box.cpp
@@ -1196,7 +1196,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_07.cpp
+  - Ex12_07.cpp
 
         ```cpp
         // Ex12_07.cpp
@@ -1241,7 +1241,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
 - 可以从类对象函数成员返回this指针
 - 案例Ex12_08
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         // Box.cppm
@@ -1270,7 +1270,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Box.cpp
+  - Box.cpp
 
         ```cpp
         // Box.cpp
@@ -1308,7 +1308,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_08.cpp
+  - Ex12_08.cpp
 
         ```cpp
         // Ex12_08.cpp
@@ -1349,7 +1349,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
 - 可以从类对象函数成员返回引用
 - 案例Ex12_08A
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         // Box.cppm
@@ -1378,7 +1378,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Box.cpp
+  - Box.cpp
 
         ```cpp
         // Box.cpp
@@ -1417,7 +1417,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
         ```
 
-    - Ex12_08A.cpp
+  - Ex12_08A.cpp
 
         ```cpp
         // Ex12_08A.cpp
@@ -1456,12 +1456,12 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
         ---
 
-    - 链式调用，重点在于声明函数时是`Box&`，而函数定义时返回解引用`return *this;`
-    - 重点注意，一般使用引用返回Box&而不是指针Box*，因为：
-        - 更安全：不会有空指针问题
-        - 更直观：语法上和普通对象调用一致
-        - 效率更高：不需要额外的指针解引用
-    - 引用与指针的区别：  
+  - 链式调用，重点在于声明函数时是`Box&`，而函数定义时返回解引用`return *this;`
+  - 重点注意，一般使用引用返回Box&而不是指针Box*，因为：
+    - 更安全：不会有空指针问题
+    - 更直观：语法上和普通对象调用一致
+    - 效率更高：不需要额外的指针解引用
+  - 引用与指针的区别：  
 
         | 操作符 | 使用场景 | 含义 | 备注 |
         | --- | --- | --- | --- |
@@ -1473,8 +1473,8 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 类类型的const变量称为**const对象**，构成const对象状态的任何成员变量都不能被修改  
 `const Box myBox{3.0, 4.0, 5.0}; //注意const关键字`
 - 当通过const指针或const引用访问对象时，具有与直接访问const对象相同的限制  
-    - `const Box* boxPointer = &myBox;`，这个boxPointer指针无法修改myBox对象的任何成员
-    - `void printBox(const Box& box);`，这个printBox函数无法修改box对象的任何成员
+  - `const Box* boxPointer = &myBox;`，这个boxPointer指针无法修改myBox对象的任何成员
+  - `void printBox(const Box& box);`，这个printBox函数无法修改box对象的任何成员
 
 ### 12.7.1 const成员函数
 
@@ -1483,7 +1483,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 要使用const对象，须在定义类的时候把不修改对象的函数指定为const
 - 案例Ex12_09
 
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         //Box.cppm
@@ -1512,7 +1512,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Box.cpp
+  - Box.cpp
 
         ```cpp
         //Box.cpp
@@ -1564,7 +1564,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_09.cpp
+  - Ex12_09.cpp
 
         ```cpp
         //Ex12_09.cpp
@@ -1648,7 +1648,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
     ```
 
 - 案例Ex12_10
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         //Box.cppm
@@ -1691,7 +1691,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Box.cpp
+  - Box.cpp
 
         ```cpp
         //Box.cpp
@@ -1710,7 +1710,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_10.cpp
+  - Ex12_10.cpp
 
         ```cpp
         //Ex12_10.cpp
@@ -1747,17 +1747,17 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ---
 
 - 多数情况下不推荐用重载const的方式代替setter函数和getter函数
-    - 不符合常规做法  
+  - 不符合常规做法  
         `box.length() = 2;`没有`box.setLength(2);`清晰
-    - 添加public成员函数来返回对private成员变量的**引用**时，实际上就抛弃了数据隐藏的大部分优势
+  - 添加public成员函数来返回对private成员变量的**引用**时，实际上就抛弃了数据隐藏的大部分优势
 - 在某些情形中，还是得用重载const，例如重载数组访问运算符
 
 ### 12.7.4 常量的强制转换
 
 - `const_cast<>()`运算符
 
-    - `const_cast<Type*>(expression) //expression可以为const Type*或Type*`
-    - `const_cast<Type&>(expression)    //expression可以为const Type&、Type或Type&`
+  - `const_cast<Type*>(expression) //expression可以为const Type*或Type*`
+  - `const_cast<Type&>(expression)    //expression可以为const Type&、Type或Type&`
 - 几乎总是不建议使用`const_cast<>()`运算符，意外修改const对象很可能导致bug
 
 ### 12.7.5 使用mutable关键字
@@ -1766,7 +1766,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 应该很少需要使用mutable成员变量。如果需要在const函数内修改一个对象，则很可能不应该将该函数声明为const
 - mutable成员变量的典型用途包括调试或日志记录、缓存和线程同步成员
 - 案例Ex12_11
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         //Box.cppm
@@ -1801,7 +1801,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Box.cpp
+  - Box.cpp
 
         ```cpp
         //Box.cpp
@@ -1830,7 +1830,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_11.cpp
+  - Ex12_11.cpp
 
         ```cpp
         //Ex12_11.cpp
@@ -1880,7 +1880,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
 - 为了把函数看作类的友元函数，必须在类定义中用关键字`friend`来声明它。类决定了它的友元，无法在类定义的外部将函数设置为类的友元函数。类的友元函数可以是一个全局函数，也可以是另一个类的成员。但是，函数不能是包含它的类的友元函数，因此，访问修饰符不能被应用于类的友元函数
 - 案例Ex12_12
-    - box.cppm
+  - box.cppm
 
         ```cpp
         //box.cppm
@@ -1901,7 +1901,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - box.cpp
+  - box.cpp
 
         ```cpp
         //box.cpp
@@ -1929,7 +1929,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_12.cpp
+  - Ex12_12.cpp
 
         ```cpp
         //Ex12_12.cpp
@@ -1975,9 +1975,9 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ---
 
 - 延伸阅读——友元函数总结
-    - 用途：突破封装边界，允许特定外部函数或类访问私有成员
-    - 三种友元关系：
-        - 类 A 的成员函数可以是类 B 的友元：
+  - 用途：突破封装边界，允许特定外部函数或类访问私有成员
+  - 三种友元关系：
+    - 类 A 的成员函数可以是类 B 的友元：
 
             ```cpp
             class ClassB;   //前向声明
@@ -1989,7 +1989,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
             void ClassA::modifyB(ClassB& b) { b.x = 20; }// ✅ 可访问私有成员
             ```
 
-        - 类 A 可以是类 B 的友元（整个类）：
+    - 类 A 可以是类 B 的友元（整个类）：
 
             ```cpp
             class ClassB {
@@ -2002,7 +2002,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
                     { b.x = 20; } };    // ✅ 可以访问 ClassB 的私有成员
             ```
 
-        - 模块内的自由函数可以是类的友元：
+    - 模块内的自由函数可以是类的友元：
 
             ```cpp
             export module box;
@@ -2020,13 +2020,13 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
             }
             ```
 
-    - C++20 模块规则：友元关系具有模块作用域限制，跨模块无效
-    - 特性：
-        - 友元关系是单向的：A 是 B 的友元 ≠ B 是 A 的友元
-        - 友元关系不传递：A 是 B 的友元，B 是 C 的友元 ≠ A 是 C 的友元
-        - C++20 模块限制：友元关系默认不跨模块边界
-        - 实现位置：友元函数的定义必须在同一模块内才能生效
-    - 使用建议：谨慎使用，明确意图，模块内定义
+  - C++20 模块规则：友元关系具有模块作用域限制，跨模块无效
+  - 特性：
+    - 友元关系是单向的：A 是 B 的友元 ≠ B 是 A 的友元
+    - 友元关系不传递：A 是 B 的友元，B 是 C 的友元 ≠ A 是 C 的友元
+    - C++20 模块限制：友元关系默认不跨模块边界
+    - 实现位置：友元函数的定义必须在同一模块内才能生效
+  - 使用建议：谨慎使用，明确意图，模块内定义
 
 ### 12.8.2 友元类
 
@@ -2049,7 +2049,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 类的对象数组的每个元素都由构造函数创建，如果没有指定初始值，编译器会为每个元素调用无参构造函数
 
 - 案例Ex12_13
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         //Box.cppm
@@ -2072,7 +2072,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Box.cpp
+  - Box.cpp
 
         ```cpp
         //Box.cpp
@@ -2104,7 +2104,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_13.cpp
+  - Ex12_13.cpp
 
         ```cpp
         //Ex12_13.cpp
@@ -2168,7 +2168,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 静态成员一般声明为private，但是也可以声明为public或protected。
 - s_object_count变量还被声明为inline，在类定义和初始化静态成员变量时，必须添加这个额外的inline关键字
 - 案例Ex12_14
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         //Box.cppm
@@ -2194,7 +2194,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Box.cpp
+  - Box.cpp
 
         ```cpp
         //Box.cpp
@@ -2227,7 +2227,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_14.cpp
+  - Ex12_14.cpp
 
         ```cpp
         //Ex12_14.cpp
@@ -2281,9 +2281,9 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 静态成员变量不是任何对象的一部分，它们属于类。由于静态成员变量不是类对象的一部分，因此const成员函数就可以修改非const静态成员变量，而不会影响函数的const性质
 - 延伸阅读：inline内联
 
-    - 内联函数（Inline Function）
+  - 内联函数（Inline Function）
 
-        - 隐式内联（类内定义）
+    - 隐式内联（类内定义）
 
             ```cpp
             class Box 
@@ -2293,10 +2293,10 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
             };
             ```
 
-            - **规则**：类体内直接定义的非虚成员函数自动视为 `inline`
-            - **优势**：代码简洁，适合短小高频函数
+      - **规则**：类体内直接定义的非虚成员函数自动视为 `inline`
+      - **优势**：代码简洁，适合短小高频函数
 
-        - 显式内联（类外定义）
+    - 显式内联（类外定义）
 
             ```cpp
             class Box 
@@ -2309,9 +2309,9 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
             }
             ```
 
-            - **适用场景**：头文件中定义，需多文件包含
+      - **适用场景**：头文件中定义，需多文件包含
 
-        - 优势
+    - 优势
 
             | 优势 | 说明 |
             | ------ | ------ |
@@ -2319,7 +2319,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
             | 提升执行速度 | 特别适合高频调用的小函数 |
             | 提高缓存命中率 | 代码局部性更好 |
 
-        - 限制
+    - 限制
 
             | 限制 | 说明 |
             | ------ | ------ |
@@ -2327,18 +2327,18 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
             | 虚函数通常不内联 | 运行时多态无法确定调用目标 |
             | 代码膨胀风险 | 过度内联会增加可执行文件体积 |
 
-    - 内联变量（Inline Variable）【C++17 引入】
+  - 内联变量（Inline Variable）【C++17 引入】
 
-        - 基本概念
+    - 基本概念
 
             ```cpp
             inline int global_counter = 0;  // 头文件中定义内联变量
             ```
 
-            - **解决的问题**：允许在头文件中定义变量，避免重复定义错误
-            - **链接类型**：`internal linkage`（内部链接）
+      - **解决的问题**：允许在头文件中定义变量，避免重复定义错误
+      - **链接类型**：`internal linkage`（内部链接）
 
-        - 静态内联成员变量
+    - 静态内联成员变量
 
             **C++17 写法**：
 
@@ -2362,11 +2362,11 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
             ```
 
             **优势**：
-            - 可直接在类内定义初始化
-            - 无需单独的 `.cpp` 文件
-            - 支持模块（如 `Box.cppm`）
+      - 可直接在类内定义初始化
+      - 无需单独的 `.cpp` 文件
+      - 支持模块（如 `Box.cppm`）
 
-        - 适用场景
+    - 适用场景
 
             | 场景 | 示例 |
             | ------ | ------ |
@@ -2374,7 +2374,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
             | 头文件中的全局常量 | `inline constexpr double PI = 3.14159;` |
             | 需要跨模块共享的变量 | `inline std::string app_name = "MyApp";` |
 
-    - `static inline` 的组合效果
+  - `static inline` 的组合效果
 
         **代码示例**：
 
@@ -2387,7 +2387,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         | `static` | 所有对象共享同一份数据（类级别变量） |
         | `inline` | 允许在类内直接定义，支持头文件/模块包含 |
 
-    - 关键区别汇总
+  - 关键区别汇总
 
         | 特性 | 类内定义函数 | 类外定义函数 | 内联变量 |
         | --- | --- | --- | --- |
@@ -2395,17 +2395,17 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         | 重复定义 | 允许 | 不允许 | 允许 |
         | 典型场景 | 短小成员函数 | 复杂成员函数 | 静态成员、全局常量 |
 
-    - 实战建议
+  - 实战建议
 
-        - 内联函数
-            - ✅ 推荐：短小访问器（如 `getVolume()`）、高频计算函数
-            - ❌ 不推荐：大型函数、递归、虚函数
+    - 内联函数
+      - ✅ 推荐：短小访问器（如 `getVolume()`）、高频计算函数
+      - ❌ 不推荐：大型函数、递归、虚函数
 
-        - 内联变量
-            - ✅ 推荐：类的静态成员（如计数器）、头文件中的常量
-            - ❌ 不推荐：频繁修改的全局变量（影响性能）
+    - 内联变量
+      - ✅ 推荐：类的静态成员（如计数器）、头文件中的常量
+      - ❌ 不推荐：频繁修改的全局变量（影响性能）
 
-    - 复习小贴士
+  - 复习小贴士
         1. **内联函数**：代码展开，消除调用开销，类内定义默认内联
         2. **内联变量**：C++17 特性，解决头文件变量重复定义问题
         3. **`static inline`**：组合优势，适合类的静态成员变量
@@ -2424,7 +2424,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 常常定义一些公共常量来包含函数参数的边界值或建议的默认值
 - 对关键字static、inline和const的出现没有顺序要求
 - 案例Ex12_15
-    - cylindrical.cppm
+  - cylindrical.cppm
 
         ```cpp
         // cylindrical.cppm
@@ -2452,7 +2452,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - cylindrical.cpp
+  - cylindrical.cpp
 
         ```cpp
         // cylindrical.cpp
@@ -2478,7 +2478,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_15.cpp
+  - Ex12_15.cpp
 
         ```cpp
         // Ex12_15.cpp
@@ -2507,7 +2507,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 ### 12.11.4 类类型的静态成员变量
 
 - 静态成员变量不是类对象的一部分，所以它可以与类具有相同的类型
-    - 静态成员常量声明
+  - 静态成员常量声明
 
         ```cpp
         class Box
@@ -2521,10 +2521,10 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - 必须在**类的外部**定义和初始化静态成员  
+  - 必须在**类的外部**定义和初始化静态成员  
   `const Box Box::s_reference_box{10.0,10.0,10.0}; //Box构造函数包含三参数`
-    - 注意：static关键字仅用于类定义中的静态成员声明，而不能用于定义静态成员
-    - 类对象的任何静态和非静态成员函数都可以访问s_reference_box，但不能从类的外部访问它，因为它被声明为私有成员
+  - 注意：static关键字仅用于类定义中的静态成员声明，而不能用于定义静态成员
+  - 类对象的任何静态和非静态成员函数都可以访问s_reference_box，但不能从类的外部访问它，因为它被声明为私有成员
 
 ### 12.11.5 静态成员函数
 
@@ -2604,7 +2604,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 `Box::~Box()=default; //让编译器生成一个默认的析构函数`
 - 类的析构函数总是在释放对象时自动调用，需要显式调用析构函数的情况很少见，可以忽略不计
 - 案例Ex12_16
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         // Box.cppm
@@ -2632,7 +2632,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Box.cpp
+  - Box.cpp
 
         ```cpp
         // Box.cpp
@@ -2673,7 +2673,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_16.cpp
+  - Ex12_16.cpp
 
         ```cpp
         // Ex12_16.cpp
@@ -2744,7 +2744,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 - 当多个对象指向并不时地（甚至并发地）使用同一个对象，并且无法推断出什么时候全部使用完该共享对象时，`std::shared_ptr<>`非常有帮助
 - 总是应该使用智能指针来管理动态分配的对象。这种原则被称为“资源获取即初始化”(**RAII**)（Resource Acquisition Is Initialization）
 - 案例Ex12_17(无模块分区方式)
-    - Box.cppm
+  - Box.cppm
 
         ```cpp
         // Box.cppm
@@ -2790,7 +2790,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - RandomBoxes.cppm
+  - RandomBoxes.cppm
 
         ```cpp
         // RandomBoxes.cppm
@@ -2827,7 +2827,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Truckload.cppm
+  - Truckload.cppm
 
         ```cpp
         // Truckload.cppm
@@ -2864,7 +2864,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Truckload.cpp
+  - Truckload.cpp
 
         ```cpp
         // Truckload.cpp
@@ -2996,7 +2996,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_17.cpp
+  - Ex12_17.cpp
 
         ```cpp
         // Ex12_17.cpp
@@ -3096,8 +3096,8 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
         ---
 
-- Ex12_17A(分区模块方式，须在vscode+msvc+cmake+minja环境编译(后三者在vs2026中包含))
-    - Box.cppm
+- Ex12_17A(模块分区方式，须在vscode + cmake tools + msvc + cmake环境编译(后二者在vs2026中包含))
+  - Box.cppm
 
         ```cpp
         // Box.cppm
@@ -3139,7 +3139,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - RandomBoxes.cppm
+  - RandomBoxes.cppm
 
         ```cpp
         // RandomBoxes.cppm
@@ -3176,7 +3176,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - SharedBox.cppm
+  - SharedBox.cppm
 
         ```cpp
         // SharedBox.cppm
@@ -3188,7 +3188,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         export using SharedBox = std::shared_ptr<Box>;
         ```
 
-    - Package.cpp
+  - Package.cpp
 
         ```cpp
         // Package.cpp
@@ -3215,7 +3215,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Truckload.cppm
+  - Truckload.cppm
 
         ```cpp
         // Truckload.cppm
@@ -3250,7 +3250,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         };
         ```
 
-    - Truckload-impl.cpp
+  - Truckload-impl.cpp
 
         ```cpp
         // Truckload-impl.cpp
@@ -3371,7 +3371,7 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
         ```
 
-    - Ex12_17.cpp
+  - Ex12_17.cpp
 
         ```cpp
         // Ex12_17.cpp

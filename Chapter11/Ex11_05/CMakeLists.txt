@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 #  通用 CMakeLists.txt 模板 —— 适用于任意 ExXX_XX 案例目录
 #  自动检测当前目录下的 .cppm 模块文件和 .cpp 源文件
 #  无需修改即可用于其他案例（只需复制到对应目录）
@@ -15,7 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # ---------- 自动收集源文件 ----------
-file(GLOB MODULE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cppm" "${CMAKE_CURRENT_SOURCE_DIR}/*.ixx")
+file(GLOB MODULE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cppm")
 file(GLOB CPP_FILES    CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
 # ---------- 创建可执行目标 ----------

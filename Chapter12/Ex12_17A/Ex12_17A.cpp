@@ -1,4 +1,4 @@
-// Ex12_17A.cpp
+﻿// Ex12_17A.cpp
 // Using a linked list
 import box.random;
 import truckload;

@@ -1,4 +1,4 @@
-// RandomBoxes.cppm
+﻿// RandomBoxes.cppm
 export module box.random;
 import box;
 import <random>;        // For random number generation
@@ -18,7 +18,12 @@ export Box randomBox()
 {
   const int dimLimit{ 100 };          // Upper limit on Box dimensions
   static auto random{ createUniformPseudoRandomNumberGenerator(dimLimit) };
-  return { random(), random(), random() };
+  return { random(), random(), random() };  //列表初始化，返回一个用3个随机值构造的Box对象。
+  // 等价于return Box{ random(), random(), random() };
+  // 创建了一个临时 Box 对象（无名字）
+  // 这个临时对象在 return 语句执行时构造
+  // 然后被「移动/拷贝」给函数的调用者
+  // 之后临时对象销毁
 }
 
 export auto randomSharedBox()

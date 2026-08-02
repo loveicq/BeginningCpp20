@@ -1,4 +1,4 @@
-// Ex12_17.cpp
+﻿// Ex12_17.cpp
 // 使用链表管理卡车上的箱子
 import box.random;
 import truckload;
