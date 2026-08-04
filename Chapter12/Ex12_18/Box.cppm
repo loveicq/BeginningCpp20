@@ -27,7 +27,7 @@ public:
 
     void listBox() const
     {
-        std::cout << std::format("Box{:.1f},{:.1f},{:.1f}", m_length, m_width, m_height);
+        std::cout << std::format("Box {:.1f},{:.1f},{:.1f}", m_length, m_width, m_height);
     }
 
 private:
