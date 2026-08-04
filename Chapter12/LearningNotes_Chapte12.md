@@ -3470,3 +3470,337 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ---
 
 ## 12.14 嵌套类
+
+- 案例Ex12_18
+  - Box.cppm
+
+    ```cpp
+    // Box.cppm
+    export module box;
+
+    import <iostream>;
+    import <format>;
+
+    export class Box
+    {
+    public:
+        Box() = default;
+        Box(double length, double width, double height)
+            : m_length{length}, m_width{width}, m_height{height} {};
+
+        double volume() const
+        {
+            return m_length * m_width * m_height;
+        }
+
+        int compare(const Box &box) const
+        {
+            if (volume() < box.volume())
+                return -1;
+            if (volume() == box.volume())
+                return 0;
+            return +1;
+        }
+
+        void listBox() const
+        {
+            std::cout << std::format("Box{:.1f},{:.1f},{:.1f}", m_length, m_width, m_height);
+        }
+
+    private:
+        double m_length{1.0};
+        double m_width{1.0};
+        double m_height{1.0};
+    };
+    ```
+
+  - RandomBoxes.cppm
+
+    ```cpp
+    // RamdomBoxes.cppm
+    export module box.random;
+
+    import box;
+    import <random>;     // For random number generation
+    import <functional>; // For std::bind()
+    import <memory>;     // For std::make_shared<>() and std::shared_ptr<>;
+
+    // Creates a pseudorandom number generator (PRNG) for random doubles between 0 and max
+    auto createUniformPseudoRandomNumberGenerator(double max)
+    {
+        std::random_device seeder;                             // True random number generator to obtain a seed(slow)
+        std::default_random_engine generator{seeder()};        // Efficient pseudo-random generator
+        std::uniform_real_distribution distribution{0.0, max}; // Generate in [0,max) interval
+        return std::bind(distribution, generator);             //... and in the darkness bind them!
+    }
+
+    export Box randomBox()
+    {
+        const int dimLimit{100}; // Upper limit on Box dimensions
+        static auto random{createUniformPseudoRandomNumberGenerator(dimLimit)};
+        return Box{random(), random(), random()};
+    }
+
+    export auto randomSharedBox()
+    {
+        return std::make_shared<Box>(randomBox()); // Uses copy constructor
+    }
+    ```
+
+  - Truckload.cppm
+
+    ```cpp
+    // Truckload.cppm
+    export module truckload;
+    import box;
+
+    import <memory>;
+    import <vector>;
+
+    export using SharedBox = std::shared_ptr<Box>;
+
+    export class Truckload
+    {
+    public:
+        Truckload() = default;                          // Default constructor - empty truckload
+        Truckload(SharedBox box);                       // Constructor - one Box
+        Truckload(const std::vector<SharedBox> &boxes); // Constructor - vector of Boxes
+        Truckload(const Truckload &src);                // Copy constructor
+
+        ~Truckload(); // Destructor
+
+        SharedBox getFirstBox();       // Get the first Box
+        SharedBox getNextBox();        // Get the next Box
+        void addBox(SharedBox box);    // Add a new SharedBox
+        bool removeBox(SharedBox box); // Remove a Box from the Truckload
+        void listBoxes() const;        // Output the Boxes
+
+    private:
+        class Package
+        {
+        public:
+            SharedBox m_box; // Pointer to the Box object contained in this Package
+            Package *m_next; // Pointer to the next Package in the list
+
+            Package(SharedBox box) : m_box{box}, m_next{nullptr} {} // Constructor
+            ~Package() { delete m_next; }                           // Destructor
+        };
+
+        Package *m_head{};    // First in the list
+        Package *m_tail{};    // Last in the list
+        Package *m_current{}; // Last retrieved from the list
+    };
+    ```
+
+  - Truckload.cpp
+
+    ```cpp
+    // Truckload.cpp
+    module truckload;
+    import <iostream>;
+
+    // Constructor - one Box (moved to source file to gain access to definition of Package)
+    Truckload::Truckload(SharedBox box)
+    {
+        m_head = m_tail = new Package{box};
+    }
+
+    // Constructor - vector of Boxes
+    Truckload::Truckload(const std::vector<SharedBox> &boxes)
+    {
+        for (const auto &box : boxes)
+        {
+            addBox(box);
+        }
+    }
+
+    // Copy constructor
+    Truckload::Truckload(const Truckload &src)
+    {
+        for (Package *package{src.m_head}; package; package = package->m_next)
+        {
+            addBox(package->m_box);
+        }
+    }
+
+    // Destructor: clean up the list (moved to source file to gain access to definition of Package)
+    Truckload::~Truckload()
+    {
+        delete m_head;
+    }
+
+    void Truckload::listBoxes() const
+    {
+        const size_t boxesPerLine{4};
+        size_t count{};
+        for (Package *package{m_head}; package; package = package->m_next)
+        {
+            std::cout << ' ';
+            package->m_box->listBox();
+            if (!(++count % boxesPerLine))
+                std::cout << std::endl;
+        }
+        if (count % boxesPerLine)
+            std::cout << std::endl;
+    }
+
+    SharedBox Truckload::getFirstBox()
+    {
+        // Return m_head's box (or nullptr if the list is empty)
+        m_current = m_head;
+        return m_current ? m_current->m_box : nullptr;
+    }
+
+    SharedBox Truckload::getNextBox()
+    {
+        if (!m_current)           // If there's no current...
+            return getFirstBox(); //...return the 1st Box
+
+        m_current = m_current->m_next; // Move to the next package
+
+        return m_current ? m_current->m_box : nullptr; // Return its box (or nullptr...).
+    }
+
+    void Truckload::addBox(SharedBox box)
+    {
+        auto package{new Package{box}}; // Create a new Package
+
+        if (m_tail)                   // Check list is not empty
+            m_tail->m_next = package; // Append the new object to the tail
+        else                          // List is empty
+            m_head = package;         // so new object is the head
+
+        m_tail = package; //  Either way: the Latest object is the (new) tail
+    }
+
+    bool Truckload::removeBox(SharedBox boxToRemove)
+    {
+        Package *previous{nullptr}; // no previous yet
+        Package *current{m_head};   // initialize current to the head of the list
+        while (current)
+        {
+            if (current->m_box == boxToRemove) // We found the Box!
+            {
+                // If there is a previous Package make it point to the next one (Figure 12.10)
+                if (previous)
+                    previous->m_next = current->m_next;
+
+                // Update pointers in member variables where required:
+                if (current == m_head)
+                    m_head = current->m_next;
+                if (current == m_tail)
+                    m_tail = previous;
+                if (current == m_current)
+                    m_current = current->m_next;
+
+                current->m_next = nullptr; // Disconnext the current Package from the list
+                delete current;            // and delete it
+
+                return true; // Return true: we found and removed the box
+            }
+            // Move both pointers along (mind the order!)
+            previous = current;         //- first current becomes the new previous
+            current  = current->m_next; //- then move current along to the next Package
+        }
+
+        return false; // Retrun false: boxToRemove was not found
+    }
+    ```
+
+  - Ex12_18.cpp
+
+    ```cpp
+    // Ex12_18.cpp
+    // Using nested classes
+    import box.random;
+    import truckload;
+    import <iostream>;
+
+    int main()
+    {
+        Truckload load1; // Create an empty List
+
+        // Add 12 random Box objects to the list
+        const size_t boxCount{12};
+        for (size_t i{}; i < boxCount; ++i)
+            load1.addBox(randomSharedBox());
+
+        std::cout << "The first list:\n";
+        load1.listBoxes();
+
+        // Copy the truckload
+        Truckload copy{load1};
+        std::cout << "The copied truckload:\n";
+        copy.listBoxes();
+
+        // Find the largest Box in the list
+        SharedBox largestBox{load1.getFirstBox()};
+
+        SharedBox nextBox{load1.getNextBox()};
+        while (nextBox)
+        {
+            if (nextBox->compare(*largestBox) > 0)
+                largestBox = nextBox;
+            nextBox = load1.getNextBox();
+        }
+
+        std::cout << "\nThe largest box in the first list is ";
+        largestBox->listBox();
+        std::cout << std::endl;
+        load1.removeBox(largestBox);
+        std::cout << "\nAfter deleting the largest box, the list contains:\n";
+        load1.listBoxes();
+
+        const size_t nBoxes{20};      // Number of vector elements
+        std::vector<SharedBox> boxes; // Array of Box objects
+
+        for (size_t i{}; i < nBoxes; ++i)
+            boxes.push_back(randomSharedBox());
+
+        Truckload load2{boxes};
+        std::cout << "\nThe second list:\n";
+        load2.listBoxes();
+
+        auto smallestBox{load2.getFirstBox()};
+        for (auto box{load2.getNextBox()}; box; box = load2.getNextBox())
+            if (box->compare(*smallestBox) < 0)
+                smallestBox = box;
+
+        std::cout << "\nThe smallest box in the second list is ";
+        smallestBox->listBox();
+        std::cout << std::endl;
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    The first list:
+    Box31.8,74.3,57.0 Box51.9,0.5,60.8 Box63.3,1.3,62.7 Box22.0,57.0,0.8 
+    Box46.2,65.2,57.8 Box64.3,33.2,9.4 Box25.0,76.5,91.4 Box51.0,68.2,92.2
+    Box91.3,83.5,74.2 Box87.8,8.8,85.6 Box67.3,31.8,49.7 Box94.3,96.2,92.2
+    The copied truckload:
+    Box31.8,74.3,57.0 Box51.9,0.5,60.8 Box63.3,1.3,62.7 Box22.0,57.0,0.8
+    Box46.2,65.2,57.8 Box64.3,33.2,9.4 Box25.0,76.5,91.4 Box51.0,68.2,92.2
+    Box91.3,83.5,74.2 Box87.8,8.8,85.6 Box67.3,31.8,49.7 Box94.3,96.2,92.2 
+
+    The largest box in the first list is Box94.3,96.2,92.2
+
+    After deleting the largest box, the list contains:
+    Box31.8,74.3,57.0 Box51.9,0.5,60.8 Box63.3,1.3,62.7 Box22.0,57.0,0.8
+    Box46.2,65.2,57.8 Box64.3,33.2,9.4 Box25.0,76.5,91.4 Box51.0,68.2,92.2
+    Box91.3,83.5,74.2 Box87.8,8.8,85.6 Box67.3,31.8,49.7
+
+    The second list:
+    Box17.0,7.6,58.4 Box53.1,42.6,95.5 Box32.5,72.8,40.9 Box55.1,93.4,87.3
+    Box79.8,83.9,10.7 Box39.7,7.8,63.4 Box13.1,59.5,0.8 Box8.1,74.3,0.0
+    Box95.0,40.5,62.9 Box82.2,95.1,20.1 Box68.4,32.4,98.4 Box39.3,15.2,54.7
+    Box5.7,20.7,57.9 Box44.8,64.8,75.4 Box74.9,94.2,16.7 Box65.4,72.0,83.4
+    Box3.3,37.5,89.1 Box56.7,15.8,86.2 Box52.3,77.9,65.9 Box36.6,14.3,55.3
+
+    The smallest box in the second list is Box8.1,74.3,0.0
+    ```
+
+    ---
