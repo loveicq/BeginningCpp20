@@ -3925,3 +3925,199 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ```
 
         ---
+
+2. 第2题
+
+    - Exer12_02.cpp
+
+        ```cpp
+        // Exer12_02.cpp
+        /*************************第12章_练习_第2题************************
+        修改上一题中的Integer类，使得不提供实参也可以创建Integer对象。此时，成
+        员变量的值应该被初始化为0。读者是否能够想出两种方法来实现此需求？另外，
+        实现一个副本构造函数，当调用该副本构造函数时，输出一条信息。
+        然后，编写一个成员函数，比较当前对象和作为实参传递的Integer对象。如果当
+        前对象小于实参，该函数就返回-1；如果它们相等，就返回0；如果当前对象大于
+        实参，就返回1.测试Integer类的两个版本：第一个版本的compare()函数的实
+        参按值传递；第二个版本的compare()函数的实参按引用传递。在调用时，构造
+        函数会输出什么结果？解释出现这种结果的原因。在类中，不能同时这两个函数
+        作为重载函数，为什么？
+        *****************************************************************/
+        import integer;
+        import <iostream>;
+
+        int main()
+        {
+            std::cout << "Create i with the value 0." << std::endl;
+            Integer i;
+            i.show();
+            std::cout << "Change value of i to 15." << std::endl;
+            i.setValue(15);
+            i.show();
+
+            std::cout << "Create j from object i." << std::endl;
+            Integer j{i};
+            j.show();
+            std::cout << "Set value of j to 150 times that of i." << std::endl;
+            j.setValue(150 * i.getValue());
+            j.show();
+
+            std::cout << "Create k with the value 789." << std::endl;
+            Integer k{789};
+            k.show();
+            std::cout << "Set value of k to sum of i and j values." << std::endl;
+            k.setValue(i.getValue() + j.getValue());
+            k.show();
+
+            std::cout << "Result of comparing i and j is " << i.compare(j) << std::endl;
+            std::cout << "Result of comparing k and j is " << k.compare(j) << std::endl;
+        }
+        ```
+
+    - Integer.cppm
+
+        ```cpp
+        // Ingeter.cppm
+        export module integer;
+
+        // Option 1: zero-initialize n and add a default constructor
+        export class Integer
+        {
+        public:
+            Integer() = default;         // Zero-arg constructor
+            Integer(int value);          // Constructor with given value
+            Integer(const Integer &obj); // Copy constructor
+
+            int getValue() const { return m_value; }
+            void setValue(int value) { m_value = value; }
+
+            // int compare(Integer obj) const;  //Compare function with value parameter
+            int compare(const Integer &obj) const; 
+            // Compare function with reference parameter
+
+            void show() const;
+
+        private:
+            int m_value{};
+        };
+
+        // Option 2: use zero a default parameter value
+
+        /* export class Integer
+        {
+        public:
+            Integer(int value = 0);      // Constructor with given value
+            Integer(const Integer &obj); // Copy constructor
+
+            int getValue() const { return m_value; }
+            void setValue(int value) { m_value = value; }
+
+            // int compare(Ingeter obj) const;  //Compare function with value parameter
+            int compare(const Integer &obj) const; 
+            // Compare function with reference parameter
+
+            void show() const;
+
+        private:
+            int m_value;
+        }; */
+        ```
+
+    - Integer.cpp
+
+        ```cpp
+        // Integer.cpp
+        module integer;
+        import <iostream>;
+
+        // Constructor
+        Integer::Integer(int value)
+            : m_value{value}
+        {
+            std::cout << "Object created." << std::endl;
+        }
+
+        // Copy constructor
+        Integer::Integer(const Integer &obj)
+            : m_value{obj.m_value}
+        {
+            std::cout << "Object created by copy constructor." << std::endl;
+        }
+
+        int Integer::compare(const Integer &obj) const
+        {
+            if (m_value < obj.m_value)
+                return -1;
+            else if (m_value == obj.m_value)
+                return 0;
+            else
+                return 1;
+        }
+
+        /* int Integer::compare(const Integer obj) const
+        {
+            if (m_value < obj.m_value)
+                return -1;
+            else if (m_value == obj.m_value)
+                return 0;
+            else
+                return 1;
+        } */
+
+        void Integer::show() const
+        {
+            std::cout << "Value is " << m_value << std::endl;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Create i with the value 0.
+        Value is 0
+        Change value of i to 15.
+        Value is 15
+        Create j from object i.
+        Object created by copy constructor.
+        Value is 15
+        Set value of j to 150 times that of i.
+        Value is 2250
+        Create k with the value 789.
+        Object created.
+        Value is 789
+        Set value of k to sum of i and j values.
+        Value is 2265
+        Result of comparing i and j is -1
+        Result of comparing k and j is 1
+        ```
+
+        ---
+
+        如果compare()改为按值传递参数，则会调用构造函数，结果如下(见最后两行)：
+
+        ---
+
+        ```cpp
+        Create i with the value 0.
+        Value is 0
+        Change value of i to 15.
+        Value is 15
+        Create j from object i.
+        Object created by copy constructor.
+        Value is 15
+        Set value of j to 150 times that of i.
+        Value is 2250
+        Create k with the value 789.
+        Object created.
+        Value is 789
+        Set value of k to sum of i and j values.
+        Value is 2265
+        Result of comparing i and j is Object created by copy constructor.
+        -1
+        Result of comparing k and j is Object created by copy constructor.
+        1
+        ```
+
+        ---
