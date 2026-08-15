@@ -4231,3 +4231,161 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         ```
 
         ---
+
+4. 第4题
+
+    - Exer12_04.cpp
+
+        ```cpp
+        // Exer12_04.cpp
+        /*************************第12章_练习_第4题************************\
+        修改第2题的解决方案，把compare()函数实现为类Integer在友元函数。然后，
+        思考是否真的有必要将这个函数实现为友元函数。
+        \*****************************************************************/
+        import integer;
+        import <iostream>;
+
+        int main()
+        {
+            std::cout << "Create i with the value 10." << std::endl;
+            Integer i{10};
+            i.show();
+            std::cout << "Change value of i to 15." << std::endl;
+            i.setValue(15);
+            i.show();
+
+            std::cout << "Create j from object i." << std::endl;
+            Integer j{i};
+            j.show();
+            std::cout << "Set value of j to 150 times that of i." << std::endl;
+            j.setValue(150 * i.getValue());
+            j.show();
+
+            std::cout << "Create k with the value 789." << std::endl;
+            Integer k{789};
+            k.show();
+            std::cout << "Set value of k to sum of i and j values." << std::endl;
+            k.setValue(i.getValue() + j.getValue());
+            k.show();
+
+            std::cout << "Result of FriendComparing i and j is " 
+                << compare(i, j) << std::endl;
+            std::cout << "Result of FriendComparing k and j is " 
+                << compare(k, j) << std::endl;
+
+            std::cout << "Result of nonFriendComparing i and j is " 
+                << nonFriendCompare(i, j) << std::endl;
+            std::cout << "Result of nonFriendComparing k and j is " 
+                << nonFriendCompare(k, j) << std::endl;
+        }
+        ```
+
+    - Integer.cppm
+
+        ```cpp
+        // Integer.cppm
+        export module integer;
+
+        export class Integer
+        {
+        public:
+            Integer(int value = 0);
+            Integer(const Integer& obj);
+
+            int getValue() const { return m_value; }
+            void setValue(int value) { m_value = value; }
+
+            void show() const;
+
+            friend int compare(const Integer& obj1, const Integer& obj2);
+
+        private:
+            int m_value;
+        };
+
+        export int nonFriendCompare(const Integer& obj1, const Integer& obj2);
+        ```
+
+    - Integer.cpp
+
+        ```cpp
+        // Integer.cpp
+        /*****************************************************************\
+        将 compare() 实现为友元函数非常简单。我们必须在类定义中将该函数声明为
+        友元。现在我们需要两个对象作为参数，函数体内的代码只需比较参数的成员变量
+        即可。两个参数都是常量引用。
+
+        然而，除了练习友元函数使用这一需求之外，compare() 函数实际上没有真正的
+        理由要成为 Integer 类的友元：它完全可以使用公有的 getValue() 函数来
+        实现。因此，下面给出的 nonFriendCompare() 函数相比友元函数更值得推荐。
+        \*****************************************************************/
+        module integer;
+        import <iostream>;
+
+        Integer::Integer(int value)
+            : m_value{value}
+        {
+            std::cout << "Object created." << std::endl;
+        }
+
+        Integer::Integer(const Integer& obj)
+            : m_value{obj.m_value}
+        {
+            std::cout << "Object created by copy constructor." << std::endl;
+        }
+
+        void Integer::show() const
+        {
+            std::cout << "Value is " << m_value << std::endl;
+        }
+
+        int compare(const Integer& obj1, const Integer& obj2)
+        {
+            if (obj1.m_value < obj2.m_value)
+                return -1;
+            else if (obj1.m_value == obj2.m_value)
+                return 0;
+            return 1;
+        }
+
+        int nonFriendCompare(const Integer& obj1, const Integer& obj2)
+        {
+            if (obj1.getValue() < obj2.getValue())
+                return -1;
+            else if (obj1.getValue() == obj2.getValue())
+                return 0;
+            return 1;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Create i with the value 10.
+        Object created.
+        Value is 10
+        Change value of i to 15.
+        Value is 15
+        Create j from object i.
+        Object created by copy constructor.
+        Value is 15
+        Set value of j to 150 times that of i.
+        Value is 2250
+        Create k with the value 789.
+        Object created.
+        Value is 789
+        Set value of k to sum of i and j values.
+        Value is 2265
+        Result of FriendComparing i and j is -1
+        Result of FriendComparing k and j is 1
+        Result of nonFriendComparing i and j is -1
+        Result of nonFriendComparing k and j is 1
+        ```
+
+        ---
+
+        - ❗❗**友元函数可以在类内部的public、private、protected 任何位置声明，但不是类的成员函数，在  
+        定义时不用加上friend关键字。**
+        - **友元函数的作用是绕过类的访问控制，直接访问类中private（和 protected）成员的一种机制**  
