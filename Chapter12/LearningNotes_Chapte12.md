@@ -3504,7 +3504,8 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
         void listBox() const
         {
-            std::cout << std::format("Box{:.1f},{:.1f},{:.1f}", m_length, m_width, m_height);
+            std::cout << std::format("Box{:.1f},{:.1f},{:.1f}", m_length,
+             m_width, m_height);
         }
 
     private:
@@ -3525,13 +3526,18 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
     import <functional>; // For std::bind()
     import <memory>;     // For std::make_shared<>() and std::shared_ptr<>;
 
-    // Creates a pseudorandom number generator (PRNG) for random doubles between 0 and max
+    // Creates a pseudorandom number generator (PRNG) for random doubles 
+    //between 0 and max
     auto createUniformPseudoRandomNumberGenerator(double max)
     {
-        std::random_device seeder;                             // True random number generator to obtain a seed(slow)
-        std::default_random_engine generator{seeder()};        // Efficient pseudo-random generator
-        std::uniform_real_distribution distribution{0.0, max}; // Generate in [0,max) interval
-        return std::bind(distribution, generator);             //... and in the darkness bind them!
+        std::random_device seeder;                             
+        // True random number generator to obtain a seed(slow)
+        std::default_random_engine generator{seeder()};        
+        // Efficient pseudo-random generator
+        std::uniform_real_distribution distribution{0.0, max}; 
+        // Generate in [0,max) interval
+        return std::bind(distribution, generator);             
+        //... and in the darkness bind them!
     }
 
     export Box randomBox()
@@ -3562,9 +3568,11 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
     export class Truckload
     {
     public:
-        Truckload() = default;                          // Default constructor - empty truckload
+        Truckload() = default;                          
+        // Default constructor - empty truckload
         Truckload(SharedBox box);                       // Constructor - one Box
-        Truckload(const std::vector<SharedBox> &boxes); // Constructor - vector of Boxes
+        Truckload(const std::vector<SharedBox> &boxes); 
+        // Constructor - vector of Boxes
         Truckload(const Truckload &src);                // Copy constructor
 
         ~Truckload(); // Destructor
@@ -3599,7 +3607,8 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
     module truckload;
     import <iostream>;
 
-    // Constructor - one Box (moved to source file to gain access to definition of Package)
+    // Constructor - one Box (moved to source file to gain access to 
+    //definition of Package)
     Truckload::Truckload(SharedBox box)
     {
         m_head = m_tail = new Package{box};
@@ -3623,7 +3632,8 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         }
     }
 
-    // Destructor: clean up the list (moved to source file to gain access to definition of Package)
+    // Destructor: clean up the list (moved to source file to gain access to 
+    //definition of Package)
     Truckload::~Truckload()
     {
         delete m_head;
@@ -3681,7 +3691,8 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         {
             if (current->m_box == boxToRemove) // We found the Box!
             {
-                // If there is a previous Package make it point to the next one (Figure 12.10)
+                // If there is a previous Package make it point to the next one 
+                //(Figure 12.10)
                 if (previous)
                     previous->m_next = current->m_next;
 
@@ -3693,14 +3704,16 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
                 if (current == m_current)
                     m_current = current->m_next;
 
-                current->m_next = nullptr; // Disconnext the current Package from the list
+                current->m_next = nullptr; // Disconnext the current Package 
+                //from the list
                 delete current;            // and delete it
 
                 return true; // Return true: we found and removed the box
             }
             // Move both pointers along (mind the order!)
             previous = current;         //- first current becomes the new previous
-            current  = current->m_next; //- then move current along to the next Package
+            current  = current->m_next; 
+            //- then move current along to the next Package
         }
 
         return false; // Retrun false: boxToRemove was not found
@@ -4118,6 +4131,103 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         -1
         Result of comparing k and j is Object created by copy constructor.
         1
+        ```
+
+        ---
+
+3. 第3题
+
+    - Exer12_03.cpp
+
+        ```cpp
+        // Exer12_03.cpp
+        /*************************第12章_练习_第3题************************
+        为Integer类实现成员函数add()、subtract()和multiply()，对当前对象和
+        Integer类型的参数值进行加法、减法和乘法运算。用main()演示类中这些函数的
+        操作，创建几个封装了整数值的Integer对象，再使用这些对象计算4*5^3 +
+        6*5^2 + 7*5 + 8的值。实现这些函数，使计算和结果的输出在一条语句中完成。
+        *****************************************************************/
+        import integer;
+        import <iostream>;
+        int main()
+        {
+            const Integer four{4};
+            const Integer six{6};
+            const Integer eight{8};
+
+            Integer result{four};
+            std::cout << "Result is "
+                    << result.multiply(5).add(six).multiply(5).add(7).multiply(5).add(eight).getValue()
+                    << std::endl;
+            /*
+            4*5^3 + 6*5^2 + 7*5 + 8 = ((4*5+6)*5+7)*5+8
+            result.multiply(5);等价于result.multiply(Integer(5));
+            只要类有一个非 explicit 的单参数构造函数，C++ 就允许从参数类型到类类型的隐式转换。
+            */
+        }
+        ```
+
+    - Integer.cppm
+
+        ```cpp
+        // Integer.cppm
+        export module integer;
+
+        export class Integer
+        {
+        public:
+            Integer() = default;
+            Integer(int value);
+            Integer(const Integer &obj);
+
+            int getValue() const { return m_value; }
+
+            Integer &add(const Integer &obj);
+            Integer &subtract(const Integer &obj);
+            Integer &multiply(const Integer &obj);
+
+        private:
+            int m_value{0};
+        };
+        ```
+
+    - Integer.cpp
+
+        ```cpp
+        //Integer.cpp
+        module integer;
+
+        Integer::Integer(int value)
+            : m_value{value} {}
+
+        Integer::Integer(const Integer &obj)
+            : m_value{obj.m_value} {}
+
+        Integer &Integer::add(const Integer &obj)
+        {
+            m_value += obj.m_value;
+            return *this;
+        }
+
+        Integer &Integer::multiply(const Integer &obj)
+        {
+            m_value *= obj.m_value;
+            return *this;
+        }
+
+        Integer &Integer::subtract(const Integer &obj)
+        {
+            m_value -= obj.m_value;
+            return *this;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Result is 693
         ```
 
         ---
