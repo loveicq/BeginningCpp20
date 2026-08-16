@@ -4389,3 +4389,175 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
         - ❗❗**友元函数可以在类内部的public、private、protected 任何位置声明，但不是类的成员函数，在  
         定义时不用加上friend关键字。**
         - **友元函数的作用是绕过类的访问控制，直接访问类中private（和 protected）成员的一种机制**  
+
+5. 第5题
+
+    - Exer12_05.cpp
+
+        ```cpp
+        // Exer12_05.cpp
+        /*************************第12章_练习_第5题************************\
+        为第2题创建的Integer类实现一个静态函数printCount()，使其输出存在的
+        Integer对象的数量。修改main()函数，测试这个数字是否根据情况增加或减少。
+        \*****************************************************************/
+        import integer;
+        import <iostream>;
+
+        void showIntegerVal(Integer it);
+        void showIntegerRef(const Integer& it);
+
+        int main()
+        {
+            std::cout << "Create i with the value 0." << std::endl;
+            Integer i;
+            i.show();
+
+            Integer::printCount();
+
+            if (i.getValue() == 0)
+            {
+                std::cout << "Create j from object i." << std::endl;
+                Integer j{i};
+                j.show();
+                Integer::printCount();
+            }
+
+            Integer::printCount();
+
+            Integer array[]{1, 2, 3};
+
+            Integer::printCount();
+
+            showIntegerRef(array[0]);
+            showIntegerVal(array[1]);
+
+            Integer::printCount();
+        }
+
+        void showIntegerVal(Integer it)
+        {
+            it.show();
+            Integer::printCount();
+        }
+
+        void showIntegerRef(const Integer& it)
+        {
+            it.show();
+            Integer::printCount();
+        }
+        ```
+
+    - Integer.cppm
+
+        ```cpp
+        // Integer.cppm
+        export module integer;
+
+        export class Integer
+        {
+        public:
+            Integer(int value = 0);
+            Integer(const Integer& obj);
+            ~Integer();
+
+            int getValue() const { return m_value; }
+            void setValue(int value) { m_value = value; }
+
+            int compare(const Integer& obj) const;
+
+            void show() const;
+
+            static void printCount();
+            // 静态成员函数的本质是「没有this指针的成员函数」——它不依赖任何对象实例
+            // 静态成员函数可以在类的作用域，用类名::函数名调用，如Integer::printCount();
+
+        private:
+            int m_value;
+
+            static inline unsigned int s_count{};
+        };
+        ```
+
+    - Integer.cpp
+
+        ```cpp
+        // Integer.cpp
+        /*****************************************************************\
+        要实现 printCount()，首先需要一个静态成员变量来存储对象计数。每个构造
+        函数都应该递增该计数，并且需要添加一个析构函数来递减它。
+        \*****************************************************************/
+        module integer;
+        import <iostream>;
+
+        Integer::Integer(int value) : m_value{value}
+        {
+            ++s_count;
+            std::cout << "Object created." << std::endl;
+        }
+
+        Integer::Integer(const Integer& obj) : m_value{obj.m_value}
+        {
+            ++s_count;
+            std::cout << "Object created by copy constructor." << std::endl;
+        }
+
+        Integer::~Integer()
+        {
+            --s_count;
+            std::cout << "Object deleted." << std::endl;
+        }
+
+        void Integer::show() const
+        {
+            std::cout << "Value is " << m_value << std::endl;
+        }
+
+        int Integer::compare(const Integer& obj) const
+        {
+            if (m_value < obj.m_value)
+                return -1;
+            else if (m_value == obj.m_value)
+                return 0;
+            return 1;
+        }
+
+        void Integer::printCount()
+        {
+            std::cout << "There are now " << s_count << " Integer object(s)." 
+                << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Create i with the value 0.
+        Object created.
+        Value is 0
+        There are now 1 Integer object(s).
+        Create j from object i.
+        Object created by copy constructor.
+        Value is 0
+        There are now 2 Integer object(s).
+        Object deleted.
+        There are now 1 Integer object(s).
+        Object created.
+        Object created.
+        Object created.
+        There are now 4 Integer object(s).
+        Value is 1
+        There are now 4 Integer object(s).
+        Object created by copy constructor.
+        Value is 2
+        There are now 5 Integer object(s).
+        Object deleted.
+        There are now 4 Integer object(s).
+        Object deleted.
+        Object deleted.
+        Object deleted.
+        Object deleted.
+        ```
+
+        --
