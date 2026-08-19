@@ -17,7 +17,7 @@ auto createUniformPseudoRandomNumberGenerator(double max)
 export Box randomBox()
 {
     const int dimLimit{100};
-    static auto random{createUniformPseudoRandomNumberGenerator{dimLimit}};
+    static auto random{createUniformPseudoRandomNumberGenerator(dimLimit)};
     return Box{random(), random(), random()};
 }
 

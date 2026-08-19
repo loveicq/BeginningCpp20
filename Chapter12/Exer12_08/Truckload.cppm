@@ -22,8 +22,8 @@ public:
     Iterator getIterator() const;
 
     void addBox(SharedBox box);
-    void removeBox(SharedBox box);
-    void removeBox(Iterator iter);
+    bool removeBox(SharedBox box);
+    bool removeBox(Iterator iter);
 
     void listBoxes() const;
     void listBoxesReversed() const;
@@ -52,6 +52,6 @@ private:
     Package* m_current;
 
     friend class Truckload;
-    explicit Tterator(Package* head, Package* tail)
+    explicit Iterator(Package* head, Package* tail)
         : m_head{head}, m_tail{tail}, m_current{nullptr} {}
 };

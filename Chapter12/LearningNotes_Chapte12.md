@@ -4688,7 +4688,8 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
             void listBox() const
             {
-                std::cout << std::format("Box({:.1f},{:.1f},{:.1f})\n", m_length, m_width, m_height);
+                std::cout << std::format("Box({:.1f},{:.1f},{:.1f})\n"
+                    , m_length, m_width, m_height);
             }
 
         private:
@@ -4779,7 +4780,8 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
             Package* m_current;
 
             friend class Truckload;
-            explicit Iterator(Package* head) : m_head{head}, m_current{nullptr} {}
+            explicit Iterator(Package* head) : m_head{head}, m_current{nullptr} 
+                {}
         };
         ```
 
@@ -4987,6 +4989,815 @@ pAcc->calcInterest();   // 根据实际对象类型调用贷款账户的 calcInt
 
 
         The smallest box in the second list is Box(33.2,0.2,30.0)
+        ```
+
+        ---
+
+7. 第7题
+
+    - Exer12_07.cpp
+
+        ```cpp
+        // Exer12_07.cpp
+        /*************************第12章_练习_第7题************************\
+        修改第6题的Package类，使其包含另外一个指针，指向链表中的前一个对象。这就
+        创建了所谓的“双向链表”，相应地，之前使用的数据结构称为“单向链表”。修改
+        Package、Truckload和Iterator类来使用这个新指针，包括提供反向遍历链表中
+        Box对象的能力，以及以相反顺序列出Truckload中Box对象的能力。设计一个
+        main()函数来演示新功能。
+        \*****************************************************************/
+        import box.random;
+        import truckload;
+        import <iostream>;
+
+        SharedBox findLargestBox(const Truckload& truckload);
+        SharedBox findSmallestBox(const Truckload& truckload);
+
+        int main()
+        {
+            Truckload load;
+
+            const size_t boxCount{12};
+            for (size_t i{}; i < boxCount; ++i)
+                load.addBox(randomSharedBox());
+
+            std::cout << "The random truckload:\n";
+            load.listBoxes();
+            std::cout << std::endl;
+
+            std::cout << "The same random truckload in reverse:\n";
+            load.listBoxesReversed();
+            std::cout << std::endl;
+
+            std::cout << "The largest box (found using forward iteration) is ";
+            findLargestBox(load)->listBox();
+            std::cout << std::endl;
+
+            std::cout << "The smallest box(found using reverse iteration) is ";
+            findSmallestBox(load)->listBox();
+            std::cout << std::endl;
+        }
+
+        SharedBox findLargestBox(const Truckload& truckload)
+        {
+            auto iterator{truckload.getIterator()};
+            SharedBox largestBox{iterator.getFirstBox()};
+
+            SharedBox nextBox{iterator.getNextBox()};
+            while (nextBox)
+            {
+                if (nextBox->compare(*largestBox) > 0)
+                    largestBox = nextBox;
+                nextBox = iterator.getNextBox();
+            }
+
+            return largestBox;
+        }
+
+        SharedBox findSmallestBox(const Truckload& truckload)
+        {
+            auto iterator{truckload.getIterator()};
+            SharedBox smallestBox{iterator.getLastBox()};
+
+            SharedBox nextBox{iterator.getPreviousBox()};
+            while (nextBox)
+            {
+                if (nextBox->compare(*smallestBox) < 0)
+                    smallestBox = nextBox;
+                nextBox = iterator.getPreviousBox();
+            }
+
+            return smallestBox;
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <iostream>;
+        import <format>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{1.0}, m_width{width}, m_height{height} {}
+
+            double volume() const
+            {
+                return m_length * m_width * m_height;
+            }
+
+            int compare(const Box& box) const
+            {
+                if (volume() < box.volume())
+                    return -1;
+                if (volume() == box.volume())
+                    return 0;
+                return 1;
+            }
+
+            void listBox() const
+            {
+                std::cout << std::format("Box({:.1f},{:.1f},{:.1f})"
+                    , m_length, m_width, m_height);
+            }
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+        ```
+
+    - RandomBoxes.cppm
+
+        ```cpp
+        // RandomBoxes.cppm
+        export module box.random;
+
+        import box;
+        import <functional>;
+        import <random>;
+        import <memory>;
+
+        auto createUniformPseudoRandomNumberGenerator(double max)
+        {
+            std::random_device seeder;
+            std::default_random_engine generator{seeder()};
+            std::uniform_real_distribution distribution{0.0, max};
+
+            return std::bind(distribution, generator);
+        }
+
+        export Box randomBox()
+        {
+            const int dimLimit{100};
+            static auto random{createUniformPseudoRandomNumberGenerator(dimLimit)};
+            return Box{random(), random(), random()};
+        }
+
+        export auto randomSharedBox()
+        {
+            return std::make_shared<Box>(randomBox());
+        }
+        ```
+
+    - Truckload.cppm
+
+        ```cpp
+        // Truckload.cppm
+        export module truckload;
+
+        import box;
+
+        import <memory>;
+        import <vector>;
+
+        export using SharedBox = std::shared_ptr<Box>;
+
+        export class Truckload
+        {
+        public:
+            Truckload() = default;
+            Truckload(SharedBox box);
+            Truckload(const std::vector<SharedBox>& boxes);
+            Truckload(const Truckload& src);
+
+            ~Truckload();
+
+            class Iterator;
+
+            Iterator getIterator() const;
+
+            void addBox(SharedBox box);
+            bool removeBox(SharedBox box);
+
+            void listBoxes() const;
+            void listBoxesReversed() const;
+
+        private:
+            class Package;
+
+            Package* m_head{};
+            Package* m_tail{};
+        };
+
+        class Truckload::Iterator
+        {
+        public:
+            SharedBox getFirstBox();
+            SharedBox getLastBox();
+            SharedBox getNextBox();
+            SharedBox getPreviousBox();
+
+        private:
+            Package* m_head;
+            Package* m_tail;
+            Package* m_current;
+
+            friend class Truckload;
+            explicit Iterator(Package* head, Package* tail)
+                : m_head{head}, m_tail{tail}, m_current{nullptr} {}
+        };
+        ```
+
+    - Truckload.cpp
+
+        ```cpp
+        // Truckload.cpp
+        module truckload;
+
+        import <iostream>;
+
+        class Truckload::Package
+        {
+        public:
+            SharedBox m_box;
+            Package* m_next;
+            Package* m_previous;
+
+            Package(SharedBox box) : m_box{box}, m_next{}, m_previous{} {}
+            ~Package() { delete m_next; }
+        };
+
+        Truckload::Truckload(const std::vector<SharedBox>& boxes)
+        {
+            for (const auto& box : boxes)
+                addBox(box);
+        }
+
+        Truckload::Truckload(const Truckload& src)
+        {
+            for (Package* package{src.m_head}; package; package = package->m_next)
+                addBox(package->m_box);
+        }
+
+        Truckload::~Truckload()
+        {
+            delete m_head;
+        }
+
+        void Truckload::listBoxes() const
+        {
+            const size_t boxesPerLine{4};
+            size_t count{};
+            for (Package* package{m_head}; package; package = package->m_next)
+            {
+                std::cout << ' ';
+                package->m_box->listBox();
+                if (!(++count % boxesPerLine))
+                    std::cout << std::endl;
+            }
+            if (count % boxesPerLine)
+                std::cout << std::endl;
+        }
+
+        void Truckload::listBoxesReversed() const
+        {
+            const size_t boxesPerLine{4};
+            size_t count{};
+            for (Package* package{m_tail}; package; package = package->m_previous)
+            {
+                std::cout << ' ';
+                package->m_box->listBox();
+                if (!(++count % boxesPerLine))
+                    std::cout << std::endl;
+            }
+            if (count % boxesPerLine)
+                std::cout << std::endl;
+        }
+
+        Truckload::Iterator Truckload::getIterator() const
+        {
+            return Iterator{m_head, m_tail};
+        }
+
+        SharedBox Truckload::Iterator::getFirstBox()
+        {
+            m_current = m_head;
+            return m_current ? m_current->m_box : nullptr;
+        }
+
+        SharedBox Truckload::Iterator::getLastBox()
+        {
+            m_current = m_tail;
+            return m_current ? m_current->m_box : nullptr;
+        }
+
+        SharedBox Truckload::Iterator::getNextBox()
+        {
+            if (!m_current)
+                return getFirstBox();
+
+            m_current = m_current->m_next;
+
+            return m_current ? m_current->m_box : nullptr;
+        }
+
+        SharedBox Truckload::Iterator::getPreviousBox()
+        {
+            if (!m_current)
+                return getLastBox();
+
+            m_current = m_current->m_previous;
+
+            return m_current ? m_current->m_box : nullptr;
+        }
+
+        void Truckload::addBox(SharedBox box)
+        {
+            auto package{new Package{box}};
+
+            if (m_tail)
+            {
+                package->m_previous = m_tail;
+                m_tail->m_next      = package;
+            }
+            else
+                m_head = package;
+
+            m_tail = package;
+        }
+
+        bool Truckload::removeBox(SharedBox boxToRemove)
+        {
+            Package* current{m_head};
+            while (current)
+            {
+                if (current->m_box == boxToRemove)
+                {
+                    if (current->m_previous)
+                        current->m_previous->m_next = current->m_next;
+                    if (current->m_next)
+                        current->m_next->m_previous = current->m_previous;
+                    if (current == m_head)
+                        m_head = current->m_next;
+                    if (current == m_tail)
+                        m_tail = current->m_previous;
+
+                    current->m_next = nullptr;
+                    delete current;
+
+                    return true;
+                }
+
+                current = current->m_next;
+            }
+
+            return false;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        The random truckload:
+        Box(1.0,48.5,65.5) Box(1.0,22.1,63.6) Box(1.0,72.3,61.9) Box(1.0,37.5,30.3)
+        Box(1.0,66.0,63.4) Box(1.0,88.2,10.6) Box(1.0,83.3,12.9) Box(1.0,23.6,82.8)
+        Box(1.0,46.9,96.2) Box(1.0,67.5,40.6) Box(1.0,53.6,83.1) Box(1.0,3.2,27.2)
+
+        The same random truckload in reverse:
+        Box(1.0,3.2,27.2) Box(1.0,53.6,83.1) Box(1.0,67.5,40.6) Box(1.0,46.9,96.2)
+        Box(1.0,23.6,82.8) Box(1.0,83.3,12.9) Box(1.0,88.2,10.6) Box(1.0,66.0,63.4)
+        Box(1.0,37.5,30.3) Box(1.0,72.3,61.9) Box(1.0,22.1,63.6) Box(1.0,48.5,65.5)
+
+        The largest box (found using forward iteration) is Box(1.0,46.9,96.2)
+        The smallest box(found using reverse iteration) is Box(1.0,3.2,27.2)
+        ```
+
+        ---
+
+8. 第8题
+
+    - Exer12_08.cpp
+
+        ```cpp
+        // Exer12_08.cpp
+        /*************************第12章_练习_第8题************************\
+        认真分析示例Ex12_17（以及示例Ex12_18和前面两个练习题）中的main()函数，
+        会发现下面的性能缺陷：要移除最大的Box对象，我们需要对链表执行两次线性遍历。
+        首先，找到最大的Box对象，然后在removeBox()内找到要取消链接的Package对象。
+        以第7题的Tterator类为基础，设计一种解决方案来避免第二次遍历。
+        提示一下，解决方案依赖于具有如下签名的成员函数：
+        bool removeBox(Iterator iterator);
+        \*****************************************************************/
+        import box.random;
+        import truckload;
+        import <iostream>;
+
+        Truckload::Iterator findLargestBox(const Truckload& truckload);
+        Truckload::Iterator findSmallestBox(const Truckload& truckload);
+
+        int main()
+        {
+            Truckload load;
+
+            const size_t boxCount{12};
+            for (size_t i{}; i < boxCount; ++i)
+                load.addBox(randomSharedBox());
+
+            std::cout << "The random truckload:\n";
+            load.listBoxes();
+            std::cout << std::endl;
+
+            const auto largestIter{findLargestBox(load)};
+            const auto smallestIter{findSmallestBox(load)};
+
+            std::cout << "The largest box(found using forward iteration) is ";
+            largestIter.getCurrentBox()->listBox();
+            std::cout << '\n'
+                    << std::endl;
+
+            load.removeBox(largestIter);
+
+            std::cout << "The truckload without its largest box:\n";
+            load.listBoxes();
+            std::cout << std::endl;
+
+            std::cout << "The smallest box (found using reverse iteration) is ";
+            smallestIter.getCurrentBox()->listBox();
+            std::cout << '\n'
+                    << std::endl;
+
+            load.removeBox(smallestIter);
+
+            std::cout << "The truckload without its smallest box (in reverse order):\n";
+            load.listBoxesReversed();
+        }
+
+        Truckload::Iterator findLargestBox(const Truckload& truckload)
+        {
+            auto iterator{truckload.getIterator()};
+            iterator.getFirstBox();
+            auto largestBoxIterator{iterator};
+
+            while (iterator.getNextBox())
+            {
+                if (iterator.getCurrentBox()->compare(*largestBoxIterator
+                    .getCurrentBox()) > 0)
+                    {
+                        largestBoxIterator = iterator;
+                    }
+            }
+            return largestBoxIterator;
+        }
+
+        Truckload::Iterator findSmallestBox(const Truckload& truckload)
+        {
+            auto iterator{truckload.getIterator()};
+            iterator.getLastBox();
+            auto smallestBoxIterator{iterator};
+
+            while (iterator.getPreviousBox())
+            {
+                if (iterator.getCurrentBox()->compare(*smallestBoxIterator
+                .getCurrentBox()) < 0)
+                    {
+                        smallestBoxIterator = iterator;
+                    }
+            }
+
+            return smallestBoxIterator;
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <iostream>;
+        import <format>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {}
+
+            double volume() const
+            {
+                return m_length * m_height * m_width;
+            }
+
+            int compare(const Box& box) const
+            {
+                if (volume() < box.volume())
+                    return -1;
+                if (volume() == box.volume())
+                    return 0;
+                return 1;
+            }
+
+            void listBox() const
+            {
+                std::cout << std::format("Box({:.1f},{:.1f},{:.1f})", m_length
+                    , m_width, m_height);
+            }
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+        ```
+
+    - RandomBoxes.cppm
+
+        ```cpp
+        // RandomBoxes.cppm
+        export module box.random;
+
+        import box;
+        import <random>;
+        import <functional>;
+        import <memory>;
+
+        auto createUniformPseudoRandomNumberGenerator(double max)
+        {
+            std::random_device seeder;
+            std::default_random_engine generator{seeder()};
+            std::uniform_real_distribution distribution{0.0, max};
+            return std::bind(distribution, generator);
+        }
+
+        export Box randomBox()
+        {
+            const int dimLimit{100};
+            static auto random{createUniformPseudoRandomNumberGenerator(dimLimit)};
+            return Box{random(), random(), random()};
+        }
+
+        export auto randomSharedBox()
+        {
+            return std::make_shared<Box>(randomBox());
+        }
+        ```
+
+    - Truckload.cppm
+
+        ```cpp
+        // Truckload.cppm
+        export module truckload;
+
+        import box;
+        import <memory>;
+        import <vector>;
+
+        export using SharedBox = std::shared_ptr<Box>;
+
+        export class Truckload
+        {
+        public:
+            Truckload() = default;
+            Truckload(SharedBox box);
+            Truckload(const std::vector<SharedBox>& boxes);
+            Truckload(const Truckload& src);
+
+            ~Truckload();
+
+            class Iterator;
+
+            Iterator getIterator() const;
+
+            void addBox(SharedBox box);
+            bool removeBox(SharedBox box);
+            bool removeBox(Iterator iter);
+
+            void listBoxes() const;
+            void listBoxesReversed() const;
+
+        private:
+            class Package;
+
+            void removePackage(Package* package);
+
+            Package* m_head{};
+            Package* m_tail{};
+        };
+
+        class Truckload::Iterator
+        {
+        public:
+            SharedBox getFirstBox();
+            SharedBox getLastBox();
+            SharedBox getNextBox();
+            SharedBox getPreviousBox();
+            SharedBox getCurrentBox() const;
+
+        private:
+            Package* m_head;
+            Package* m_tail;
+            Package* m_current;
+
+            friend class Truckload;
+            explicit Iterator(Package* head, Package* tail)
+                : m_head{head}, m_tail{tail}, m_current{nullptr} {}
+        };
+        ```
+
+    - Truckload.cpp
+
+        ```cpp
+        // Truckload.cpp
+        module truckload;
+
+        import <iostream>;
+
+        class Truckload::Package
+        {
+        public:
+            SharedBox m_box;
+            Package* m_next;
+            Package* m_previous;
+
+            Package(SharedBox box) : m_box{box}, m_next{}, m_previous{} {}
+            ~Package() { delete m_next; }
+        };
+
+        Truckload::Truckload(SharedBox box)
+        {
+            m_head = m_tail = new Package{box};
+        }
+
+        Truckload::Truckload(const std::vector<SharedBox>& boxes)
+        {
+            for (const auto& box : boxes)
+                addBox(box);
+        }
+
+        Truckload::Truckload(const Truckload& src)
+        {
+            for (Package* package{src.m_head}; package; package = package->m_next)
+                addBox(package->m_box);
+        }
+
+        Truckload::~Truckload()
+        {
+            delete m_head;
+        }
+
+        void Truckload::listBoxes() const
+        {
+            const size_t boxesPerLine{4};
+            size_t count{};
+            for (Package* package{m_head}; package; package = package->m_next)
+            {
+                std::cout << ' ';
+                package->m_box->listBox();
+                if (!(++count % boxesPerLine))
+                    std::cout << std::endl;
+            }
+            if (count % boxesPerLine)
+                std::cout << std::endl;
+        }
+
+        void Truckload::listBoxesReversed() const
+        {
+            const size_t boxesPerLine{4};
+            size_t count{};
+            for (Package* package{m_tail}; package; package = package->m_previous)
+            {
+                std::cout << ' ';
+                package->m_box->listBox();
+                if (!(++count % boxesPerLine))
+                    std::cout << std::endl;
+            }
+            if (count % boxesPerLine)
+                std::cout << std::endl;
+        }
+
+        Truckload::Iterator Truckload::getIterator() const
+        {
+            return Iterator{m_head, m_tail};
+        }
+
+        SharedBox Truckload::Iterator::getFirstBox()
+        {
+            m_current = m_head;
+            return getCurrentBox();
+        }
+
+        SharedBox Truckload::Iterator::getLastBox()
+        {
+            m_current = m_tail;
+            return getCurrentBox();
+        }
+
+        SharedBox Truckload::Iterator::getNextBox()
+        {
+            if (!m_current)
+                return getFirstBox();
+
+            m_current = m_current->m_next;
+
+            return getCurrentBox();
+        }
+
+        SharedBox Truckload::Iterator::getPreviousBox()
+        {
+            if (!m_current)
+                return getLastBox();
+
+            m_current = m_current->m_previous;
+
+            return getCurrentBox();
+        }
+
+        SharedBox Truckload::Iterator::getCurrentBox() const
+        {
+            return m_current ? m_current->m_box : nullptr;
+        }
+
+        void Truckload::addBox(SharedBox box)
+        {
+            auto package{new Package{box}};
+
+            if (m_tail)
+            {
+                package->m_previous = m_tail;
+                m_tail->m_next      = package;
+            }
+            else
+                m_head = package;
+
+            m_tail = package;
+        }
+
+        bool Truckload::removeBox(SharedBox boxToRemove)
+        {
+            for (auto* current{m_head}; current != nullptr; current = current->m_next)
+            {
+                if (current->m_box == boxToRemove)
+                {
+                    removePackage(current);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        bool Truckload::removeBox(Iterator iter)
+        {
+            if (iter.m_current)
+            {
+                removePackage(iter.m_current);
+                return true;
+            }
+            else
+                return false;
+        }
+
+        void Truckload::removePackage(Package* package)
+        {
+            if (package->m_previous)
+                package->m_previous->m_next = package->m_next;
+            if (package->m_next)
+                package->m_next->m_previous = package->m_previous;
+
+            if (package == m_head)
+                m_head = package->m_next;
+            if (package == m_tail)
+                m_tail = package->m_previous;
+
+            package->m_next = nullptr;
+            delete package;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        The random truckload:
+        Box(42.2,32.6,10.9) Box(18.1,35.0,92.2) Box(20.0,7.1,27.4) Box(99.7,43.7,45.5)
+        Box(56.4,17.9,26.0) Box(43.9,53.7,92.5) Box(40.7,99.3,55.1) Box(5.3,47.8,84.5)
+        Box(64.6,47.6,91.3) Box(56.4,43.3,70.6) Box(34.5,60.6,16.9) Box(57.5,58.3,30.4)
+
+        The largest box(found using forward iteration) is Box(64.6,47.6,91.3)
+
+        The truckload without its largest box:
+        Box(42.2,32.6,10.9) Box(18.1,35.0,92.2) Box(20.0,7.1,27.4) Box(99.7,43.7,45.5)
+        Box(56.4,17.9,26.0) Box(43.9,53.7,92.5) Box(40.7,99.3,55.1) Box(5.3,47.8,84.5)
+        Box(56.4,43.3,70.6) Box(34.5,60.6,16.9) Box(57.5,58.3,30.4)
+
+        The smallest box (found using reverse iteration) is Box(20.0,7.1,27.4)
+
+        The truckload without its smallest box (in reverse order):
+        Box(57.5,58.3,30.4) Box(34.5,60.6,16.9) Box(56.4,43.3,70.6) Box(5.3,47.8,84.5)
+        Box(40.7,99.3,55.1) Box(43.9,53.7,92.5) Box(56.4,17.9,26.0) Box(99.7,43.7,45.5)
+        Box(18.1,35.0,92.2) Box(42.2,32.6,10.9)
         ```
 
         ---
