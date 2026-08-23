@@ -37,11 +37,16 @@ int main()
     return 0;
 }
 ```
+
 ### 4.1.2 比较浮点数值
+
 - NaN值既不小于、大于也不等于任何其他数字，甚至也不等于另一个NaN值
 - ±Inf值，正、负无穷大
+
 ### 4.1.3 太空飞船运算符
+
 <=>:三向比较运算符  
+
 ```cpp
 #include <iostream>
 #include <format>
@@ -63,6 +68,7 @@ int main()
     return 0;
 }
 ```
+
 1. 比较类型
     - strong_ordering（整数和指针）->less、greater、equal、equivalent
     - partial_ordering（浮点数）->less、greater、equivalent、unordered
