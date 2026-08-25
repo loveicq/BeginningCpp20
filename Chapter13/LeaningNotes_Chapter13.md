@@ -247,7 +247,10 @@ export bool operator<(const Box& box1, const Box& box2)
 4. 将一元运算符Op实现为类ClassType的成员，形式如下：  
     `ClassType& operator Op();`  
     当一元运算符被定义为全局运算符函数时，其唯一的参数就是操作数。原型如下：  
-    `ClassType& operator Op(/*const*/ ClassType& obj);`
+    `ClassType& operator Op(/*const*/ ClassType& obj);`  
+
+    **在类中实现所有的比较运算符**  
+
 5. 案例Ex13_03
     - Box.cppm
 
@@ -372,3 +375,11 @@ export bool operator<(const Box& box1, const Box& box2)
     - `>`
     - `>=`
 7. 本例重载了`==`运算符，编译器会自动生成`!=`比较运算符
+8. 如上，通过重载<=>和==即可实现全部比较运算符（7个）  
+
+    **默认比较运算符**  
+
+    `bool Box::operator==(const Box& otherBox) const = default;`  
+    `std::partial_ordering Box::operator<=>(const Box& otherBox) const = default;`  
+
+9. 每当默认生成`<=>`时，编译器也将添加默认生成的`==`运算符，如果所有比较运算符的默认行为符合要求，就只需要默认生成一个运算符函数：`<=>`。
