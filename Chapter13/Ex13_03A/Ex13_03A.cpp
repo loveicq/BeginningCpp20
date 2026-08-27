@@ -1,8 +1,8 @@
-// Ex13_03.cpp
+// Ex13_03A.cpp
 import box;
 import <iostream>;
-import <string_view>;
 import <vector>;
+import <string_view>;
 import <format>;
 
 void show(const Box& box);
@@ -16,34 +16,32 @@ int main()
 
     for (const auto& box : boxes)
         if (theBox > box)
-            show(theBox, " is greater than ", box); // > works
-
-    std::cout << std::endl;
+            show(theBox, " is greater than ", box);
+    std::cout << '\n';
 
     for (const auto& box : boxes)
         if (theBox != box)
-            show(theBox, " is not equal to ", box); // != works
-
-    std::cout << std::endl;
+            show(theBox, " is not equal to ", box);
+    std::cout << '\n';
 
     for (const auto& box : boxes)
-        if (6.0 <= box) // Yes, even double <= Box works!!
+        if (6.0 <= box)
         {
             std::cout << "6 is less than or equal to ";
             show(box);
-            std::cout << std::endl;
+            std::cout << '\n';
         }
 }
 
 void show(const Box& box)
 {
-    std::cout << std::format("Box({:.1f},{:.1f},{:.1f})",
-                             box.getLength(), box.getWidth(), box.getHeight());
+    std::cout << std::format("Box({:.1f},{:.1f},{:.1f})", box.getLength(), box.getWidth(), box.getHeight());
 }
+
 void show(const Box& box1, std::string_view relationship, const Box& box2)
 {
     show(box1);
     std::cout << relationship;
     show(box2);
-    std::cout << std::endl;
+    std::cout << '\n';
 }

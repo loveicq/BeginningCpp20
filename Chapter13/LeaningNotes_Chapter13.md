@@ -375,11 +375,151 @@ export bool operator<(const Box& box1, const Box& box2)
     - `>`
     - `>=`
 7. 本例重载了`==`运算符，编译器会自动生成`!=`比较运算符
-8. 如上，通过重载<=>和==即可实现全部比较运算符（7个）  
+8. 如上，通过重载<=>和==即可实现全部比较运算符（6个）  
 
     **默认比较运算符**  
 
-    `bool Box::operator==(const Box& otherBox) const = default;`  
-    `std::partial_ordering Box::operator<=>(const Box& otherBox) const = default;`  
+    ```cpp
+    bool Box::operator==(const Box& otherBox) const = default;
+    // 默认==比较运算符可实现逐个成员变量比较，而非比较体积
+    // 重载==，编译器会自动生成!=，反之变然。可直接调用
+    ```
 
-9. 每当默认生成`<=>`时，编译器也将添加默认生成的`==`运算符，如果所有比较运算符的默认行为符合要求，就只需要默认生成一个运算符函数：`<=>`。
+    ```cpp
+    std::partial_ordering Box::operator<=>(const Box& otherBox) const = default;
+    auto Box::operator<=>(const Box& oterBox) const = default;
+    // 默认<=>也是按声明顺序逐个比较成员变量，且包含了上面所提到的6个运算符
+    // 但本案例因要比较体积，所以自定义重载<=>，再默认重载==，实现体积和成员变量两种比较
+    ```
+
+9. 每当默认生成`<=>`时，编译器也将添加默认生成的`==`运算符，如果所有比较运算符的
+默认行为符合要求，就只需要默认生成一个运算符函数：`<=>`。
+
+10. 案例Ex13_03A
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <compare>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {}
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+            std::partial_ordering operator<=>(const Box& box) const 
+                { return volume() <=> box.volume(); } // 自定义<=>,比较体积大小，而非比较成员变量大小
+
+            bool operator==(const Box& box) const = default; // 默认==，逐个成员变量比较大小，而非比较体积大小
+            // 对象与对象的比较，通过上面的<=>和==重载，即包含了<、<=、>、>=、==、!=这6个运算符了
+            // 仅重载<=>是不包括==和!=这2个运算符的
+
+            std::partial_ordering operator<=>(const double value) const 
+                { return volume() <=> value; } // 自定义<=>，比较体积，而非成员变量
+            // 对象与数值的比较，需要单独重载<=>
+
+            // 如果本例不比较体积大小(自定义)，仅比较成员变量大小(默认)，则只需要一行默认的<=>重载就足够了：
+            // std::partial_ordering operator<=>(const Box& box) const = default;
+            //包括==、!=、<、<=、>、>=6个运算符
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+        ```
+
+    - Ex13_03.cpp
+
+        ```cpp
+        // Ex13_03A.cpp
+        import box;
+        import <iostream>;
+        import <vector>;
+        import <string_view>;
+        import <format>;
+
+        void show(const Box& box);
+        void show(const Box& box1, std::string_view relationship, const Box& box2);
+
+        int main()
+        {
+            const std::vector boxes{Box{2.0, 1.5, 3.0}, Box{1.0, 3.0, 5.0},
+                                    Box{1.0, 2.0, 1.0}, Box{2.0, 3.0, 2.0}};
+            const Box theBox{3.0, 1.0, 4.0};
+
+            for (const auto& box : boxes)
+                if (theBox > box)
+                    show(theBox, " is greater than ", box);
+            std::cout << '\n';
+
+            for (const auto& box : boxes)
+                if (theBox != box)
+                    show(theBox, " is not equal to ", box);
+            std::cout << '\n';
+
+            for (const auto& box : boxes)
+                if (6.0 <= box)
+                {
+                    std::cout << "6 is less than or equal to ";
+                    show(box);
+                    std::cout << '\n';
+                }
+        }
+
+        void show(const Box& box)
+        {
+            std::cout << std::format("Box({:.1f},{:.1f},{:.1f})"
+                , box.getLength(), box.getWidth(), box.getHeight());
+        }
+
+        void show(const Box& box1, std::string_view relationship, const Box& box2)
+        {
+            show(box1);
+            std::cout << relationship;
+            show(box2);
+            std::cout << '\n';
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+
+        Box(3.0,1.0,4.0) is greater than Box(2.0,1.5,3.0)
+        Box(3.0,1.0,4.0) is greater than Box(1.0,2.0,1.0)
+
+        Box(3.0,1.0,4.0) is not equal to Box(2.0,1.5,3.0)
+        Box(3.0,1.0,4.0) is not equal to Box(1.0,3.0,5.0)
+        Box(3.0,1.0,4.0) is not equal to Box(1.0,2.0,1.0)
+        Box(3.0,1.0,4.0) is not equal to Box(2.0,3.0,2.0)
+
+        6 is less than or equal to Box(2.0,1.5,3.0)
+        6 is less than or equal to Box(1.0,3.0,5.0)
+        6 is less than or equal to Box(2.0,3.0,2.0)
+        ```
+
+        ---
+
+## 13.4 为输出流重载<<运算符
+
+1. 标准输出流cout的类型是std::ostream
+2. 重载运算符并不是必须等效于对应的内置运算符，如<<和>>运算符原本是整数的移位操作；+和+=连接字符串等
+3. 案例Ex13_04
+    - Box.cppm
+
+```cpp
+
+```
