@@ -14,6 +14,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# ---------- ★ 解决 MSVC 中文乱码：强制使用 UTF-8 编码（源字符集和执行字符集） ----------
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 # ---------- 自动收集源文件 ----------
 file(GLOB MODULE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cppm" "${CMAKE_CURRENT_SOURCE_DIR}/*.ixx") 
 file(GLOB CPP_FILES    CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")

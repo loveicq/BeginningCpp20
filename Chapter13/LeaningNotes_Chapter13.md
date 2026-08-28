@@ -439,7 +439,7 @@ export bool operator<(const Box& box1, const Box& box2)
         };
         ```
 
-    - Ex13_03.cpp
+    - Ex13_03A.cpp
 
         ```cpp
         // Ex13_03A.cpp
