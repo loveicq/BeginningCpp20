@@ -32,5 +32,10 @@ private:
 export std::ostream& operator<<(std::ostream& stream, const Box& box)
 {
     stream << std::format("Box({:.1f},{:.1f},{:.1f})", box.getLength(), box.getWidth(), box.getHeight());
+    /*
+    ① std::format(...) → 先把格式串构造成一个 std::string
+    ② stream << std::string → 调用标准库已有的成员 operator<<，把字符串写入流
+    ③ 整个表达式返回 stream 的引用（供 return 使用）
+    */
     return stream;
 }

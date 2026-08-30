@@ -520,6 +520,281 @@ export bool operator<(const Box& box1, const Box& box2)
 3. 案例Ex13_04
     - Box.cppm
 
-```cpp
+        ```cpp
+        // Box.cppm
+        export module box;
 
-```
+        import <compare>;
+        import <ostream>;
+        import <format>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {}
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+            auto operator<=>(const Box& box) const { return volume() 
+                <=> box.volume(); }
+            auto operator<=>(double value) const { return volume() <=> value; }
+
+            bool operator==(const Box& box) const = default;
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, const Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})", box.getLength()
+                , box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+    - Ex13_04.cpp
+
+        ```cpp
+        // Ex13_04.cpp
+        import box;
+        import <iostream>;
+        import <format>;
+        import <string_view>;
+        import <vector>;
+
+        int main()
+        {
+            const std::vector boxes{Box{2.0, 1.5, 3.0}, Box{1.0, 3.0, 5.0},
+                                    Box{1.0, 2.0, 1.0}, Box{2.0, 3.0, 2.0}};
+            const Box theBox{3.0, 1.0, 4.0};
+
+            for (const auto& box : boxes)
+                if (theBox > box)
+                    std::cout << theBox << " is greater than " << box << std::endl;
+
+            std::cout << std::endl;
+
+            for (const auto& box : boxes)
+                if (theBox != box)
+                    std::cout << theBox << " is not equal to " << box << std::endl;
+
+            std::cout << std::endl;
+
+            for (const auto& box : boxes)
+                if (6.0 <= box)
+                    std::cout << "6 is less than or equal to " << box << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box(3.0,1.0,4.0) is greater than Box(2.0,1.5,3.0)
+        Box(3.0,1.0,4.0) is greater than Box(1.0,2.0,1.0)
+
+        Box(3.0,1.0,4.0) is not equal to Box(2.0,1.5,3.0)
+        Box(3.0,1.0,4.0) is not equal to Box(1.0,3.0,5.0)
+        Box(3.0,1.0,4.0) is not equal to Box(1.0,2.0,1.0)
+        Box(3.0,1.0,4.0) is not equal to Box(2.0,3.0,2.0)
+
+        6 is less than or equal to Box(2.0,1.5,3.0)
+        6 is less than or equal to Box(1.0,3.0,5.0)
+        6 is less than or equal to Box(2.0,3.0,2.0)
+
+        ```
+
+        ---
+
+        ♻通过本例理解重载<<运算符  
+        调用语句：`std::cout << "6 is less than or equal to " << box << std::endl;`  
+            三个<<运算符都是函数调用，每一个调用都返回std::cout引用，通过引用实现链式调用
+        1. std::ostream 定义在 `<ostream>` 头文件中，它是 C++ 标准库中的"输出流"类。
+            - std::cout，是 std::ostream 的直接实例，代表流出到屏幕
+            - std::ofstream，是std::ostream的派生实例，代表流出到文件
+            - std::ostringstream也是std::ostream的派生实例，代表流出到字符串输出流
+        2. std::cout<< "6 is less than or equal to "，右边操作数是字符串字面量  
+        （类型是 const char*），调用的重载：标准库自带的 operator<<：  
+            `std::ostream& operator<<(std::ostream&, const char*);`
+        3. （上一步返回的 std::cout 引用）<< box，右边操作数是自定义类型 Box，  
+            调用的重载是我们自己写的那个版本：  
+            `std::ostream& operator<<(std::ostream& stream, const Box& box);`
+        4. 上一步返回的 std::cout 引用）<< std::endl，右边操作数：std::endl（它是一个输出操纵器，  
+            本质是一个函数指针类型），调用的重载：标准库自带的 operator<<：  
+            `std::ostream& operator<<(std::ostream&, std::ostream& (*)(std::ostream&));`
+
+## 13.5 重载算术运算符
+
+1. 总是应该根据相应的算术赋值运算符op=()来实现二元算术运算符op()
+2. 案例Ex13_06
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <compare>;
+        import <ostream>;
+
+        export class Box {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{std::max(length, width)},
+                m_width{std::min(length, width)},
+                m_height{height}
+            {}
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+            std::partial_ordering operator<=>(const Box& aBox) const;
+            std::partial_ordering operator<=>(double value) const;
+            bool operator==(const Box& aBox) const = default;
+
+            Box& operator+=(const Box& aBox);
+            Box operator+(const Box& aBox) const;
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, const Box& box);
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        // Box.cpp
+        module box;
+
+        import <cmath>;
+        import <format>;
+
+        Box& Box::operator+=(const Box& aBox)
+        {
+            m_length = std::max(m_length, aBox.m_length);
+            m_width  = std::max(m_width, aBox.m_width);
+            m_height += aBox.m_height;
+            return *this;
+        }
+
+        Box Box::operator+(const Box& aBox) const
+        {
+            Box copy{*this};
+            copy += aBox;
+            return copy;
+        }
+
+        std::partial_ordering Box::operator<=>(const Box& aBox) const
+        {
+            return volume() <=> aBox.volume();
+        }
+
+        std::partial_ordering Box::operator<=>(double value) const
+        {
+            return volume() <=> value;
+        }
+
+        std::ostream& operator<<(std::ostream& stream, const Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                box.getLength(), box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+    - Ex13_06.cpp
+
+        ```cpp
+        // Ex13_06.cpp
+        import <iostream>;
+        import <format>;
+        import <vector>;
+        import <random>;
+        import <functional>;
+        import box;
+
+        auto createUniformPseudoRandomNumberGenerator(double max)
+        {
+            std::random_device seeder;
+            std::default_random_engine generator{seeder()};
+            std::uniform_real_distribution distribution{1.0, max};
+            return std::bind(distribution, generator);
+        }
+
+        int main()
+        {
+            const double limit{99};
+            auto random{createUniformPseudoRandomNumberGenerator(limit)};
+
+            const size_t boxCount{20};
+            std::vector<Box> boxes;
+
+            for (size_t i{}; i < boxCount; ++i)
+                boxes.push_back(Box{random(), random(), random()});
+
+            size_t first{};
+            size_t second{1};
+            double minVolume{(boxes[first] + boxes[second]).volume()};
+
+            for (size_t i{}; i < boxCount - 1; ++i) {
+                for (size_t j{i + 1}; j < boxCount; j++) {
+                    if (boxes[i] + boxes[j] < minVolume) {
+                        first     = i;
+                        second    = j;
+                        minVolume = (boxes[i] + boxes[j]).volume();
+                    }
+                }
+            }
+
+            std::cout << "The two boxes that sum to the smallest volume are "
+                    << boxes[first] << " and " << boxes[second] << '\n';
+            std::cout << std::format("The volume of the first box is {:.1f}\n",
+                                    boxes[first].volume());
+            std::cout << std::format("The volume of the second box is {:.1f}\n",
+                                    boxes[second].volume());
+            std::cout << "The sum of these boxes is " << (boxes[first] 
+                        + boxes[second]) << '\n';
+            std::cout << std::format("The volume of the sum is {:.1f}"
+                                        , minVolume) << std::endl;
+
+            Box sum{0, 0, 0};
+            for (const auto& box : boxes)
+                sum += box;
+
+            std::cout << "The sum of " << boxCount << " random boxes if " 
+            << sum << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        The two boxes that sum to the smallest volume are Box(77.6,1.8,41.7)
+             and Box(89.0,1.2,20.4)
+        The volume of the first box is 5723.0
+        The volume of the second box is 2139.8
+        The sum of these boxes is Box(89.0,1.8,62.1)
+        The volume of the sum is 9777.6
+        The sum of 20 random boxes if Box(96.7,86.5,1011.6)  
+        ```
+
+        ---
