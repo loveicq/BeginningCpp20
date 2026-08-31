@@ -1,6 +1,9 @@
 # 第2章 基本数据类型
+
 ## 2.1 变量、数据和数据类型
+
 ### 2.1.1 定义整形变量
+
 🈯定义:包含初始值的花括号称为`列表初始化`。  
 
 ```c++
@@ -9,6 +12,7 @@ int b(4);        // 直接初始化（direct initialization），书中称为函
 int c{4};        // 列表初始化（list initialization，C++11 引入）
 int d = {4};     // 拷贝列表初始化（结合拷贝和列表语法）
 ```
+
 - 实践只要使用列表初始化即可,其它方法熟悉,方便阅读其他代码。  
 - 列表初始化允许使用表达式,但表达式应提前定义。  
 - int类型一般为4字节,存储范围为-2147483648～+2147483647。  
@@ -26,10 +30,21 @@ int main()
     std::cout << "The value of apple_count is " << apple_count << std::endl;
     std::cout << "The value of orange_count is " << orange_count << std::endl;
     std::cout << "The value of fruit_count is " << fruit_total << std::endl;
-    std::cin.get();
-    return 0;
 }
 ```
+
+以上程序运行结果如下：
+
+---
+
+```cpp
+The value of apple_count is 15
+The value of orange_count is 5
+The value of fruit_count is 20 
+```
+
+---
+
 |  类型名   | 类型的大小(字节) |                    值域                    |
 | :-------: | :--------------: | :----------------------------------------: |
 |   char    |        1         |                 -128～+127                 |
@@ -43,15 +58,19 @@ int main()
 - char是不同于signed和unsigned的整数类型,不带修饰符一般只用于存储字符，如果要存储数字，必须带修饰符,或者用std::byte更合适(C++20)。
 
 ### 2.1.2 零初始化
+
 - int counter {0}; 与int counter { };效果相同。
 - 对于所有基本数值类型,空初始化列表总是被视为包含数字0。
 
 ### 2.1.3 定义有固定值的变量
+
 - 使用const关键字,即定义常量。
 - const unsigned toe_count {10};
 
 ## 2.2 整形字面量
+
 ### 2.2.1 十进制整形字面量
+
 - 整数字面量：如123
 - 浮点数字面量：如3.14
 - 字符字面量：如'a'
@@ -60,19 +79,24 @@ int main()
 - 指针字面量：如nullptr
 - 自定义字面量
 
-字面量可以有后缀,如-123L、98U、12345ULL等，大小写不限，U和L前后不限。一般情况下实际编程不写后缀，但在某些情况下，需要添加正确的字面量后缀，例如初始化一个auto类型的变量或者调用有字面量实参的重载函数（第8章介绍）时。  
+字面量可以有后缀,如-123L、98U、12345ULL等，大小写不限，U和L前后不限。一般情况下实际编程不写后缀，但在某些情况下，  
+需要添加正确的字面量后缀，例如初始化一个auto类型的变量或者调用有字面量实参的重载函数（第8章介绍）时。  
 从C++14开始，可以使用单引号字符'使数值字面量更便于阅读,如22'333、-1'234LL、12'345ULL等。
+
 ### 2.2.2 十六进制整形字面量
+
 - 十六进制整形字面量要加上0x或0X前缀。
 - 十六进制整形字面量主要用于定义位的特定模式。例如下:
-  - unsigned int color {0x0ff1ce};
-  - int mask {0XFF00FF00};
-  - unsigned long value {0xDEADlu};
+    - unsigned int color {0x0ff1ce};
+    - int mask {0XFF00FF00};
+    - unsigned long value {0xDEADlu};
 
 ### 2.2.3 八进制的整形字面量
+
 - 八进制整形字面量要加前缀0。
 
 ### 2.2.4 二进制的整形字面量
+
 - 二进制整形字面量要加前缀0b或0B。
 
 ```c++
@@ -82,28 +106,30 @@ int main()
 {
     //列表初始化时可以采用表达式,并且可以直接用不同数制的字面量整数
     long long finalResult{22'333uLL + 0xFF00FF00u + 0765321L + 0b110010101101U};
-    std::cout << "22'333uLL + 0xFF00FF00u + 0765321L + 0b110010101101U = " << finalResult << std::endl;
-    std::cin.get();
-    return 0;
+    std::cout << "22'333uLL + 0xFF00FF00u + 0765321L + 0b110010101101U = " 
+                << finalResult << std::endl;
 }
 ```
 
 > 🤞`知识点`  在整形字面量中可以使用单引号作为分隔符,使字面量更容易阅读。包括十进制、十六进制和二进制的字面量，例如123'456'789、0xFF00'00FFu、0b11001010'11011001。
 
- ## 2.3 整数的计算
- - 二元运算符:有两个操作数,如`+、-、*、/、%`等。
- - 一元运算符:只有一个操作数,如`-`(取反运算)。
- - 取模运算符%是对除法运算符/的补充：（x/y）*y +（x%y）= x。
+## 2.3 整数的计算
+
+- 二元运算符:有两个操作数,如`+、-、*、/、%`等。
+- 一元运算符:只有一个操作数,如`~`(取反运算)。
+- 取模运算符%是对除法运算符/的补充：（x/y）*y +（x%y）= x。
 
 > 👉`重点`  c++中整数除法结果总是整数,结果不会出现小数!
 
 "/"或"%"的右操作数为0,后果很严重!除数为变量时,须编程人员主动防御(先判断被除数是否为0)。
-|         场景         |       整数除法       |       浮点数除法        |
-| :------------------: | :------------------: | :---------------------: |
-|     除数为常量0      |      编译报错 ❌      |       编译报错 ❌        |
-| ‌除数为变量（值为0）‌ | 编译通过 ✅运行崩溃 💥 | 编译通过 ✅返回 inf/nan ️ |
+
+|         场景         |        整数除法         |       浮点数除法       |
+| :------------------: | :---------------------: | :--------------------: |
+|      除数为常量0     |       编译报错 ❌       |      编译报错 ❌       |
+|除数为变量（值为0）   | 编译通过 ✅运行崩溃 💥  |编译通过 ✅返回 inf/nan |
 
 ## 2.4 赋值运算
+
 - "="是赋值运算符。
 - 可以在单行语句中同时为多个变量赋值:a = b = c\*c - d\*d。
 
@@ -125,7 +151,8 @@ int main()
     const unsigned inches_per_foot{12};
 
     unsigned total_inches{};
-    total_inches = yards * feet_per_yard * inches_per_foot + feet * inches_per_foot + inches;
+    total_inches = yards * feet_per_yard * inches_per_foot + feet 
+                    * inches_per_foot + inches;
     cout << "这个距离相当于" << total_inches << "英寸。" << endl;
 
     cout << "请输入一个距离(英寸):";
@@ -135,13 +162,25 @@ int main()
     yards = feet / feet_per_yard;
     feet = feet % feet_per_yard;
     cout << "这个距离相当于" << yards << "码" << feet << "英尺" << inches << "英寸。\n";
-
-    cin.get();
-    return 0;
 }
 ```
+
+以上程序运行结果如下：
+
+---
+
+```cpp
+请分别输入距离的码、英尺和英寸的数值,用空格分开:12 65 33
+这个距离相当于1245英寸。
+请输入一个距离(英寸):3
+这个距离相当于0码0英尺3英寸。
+```
+
+---
+
 **OP=赋值运算符**  
 y += 1;
+
 | 操作  | 运算符 |   操作   | 运算符 |
 | :---: | :----: | :------: | :----: |
 |  加   |   +=   |  按位与  |   &=   |
@@ -151,6 +190,7 @@ y += 1;
 | 取模  |   %=   | 向右移位 |  >>=   |
 
 ## 2.5 sizeof运算符
+
 使用`sizeof`运算符可以得到某类型、变量或表达式结果所占用的字节数。  
 
 ```c++
@@ -166,14 +206,13 @@ int main()
     std::cout << "\"long long\"数据类型占用" << sizeof(long long) << "字节。" << std::endl;
     std::cout << "\"float\"数据类型占用" << sizeof(float) << "字节。" << std::endl;
     std::cout << "\"double\"数据类型占用" << sizeof(double) << "字节。" << std::endl;
-    std::cout << "表达式\"height*height/2\"结果占用" << sizeof(height * height / 2) << "字节。" << std::endl;
-    std::cin.get();
-
-    return 0;
+    std::cout << "表达式\"height*height/2\"结果占用" << sizeof(height * height / 2) 
+                << "字节。" << std::endl;
 }
 ```
 
 ## 2.6 整数的递增和递减
+
 - 一元运算符：递增`++`和递减`--`，前缀时优先级高于其它二元运算符。如：  
 total = --count + 6;等效于下面两句：  
 --count；  
@@ -186,35 +225,41 @@ count += 1;
 ```
 
 - 在使用++的后缀形式时,先在表达式中使用变量的值进行计算,再递增该变量的值.即后缀时优先级低于其它二元运算符。如：  
-total = count-- + 6;等效于下面两句：    
+total = count-- + 6;等效于下面两句：
 total = count + 6;  
 --count;
 - 一个语句只能对变量修改一次。类似`total = ++count * 3 + count ++ * 5;`这样赋值，其值是不能确定的。
 
 ## 2.7 定义浮点变量
 
-|  数据类型   |        说明        | 精度(十进制位数) |                     取值范围                      |
-| :---------: | :----------------: | :--------------: | :-----------------------------------------------: |
-|    float    |    单精度浮点数    |        7         |   ±1.18×10<sup>-38</sup>～±3.4×10<sup>38</sup>    |
-|   double    |    双精度浮点数    |    15(几乎16)    |  ±2.22×10<sup>-308</sup>～±1.8×10<sup>308</sup>   |
-| long double | 扩展的双精度浮点数 |      18或19      | ±3.65×10<sup>-4932</sup>～±11.8×10<sup>4932</sup> |
-> 👉`重点`  浮点数的精度是包含整数位和小数位的全部数字的（不包含小数点），所以要谨慎选择浮点数的数据类型。要注意理解精度和取值范围的含义。“大多数情况下，使用double类型就够了。通常，只有当速度或数据大小非常关键时，才会使用float。”  
+|   数据类型  |            说明    | 精度(十进制位数) |           取值范围          |
+| :---------: | :------:           | :-----:          | :--------------:            |
+|   float     | 单精度浮点数       | 7                |   ±1.18×10⁻³⁸～±3.4×10³⁸    |
+|  double     | 双精度浮点数       | 15(几乎16)       |  ±2.22×10⁻³⁰⁸～±1.8×10³⁰⁸   |
+| long double | 扩展的双精度浮点数 |  18或19          | ±3.65×10⁻⁴⁹³²～±11.8×10⁴⁹³² |
+
+> 👉`重点`  浮点数的精度是包含整数位和小数位的全部数字的（不包含小数点），所以要谨慎选择浮点数的数据类型。  
+> 要注意理解精度和取值范围的含义。“大多数情况下，使用double类型就够了。通常，只有当速度或数据大小非常关键时，才会使用float。”  
 
 📖`拓展阅读`  
 
 ---
 一个浮点数在内存中通常由三部分组成（以最常见的32位float为例）：  
+
 1. 符号位 (1 bit): 表示正负（0正，1负）。  
 2. 指数部分 (8 bits): 决定数字的规模或范围（相当于科学计数法中的 10^N 的 N）。  
 3. 尾数部分/有效数字部分 (23 bits): 决定数字的精度（相当于科学计数法中的 3.14159265 部分）。  
 <!--   -->
 **为什么float精度只有约7位，但范围有约10^38？**  
+
 1. 精度（约7位有效数字）的来源：  
     - 这完全由尾数部分（23 bits） 决定。  
     - 23位二进制能精确表示的不同状态有 2²³ = 8,388,608 个。  
     - 8,388,608 大约是 10⁷（10,000,000）。这意味着尾数部分能区分大约 10⁷ 个不同的有效数字序列。  
-    - 所以，float 能保证大约 7位十进制有效数字 是精确的。当你存储一个像 123456789.0f 的float时，它可能只能精确表示为 123456790.0 或 123456788.0（后几位不精确），因为有效数字超过了7位。但它能精确表示像 1.234567 或 12345.67 这样的数（只要总的有效数字不超过约7位）。  
-2. 巨大范围（约 ±3.4e38）的来源：  
+    - 所以，float 能保证大约 7位十进制有效数字 是精确的。当你存储一个像 123456789.0f 的float时，
+        它可能只能精确表示为 123456790.0 或 123456788.0（后几位不精确），因为有效数字超过了7位。
+        但它能精确表示像 1.234567 或 12345.67 这样的数（只要总的有效数字不超过约7位）。  
+1. 巨大范围（约 ±3.4e38）的来源：  
     - 这主要由指数部分（8 bits） 决定。  
     - 8位二进制能表示 256 个不同的指数值（通常用偏移码表示，实际指数范围大约是 -126 到 +127）。  
     - 指数的作用是 缩放 尾数部分表示的值。想象一下：  
@@ -224,7 +269,9 @@ total = count + 6;
     - 所以，指数部分赋予了浮点数跨越几十个数量级的能力。它决定了你能表示像 340, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000.0 (3.4e38) 这样巨大的数，也能表示像 0.000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 012 (1.2e-38) 这样微小的数。**指数部分不负责保证这些巨大或微小数字内部的有效数字有多精确，它只负责把尾数部分表示的小数点“浮动”到一个极其宽广的区间内。** 精度仍然只由那23位尾数决定。
 
 ---
+
 ## 2.8 浮点字面量
+
 - float字面量加后缀f(或F)
 - long long字面量加后缀L(或l)
 - 没有后缀的浮点字面量是double类型
@@ -232,24 +279,29 @@ total = count + 6;
 - 编译器能够使用不带F或L后缀的字面量(甚至整形字面量)来初始化浮点变量.但是如果字面量的值超出了变量类型的可表示范围,编译器至少应该发出缩窄转换警告
 
 ## 2.9 浮点数的计算
+
 - 浮点数的计算与整数计算相同
 - 取模运算符%不能用于浮点操作数
 - 可以使用 ++ 和 -- 运算符,变量会递增或递减1.0
 
 ### 2.91 数学常量
+
 C++20提供了一个number模块
+
 |        常量        |     描述     |   近似值   |
 | :----------------: | :----------: | :--------: |
 |   std::number::e   | 自然对数的底 | 2.71828... |
 |  std::number::pi   |      π       | 3.14159... |
 | std::number::sqrt2 |  2的平方根   | 1.41421... |
 |  std::number::phi  | 黄金比例常量 |  1.618...  |
+
 - 上表常量类型为double
 - 如果需要float常量，应该使用std::number::pi_v\<float\>形式的表达式
 - 如果需要long long常量，应该使用std::number::sqrt2_v\<long long\>形式的表达式
 - 使用`预定义常量`要优于`自定义常量`
 
 ### 2.9.2 数学函数
+
 - 使用标准头文件<cmath>
 - 包含abs()、ceil()、floor()、exp()、log()（在计算机中表示以e为底的对数）、log10()、pow()、sqrt()、round()、lround()、llround()、cos()、sin()、tan()、acos()、asin()、atan()等数学函数
 - 不能保证可将C头文件作为模块导入（import），而需要使用包含指令（#include）
@@ -284,13 +336,16 @@ int main()
     return 0;
 }
 ```
+
 ### 2.9.3 无效的浮点效果
+
 |      操作       |   结果    |        操作         | 结果  |
 | :-------------: | :-------: | :-----------------: | :---: |
 |    ±value/0     | ±infinity |         0/0         |  NaN  |
 | ±infinity±value | ±infinity | ±infinity/±infinity |  NaN  |
 | ±infinity*value | ±infinity |  infinity-infinity  |  NaN  |
 | ±infinity/value | ±infinity |     infinity*0      |  NaN  |
+
 - NaN:not a number; infinity:无穷
 - 要验证数字是否inf或nan,应该使用`<cmath>`中的std::isinf()和std::()函数。
 
@@ -309,14 +364,17 @@ int main()
     return 0;
 }
 ```
-`程序运行结果为：1.5/0=inf；  inf+1.5=inf；  0/0=nan `
+
+`程序运行结果为：1.5/0=inf；  inf+1.5=inf；  0/0=nan`
 
 ### 2.9.4 缺点
+
 - 一些小数值没有准确转换为二进制浮点数值。在计算过程中，很容易把一些小错误放大为大错误。
 - 计算两个非常接近的数值之差会丧失精度。称为灾难性抵消。
 - 处理范围相关几个数量级的数值会导致错误。如两个数相差10<sup>8</sup>倍，它们相加，较大值不会有变化。
 
 ## 2.10 混合的表达式和类型转换
+
 - 隐式转换  
 转换时会把低的转换成高的，排序如下：  
 1.long double&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.unsigned long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.long  
@@ -324,20 +382,25 @@ int main()
 3.float&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.unsigned long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.int  
 - 隐式转换可能会产生预料不到的结果
     - 下溢
+
     ```cpp
     unsigned int x{20u};
     int y{30};
     std::cout<<x-y<<std::endl;
     ```
+
     得出结果不是-10，而是4294967286
     - 上溢
+
     ```cpp
     unsigned char x{253};
     int y{5};
     std::cout<<x+y<<std::endl;
     ```
+
     得出结果不是258，而是2(258%256)
 - 等号右边的表达式生成的值的类型不同于等号左边的变量类型时，编译器也会插入一个转换操作（缩窄转换）
+
     ```cpp
     int y{};
     double z{5.0};
@@ -345,6 +408,7 @@ int main()
     ```
 
 ## 2.11 显式类型转换
+
 - static_cast<转换后类型>(待转换的数值),如上节:y=static_cast\<int\>(z);
 - 将浮点数强制转换为整数会进行截断，即丢弃浮点数的整个小数部分
 - round()、lround()和llround()函数会将浮点数四舍五入到最接近的整数，大多情况下比强制转换更合适。
@@ -381,11 +445,14 @@ int main()
     return 0;
 }
 ```
+
 - 旧式的强制转换  
 C风格：`(转换后类型)待转换的数值`，这是C语言遗留下来的，现在应该使用C++风格的强制转换
 
 ## 2.12 格式化字符串
+
 ✅1. 使用\<iomanip\>模块
+
 ```cpp
     // 格式化字符串setprecision()测试
 #include <iostream>
@@ -415,6 +482,7 @@ int main()
     return 0;
 }
 ```
+
 ✅2. 使用\<format\>模块(C++20才有这个模块)  
 ✅3. 使用std::format()格式化字符串  
     `std::cout<<std::format("pond radius required for {} fish is {} feet.\n",fish_count,pond_radius);`  
@@ -422,6 +490,7 @@ int main()
     - {:.2}点后面的数字指定总有效位数,包含小数点前和后的数字
     - {:.2f}加了f就是指定小数位数
     - 要调试失败的std::format()表达式,可以用try-catch块。实践中win10+vscode+gcc 15.1.0中这个try-catch块不能实现书中的错误诊断效果，还在语法检查阶段就报错了（如下例所示）。
+
 ```cpp
 // 测试std::format()错误调试的try-catch块
 #include <iostream>
@@ -459,9 +528,10 @@ int main()
     return 0;
 }
 ```
+
 ![try_catch测试](https://tc.z.wiki/autoupload/f/9lpqiNvEAS8uNqygSEXEG7KXl_QqVl-bpSwqP4fJO68/20250804/EJRf/1444X363/try_catch.png)
 
-5. `[fill][align][sign][#][0][width][.precision][type]`,可选的格式化选项
+1. `[fill][align][sign][#][0][width][.precision][type]`,可选的格式化选项
     - fill：填充字符,默认是空格,必须在align前面，指定空白处的填充字符
     - align：对齐方式,默认是右对齐
       - <：左对齐
@@ -521,9 +591,10 @@ int main()
     return 0;
 }
 ```
+
 上面的程序运行结果如下：
 
-<img src=https://z.wiki/u/J78qrS>
+<img src=<https://z.wiki/u/J78qrS>>
 
 ✅7. 格式化数字  
 主要介绍sign\\#\.precision\type等格式化选项，详细解释见第5点。
@@ -554,10 +625,12 @@ int main()
     return 0;
 }
 ```
+
 上面的程序运行结果如下：
-<img src=https://z.wiki/u/9HwRnn>
+<img src=<https://z.wiki/u/9HwRnn>>
 
 ✅8. 参数索引  
+
 ```cpp
 // 测试format（参数索引）
 #include <iostream>
@@ -579,13 +652,17 @@ int main()
     return 0;
 }
 ```
+
 👉注意：
+
 - 参数索引从0开始
 - 参数索引可以重复使用
 - 参数索引可以不连续
 
 ## 2.13 确定数值的上下限
+
 使用`numeric_limits<type_name>::min()`、`numeric_limits<type_name>::lowest()`和`numeric_limits<type_name>::max()`读取基本数据类型的上下限。
+
 ```cpp
 // Ex2_07.cpp
 // Finding maximum and minimum values for data types
@@ -621,10 +698,12 @@ int main()
     return 0;
 }
 ```
+
 上面程序的运行结果如下，注意浮点数min()和lowest()的区别：  
 <img src="https://z.wiki/u/hRSubG">  
 
 确定基本类型的其他属性  
+
 - 返回二进制数字的位数：  
   `std::numeric_limits<type_name>::digits;`
 - 获得infinity的浮点值(正无穷大)：  
@@ -635,7 +714,9 @@ int main()
   `long double not_a_number=std::numeric_limits<long double>::quiet_NaN()`
 
 ## 2.14 使用字符变量
+
 1. **ascii字符**
+
 ```cpp
 // 使用字符变量
 #include <iostream>
@@ -673,17 +754,19 @@ int main()
     return 0;
 }
 ```
-上面程序运行结果如下：  
-<img src=https://z.wiki/u/Nn3lyH>
 
-2. **unicode字符**  
+上面程序运行结果如下：  
+<img src=<https://z.wiki/u/Nn3lyH>>
+
+1. **unicode字符**  
 宽字符字面量采用'L'开头
+
 - `wchar_t z {L'Z'};`
 - `wchar_t cc {L'\x00E7'}`
 - 推荐使用以下几种类型:
-  - char8_t  utf8[]  = u8"UTF-8文本";   // 明确UTF-8
-  - char16_t utf16[] = u"UTF-16文本";   // 明确UTF-16
-  - char32_t utf32[] = U"UTF-32文本";   // 明确UTF-32
+    - char8_t  utf8[]  = u8"UTF-8文本";   // 明确UTF-8
+    - char16_t utf16[] = u"UTF-16文本";   // 明确UTF-16
+    - char32_t utf32[] = U"UTF-32文本";   // 明确UTF-32
 - 标准库提供了标准输入流(wcin)和输出流(wcout)来读写wchar_t类型的字符,但没有提供处理char8_t、char16_t和char32_t字符数据的方式
 - 在控制台中用cin()输入宽字符,可能是GBK编码,而不是UTF-8编码,会导致在控制台中输出乱码
 
@@ -696,7 +779,9 @@ int main()
 |   U   | char32_t |  UTF-32  |     4     |  C++11   |
 
 ## 2.17 练习
+
 1. 第1题
+
 ```cpp
 // 第2章第1题
 #include <iostream>
@@ -720,7 +805,9 @@ int main()
     return 0;
 }
 ```
+
 2. 第2题
+
 ```cpp
 // 第2题
 #include <iostream>
@@ -741,10 +828,13 @@ int main()
     return 0;
 }
 ```
+
 3. 第3题
-  - 此题比较复杂,涉及三角函数知识,角度和弧度转换
-  - 数学模块应用
-  - 有些地方常量比变量更合理
+
+- 此题比较复杂,涉及三角函数知识,角度和弧度转换
+- 数学模块应用
+- 有些地方常量比变量更合理
+
 ```cpp
 // 第3题
 #include <iostream>
@@ -784,7 +874,9 @@ int main()
     return 0;
 }
 ```
+
 4. 第4题
+
 ```cpp
 // 第4题
 #include <iostream>
@@ -817,7 +909,9 @@ int main()
     return 0;
 }
 ```
+
 5. 第5题
+
 ```cpp
 // 第5题
 #include <iostream>
@@ -851,7 +945,9 @@ int main()
     return 0;
 }
 ```
+
 6. 第6题
+
 ```cpp
 // 第6题
 #include <iostream>
@@ -880,7 +976,9 @@ int main()
     return 0;
 }
 ```
+
 7. 第7题
+
 ```cpp
 // 第7题
 #include <iostream>
@@ -918,5 +1016,6 @@ int main()
     return 0;
 }
 ```
+
 上面练习第7题程序运行结果如下:  
-<img src=https://z.wiki/u/kINCSA>
+<img src=<https://z.wiki/u/kINCSA>>
