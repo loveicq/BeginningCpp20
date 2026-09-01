@@ -798,3 +798,94 @@ export bool operator<(const Box& box1, const Box& box2)
         ```
 
         ---
+
+## 13.6 成员与非成员函数
+
+运算符重载的三种方式：
+
+- 成员函数：`Box operator+(const Box& aBox) const;`
+- 非成员函数：`Box operator+(const Box& aBox, const Box& bBox);`
+- 友元函数：`friend Box operator+(const Box& aBox, const Box& bBox);`
+
+运算符重载函数应尽可能避免定义为友元函数，大多数情况下应该定义为成员函数，但下列情况应该定义为非成员函数：
+
+- 在某些场景中，除了实现为非成员函数，没有其它选择，即使意味着要把运算符重载实现为友元函数。例如，重载的  
+二元运算符的第一个实参是基本类型，或是与当前正在编写的类不同的类型。如：
+    - `bool operator<(double value, const Box& box);`
+    - `ostream& operator<<(ostream& stream, const Box& box);`
+- 希望二元运算符的左操作数可被隐式转换时，可能首选将运算符重载实现为非成员函数
+
+**运算符函数和隐式转换**  
+
+不是所有单实参构造函数都应该用explicit禁止隐式转换，因为有时候允许转换没有坏处
+
+- 案例Ex13_07
+    - Inteter.cppm
+
+        ```cpp
+        // Integer.cppm
+        export module integer;
+
+        export class Integer
+        {
+        public:
+            Integer(int value = 0) : m_value{value} {}
+            int getValue() const { return m_value; }
+            void setValue(int value) { m_value = value; }
+
+        private:
+            int m_value{};
+        };
+
+        Integer operator+(const Integer &one, const Integer &other)
+        {
+            return one.getValue() + other.getValue();
+        }
+        Integer operator-(const Integer &one, const Integer &other)
+        {
+            return one.getValue() - other.getValue();
+        }
+        Integer operator*(const Integer &one, const Integer &other)
+        {
+            return one.getValue() * other.getValue();
+        }
+        Integer operator/(const Integer &one, const Integer &other)
+        {
+            return one.getValue() / other.getValue();
+        }
+        Integer operator%(const Integer &one, const Integer &other)
+        {
+            return one.getValue() % other.getValue();
+        }
+        ```
+
+    - Ex13_07.cpp
+
+        ```cpp
+        // Ex13_07.cpp
+        module integer;
+
+        import <iostream>;
+
+        int main()
+        {
+            const Integer i{1};
+            const Integer j{2};
+            const auto result = (i * 2 + 4 / j - 1) % j;
+            // 因Integer构造函数没有explicit关键字，而+-*/%重载要求左、右操作数为Integer对象，
+            // 所以上面表达式的整数隐式转换为Integer对象了
+            std::cout << result.getValue() << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        1
+        ```
+
+        ---
+
+❗注意：编译器不会对成员函数的左操作数执行转换，如果将operator/()定义为成员函数，上例的表达式4-j将不能编译！
