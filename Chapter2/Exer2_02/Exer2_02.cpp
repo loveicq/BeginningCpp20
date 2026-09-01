@@ -13,6 +13,4 @@ int main()
     cin >> radius;
     area = numbers::pi * radius * radius;
     cout << "圆面积是" << area << "。" << endl;
-
-    return 0;
 }

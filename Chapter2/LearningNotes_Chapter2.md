@@ -256,8 +256,8 @@ total = count + 6;
     - 这完全由尾数部分（23 bits） 决定。  
     - 23位二进制能精确表示的不同状态有 2²³ = 8,388,608 个。  
     - 8,388,608 大约是 10⁷（10,000,000）。这意味着尾数部分能区分大约 10⁷ 个不同的有效数字序列。  
-    - 所以，float 能保证大约 7位十进制有效数字 是精确的。当你存储一个像 123456789.0f 的float时，
-        它可能只能精确表示为 123456790.0 或 123456788.0（后几位不精确），因为有效数字超过了7位。
+    - 所以，float 能保证大约 7位十进制有效数字 是精确的。当你存储一个像 123456789.0f 的float时，  
+        它可能只能精确表示为 123456790.0 或 123456788.0（后几位不精确），因为有效数字超过了7位。  
         但它能精确表示像 1.234567 或 12345.67 这样的数（只要总的有效数字不超过约7位）。  
 1. 巨大范围（约 ±3.4e38）的来源：  
     - 这主要由指数部分（8 bits） 决定。  
@@ -266,7 +266,11 @@ total = count + 6;
         - 尾数部分能表示的最大值大约是 2 (二进制 1.111...1)。  
         - 当指数取最大值（约 +127)时，数字大小是 尾数最大值 × 2¹²⁷ ≈ 2 × 1.7e38 = 3.4e38。  
         - 当指数取最小值（约 -126)时，数字大小是 尾数最小值（约1) × 2⁻¹²⁶ ≈ 1.2e-38。  
-    - 所以，指数部分赋予了浮点数跨越几十个数量级的能力。它决定了你能表示像 340, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000.0 (3.4e38) 这样巨大的数，也能表示像 0.000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000, 012 (1.2e-38) 这样微小的数。**指数部分不负责保证这些巨大或微小数字内部的有效数字有多精确，它只负责把尾数部分表示的小数点“浮动”到一个极其宽广的区间内。** 精度仍然只由那23位尾数决定。
+    - 所以，指数部分赋予了浮点数跨越几十个数量级的能力。它决定了你能表示像 340, 000, 000, 000,  
+         000, 000, 000, 000, 000, 000, 000.0 (3.4e38) 这样巨大的数，也能表示像 0.000, 000,  
+         000, 000, 000, 000, 000, 000, 000, 000, 000, 012 (1.2e-38) 这样微小的数。  
+         **指数部分不负责保证这些巨大或微小数字内部的有效数字有多精确，它只负责把尾数部分表示  
+         的小数点“浮动”到一个极其宽广的区间内。** 精度仍然只由那23位尾数决定。
 
 ---
 
@@ -275,8 +279,11 @@ total = count + 6;
 - float字面量加后缀f(或F)
 - long long字面量加后缀L(或l)
 - 没有后缀的浮点字面量是double类型
-- 在浮点字面量中,指数是可选的,表示10的幂乘以该值.指数必须带有前缀e或E,其后是数值.如:5E3(5000.0)、100.5E2(10050.0)、2.5e-3(0.0025)、-0.1E-3L(-0.0001L)、.345e1F(=0.345*10<sup>1</sup>=3.45F).注意不要将这里的 e 与自然常数 e (≈2.71828) 混淆
-- 编译器能够使用不带F或L后缀的字面量(甚至整形字面量)来初始化浮点变量.但是如果字面量的值超出了变量类型的可表示范围,编译器至少应该发出缩窄转换警告
+- 在浮点字面量中,指数是可选的,表示10的幂乘以该值.指数必须带有前缀e或E,其后是数值.如:5E3(5000.0)、  
+    100.5E2(10050.0)、2.5e-3(0.0025)、-0.1E-3L(-0.0001L)、.345e1F(=0.345*10¹=3.45F).注意不  
+    要将这里的 e 与自然常数 e (≈2.71828) 混淆
+- 编译器能够使用不带F或L后缀的字面量(甚至整形字面量)来初始化浮点变量.但是如果字面量的值超出了变量类型
+    的可表示范围,编译器至少应该发出缩窄转换警告
 
 ## 2.9 浮点数的计算
 
@@ -302,21 +309,24 @@ C++20提供了一个number模块
 
 ### 2.9.2 数学函数
 
-- 使用标准头文件<cmath>
-- 包含abs()、ceil()、floor()、exp()、log()（在计算机中表示以e为底的对数）、log10()、pow()、sqrt()、round()、lround()、llround()、cos()、sin()、tan()、acos()、asin()、atan()等数学函数
+- 使用标准头文件`<cmath>`
+- 包含abs()、ceil()、floor()、exp()、log()（在计算机中表示以e为底的对数）、log10()、pow()、  
+  sqrt()、round()、lround()、llround()、cos()、sin()、tan()、acos()、asin()、atan()等数学函数
 - 不能保证可将C头文件作为模块导入（import），而需要使用包含指令（#include）
 
 ```cpp
 // Ex2_03.cpp
 // Sizing a pond for happy fish
-//书中案例程序把英寸转换成英尺,纯属是多余的步骤,还绕几圈,不便于理解
-#include <iostream>
 #include <cmath>
+#include <iostream>
 #include <numbers> //取π值
 
 int main()
 {
     const double fish_factor{2.0 / 6};
+    // 一条典型的鱼（体长约 6 英寸）大约需要2方英尺的水面面积
+    // fish_factor = 2.0 / 6 表达的就是这个"每英寸鱼需要多少面积"的换算系数。
+    // 这个常数直接用"英寸的鱼"算出"平方英尺的池塘"，隐含地把单位跨越也打包进去了。
 
     double fish_count{};
     double fish_length{};
@@ -328,14 +338,30 @@ int main()
     std::cout << std::endl;
 
     const double pond_area{fish_count * fish_length * fish_factor};
-    const double pond_diameter{2.0 * std::sqrt(pond_area / std::numbers::pi)}; 
-    //pond_area=pi*(pond_diameter/2)²
+    const double pond_diameter{2.0 * std::sqrt(pond_area / std::numbers::pi)};
+    // A=πr²,A=π(d/2)²,A=π⋅(d²/2²)
+    // 4A=πd²
+    // 4A/π=d²
+    // d=sqrt(4A/π)
+    // d=sqrt(4)×sqrt(A/π)=2×sqrt(A/π)
 
     std::cout << "Pond diameter required for " << fish_count << " fish is "
               << pond_diameter << " feet." << std::endl;
-    return 0;
 }
 ```
+
+上面程序运行结果如下：
+
+---
+
+```cpp
+Enter the number of fish you want to keep: 10
+Enter the average fish length in inches: 8
+
+Pond diameter required for 10 fish is 5.82692 feet.
+```
+
+---
 
 ### 2.9.3 无效的浮点效果
 
@@ -371,15 +397,19 @@ int main()
 
 - 一些小数值没有准确转换为二进制浮点数值。在计算过程中，很容易把一些小错误放大为大错误。
 - 计算两个非常接近的数值之差会丧失精度。称为灾难性抵消。
-- 处理范围相关几个数量级的数值会导致错误。如两个数相差10<sup>8</sup>倍，它们相加，较大值不会有变化。
+- 处理范围相关几个数量级的数值会导致错误。如两个数相差10⁸倍，它们相加，较大值不会有变化。
 
 ## 2.10 混合的表达式和类型转换
 
 - 隐式转换  
 转换时会把低的转换成高的，排序如下：  
-1.long double&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.unsigned long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.long  
-2.double&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.unsigned int  
-3.float&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.unsigned long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.int  
+
+    ||||
+    |:---|:---|:---|
+    |1.long long|4.unsinged long long|7.long|
+    |2.double|5.long long|8.unsigned int|
+    |3.float|6.unsigned long|9.int|
+
 - 隐式转换可能会产生预料不到的结果
     - 下溢
 
@@ -430,21 +460,30 @@ int main()
     unsigned int inches{};
 
     cout << "Enter a length in yards as a decimal: ";
-    cin >> length;
+    cin >> length; //  注意，只有输入小数，才会有换算的英尺和英寸
 
     yards = static_cast<unsigned int>(length);
-    feet = static_cast<unsigned int>((length - yards) * feet_per_yard);
-    // 总英寸数与inches_per_foot取模（除以12取余数）即是英寸数，在此例中，英寸数总是小于12
+    feet  = static_cast<unsigned int>((length - yards) * feet_per_yard);
+    // 总英寸数与inches_per_foot取模（除以12取余数）即是英寸数
     inches = static_cast<unsigned int>(length * inches_per_yard) % inches_per_foot;
 
     cout << length << " yards converts to "
          << yards << " yards "
          << feet << " feet "
          << inches << " inches." << endl;
-
-    return 0;
 }
 ```
+
+上面程序运行结果如下：
+
+---
+
+```cpp
+Enter a length in yards as a decimal: 10.25
+10.25 yards converts to 10 yards 0 feet 9 inches. 
+```
+
+---
 
 - 旧式的强制转换  
 C风格：`(转换后类型)待转换的数值`，这是C语言遗留下来的，现在应该使用C++风格的强制转换
@@ -485,11 +524,13 @@ int main()
 
 ✅2. 使用\<format\>模块(C++20才有这个模块)  
 ✅3. 使用std::format()格式化字符串  
-    `std::cout<<std::format("pond radius required for {} fish is {} feet.\n",fish_count,pond_radius);`  
+    `std::cout<<std::format("pond radius required for {} fish is {} feet.\n",fish_count
+    ,pond_radius);`  
 ✅4. 格式说明符  
     - {:.2}点后面的数字指定总有效位数,包含小数点前和后的数字
     - {:.2f}加了f就是指定小数位数
-    - 要调试失败的std::format()表达式,可以用try-catch块。实践中win10+vscode+gcc 15.1.0中这个try-catch块不能实现书中的错误诊断效果，还在语法检查阶段就报错了（如下例所示）。
+    - 要调试失败的std::format()表达式,可以用try-catch块。下面案例还在编译期的语法检查阶段就报错了，  
+        未进入运行期。而try-catch块是运行期检查语句，故无效（如下例所示）。
 
 ```cpp
 // 测试std::format()错误调试的try-catch块
@@ -519,6 +560,7 @@ int main()
     try
     {
         cout << format(" 养 {:.2} 条鱼的池塘半径需要 {:.2f} 英尺。\n", fish_count, pond_radius);
+        // {:.2}不能用于整数，fish_count是整数类型
     }
     catch (const format_error &error)
     {
@@ -528,8 +570,6 @@ int main()
     return 0;
 }
 ```
-
-![try_catch测试](https://tc.z.wiki/autoupload/f/9lpqiNvEAS8uNqygSEXEG7KXl_QqVl-bpSwqP4fJO68/20250804/EJRf/1444X363/try_catch.png)
 
 1. `[fill][align][sign][#][0][width][.precision][type]`,可选的格式化选项
     - fill：填充字符,默认是空格,必须在align前面，指定空白处的填充字符
@@ -587,14 +627,20 @@ int main()
     cout << format("{:*<7}|{:*<7}|{:*>7}|{:*>7}|{:*>7}\n", 1, -0.2, "str", 'c', true);
     // centered alignment +0 formatting option for numbers
     cout << format("{:0^7}|{:0^7}|{:^7}|{:^7}|{:^7}\n", 1, -0.2, "str", 'c', true);
-
-    return 0;
 }
 ```
 
-上面的程序运行结果如下：
+上面程序运行结果如下：
 
-<img src=<https://z.wiki/u/J78qrS>>
+---
+
+```cpp
+      1|   -0.2|str    |c      |true
+1******|-0.2***|****str|******c|***true
+0001000|0-0.200|  str  |   c   | true 
+```
+
+---
 
 ✅7. 格式化数字  
 主要介绍sign\\#\.precision\type等格式化选项，详细解释见第5点。
@@ -626,8 +672,20 @@ int main()
 }
 ```
 
-上面的程序运行结果如下：
-<img src=<https://z.wiki/u/9HwRnn>>
+上面程序运行结果如下：
+
+---
+
+```cpp
+default: 3.1,fixed:3.14,scientific:3.14e+00,general:3.1
+default: 314,binary:100111010,hex.:13a
+default: c,decimal:99,hex.:63
+alternative hex.: 0x13a,binary:0b100111010,HEX.:0X13A
+forced sign: +314,space sign: 314
+all together: +3.1416***,+0x00013a 
+```
+
+---
 
 ✅8. 参数索引  
 
@@ -694,13 +752,26 @@ int main()
                    numeric_limits<long double>::min(), numeric_limits<long double>::max())
          << format("The range for type long double is from {} to {}\n",
                    numeric_limits<long double>::lowest(), numeric_limits<long double>::max());
-
-    return 0;
 }
 ```
 
-上面程序的运行结果如下，注意浮点数min()和lowest()的区别：  
-<img src="https://z.wiki/u/hRSubG">  
+上面程序运行结果如下：
+
+---
+
+```cpp
+The range for type short is from -32768 to 32767
+The range for type unsigned int is from 0 to 4294967295
+The range for type long is from -2147483648 to 2147483647
+The range for type float is from 1.1754944e-38 to 3.4028235e+38
+The range for type float is from -3.4028235e+38 to 3.4028235e+38
+The range for type double is from 2.2250738585072014e-308 to 1.7976931348623157e+308
+The range for type double is from -1.7976931348623157e+308 to 1.7976931348623157e+308
+The range for type long double is from 2.2250738585072014e-308 to 1.7976931348623157e+308
+The range for type long double is from -1.7976931348623157e+308 to 1.7976931348623157e+308
+```
+
+---
 
 确定基本类型的其他属性  
 
@@ -755,9 +826,6 @@ int main()
 }
 ```
 
-上面程序运行结果如下：  
-<img src=<https://z.wiki/u/Nn3lyH>>
-
 1. **unicode字符**  
 宽字符字面量采用'L'开头
 
@@ -782,240 +850,329 @@ int main()
 
 1. 第1题
 
-```cpp
-// 第2章第1题
-#include <iostream>
-#include <format>
+    ```cpp
+    // Exer2_01.cpp
+    #include <iostream>
+    #include <format>
 
-int main()
-{
+    int main()
+    {
 
-    using namespace std;
+        using namespace std;
 
-    unsigned inches{};
-    unsigned feet{};
-    unsigned inchesRemainder{};
+        unsigned inches{};
+        unsigned feet{};
+        unsigned inchesRemainder{};
 
-    cout << "请输入整数值英寸数:";
-    cin >> inches;
-    feet = inches / 12;
-    inchesRemainder = inches % 12;
-    cout << format("{}英寸共有{}英尺{}英寸。\n", inches, feet, inchesRemainder);
+        cout << "请输入整数值英寸数:";
+        cin >> inches;
+        feet = inches / 12;
+        inchesRemainder = inches % 12;
+        cout << format("{}英寸共有{}英尺{}英寸。\n", inches, feet, inchesRemainder);
+    }
+    ```
 
-    return 0;
-}
-```
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    请输入整数值英寸数:21
+    21英寸共有1英尺9英寸。
+    ```
+
+    ---
 
 2. 第2题
 
-```cpp
-// 第2题
-#include <iostream>
-#include <numbers>
+    ```cpp
+    // Exer2_02.cpp
+    #include <iostream>
+    #include <numbers>
 
-int main()
-{
-    using namespace std;
+    int main()
+    {
+        using namespace std;
 
-    double radius{};
-    double area{};
+        double radius{};
+        double area{};
 
-    cout << "请输入半径:";
-    cin >> radius;
-    area = numbers::pi * radius * radius;
-    cout << "圆面积是" << area << "。" << endl;
+        cout << "请输入半径:";
+        cin >> radius;
+        area = numbers::pi * radius * radius;
+        cout << "圆面积是" << area << "。" << endl;
+    }
+    ```
 
-    return 0;
-}
-```
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    请输入整数值英寸数:21
+    21英寸共有1英尺9英寸。
+    ```
+
+    ---
 
 3. 第3题
 
-- 此题比较复杂,涉及三角函数知识,角度和弧度转换
-- 数学模块应用
-- 有些地方常量比变量更合理
+   - 此题比较复杂,涉及三角函数知识,角度和弧度转换
+   - 数学模块应用
+   - 有些地方常量比变量更合理
 
-```cpp
-// 第3题
-#include <iostream>
-#include <cmath>
-#include <numbers>
+    ```cpp
+    // Exer2_03.cpp
+    #include <iostream>
+    #include <cmath>
+    #include <numbers>
 
-int main()
-{
-    using namespace std;
+    int main()
+    {
+        using namespace std;
 
-    const double inchesPerFoot{12.0};
-    const double piDegrees{180.0};
+        const double inchesPerFoot{12.0};
+        const double piDegrees{180.0};
 
-    double feet{};
-    double inches{};
-    cout << "请分别输入你与树之间的距离是几英尺和几英寸(用空格隔开):";
-    cin >> feet >> inches;
-    const double distance{feet + inches / inchesPerFoot};
+        double feet{};
+        double inches{};
+        cout << "请分别输入你与树之间的距离是几英尺和几英寸(用空格隔开):";
+        cin >> feet >> inches;
+        const double distance{feet + inches / inchesPerFoot};
 
-    double angle{}, angleToRadian{};
-    cout << "请输入树顶的仰角（单位：度）:";
-    cin >> angle;
-    angleToRadian = angle * (numbers::pi / piDegrees); // 角度转换为弧度
+        double angle{}, angleToRadian{};
+        cout << "请输入树顶的仰角（单位：度）:";
+        cin >> angle;
+        angleToRadian = angle * (numbers::pi / piDegrees); // 角度转换为弧度
 
-    double eyeHeight{};
-    cout << "请输入地面到眼睛的高度(英寸):";
-    cin >> eyeHeight;
-    eyeHeight /= inchesPerFoot;
+        double eyeHeight{};
+        cout << "请输入地面到眼睛的高度(英寸):";
+        cin >> eyeHeight;
+        eyeHeight /= inchesPerFoot;
 
-    const double height{eyeHeight + distance * tan(angleToRadian)};                                   // 按公式计算树高度，这个三角函数要用弧度
-    const unsigned heightFeet{static_cast<unsigned>(height)};                                         // 显式转换成无符号整数(英尺数)
-    const unsigned heightInches{static_cast<unsigned>(round(inchesPerFoot * (height - heightFeet)))}; //(浮点数-整数)的余数乘12就是英寸数
+        const double height{eyeHeight + distance * tan(angleToRadian)};// 按公式计算树高度，这个三角函数要用弧度
+        const unsigned heightFeet{static_cast<unsigned>(height)};// 显式转换成无符号整数(英尺数)
+        const unsigned heightInches{static_cast<unsigned>(round(inchesPerFoot 
+                        * (height - heightFeet)))}; //(浮点数-整数)的余数乘12就是英寸数
 
-    cout << "树的高度是" << heightFeet << "英尺"
-         << heightInches << "英寸。" << endl;
+        cout << "树的高度是" << heightFeet << "英尺"
+            << heightInches << "英寸。" << endl;
 
-    return 0;
-}
-```
+        return 0;
+    }
+    ```
+
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    请分别输入你与树之间的距离是几英尺和几英寸(用空格隔开):10 25
+    请输入树顶的仰角（单位：度）:35
+    请输入地面到眼睛的高度(英寸):80
+    树的高度是15英尺2英寸。 
+    ```
+
+    ---
 
 4. 第4题
 
-```cpp
-// 第4题
-#include <iostream>
+    ```cpp
+    // Exer2_04.cpp
+    #include <iostream>
 
-int main()
-{
-    using namespace std;
+    int main()
+    {
+        using namespace std;
 
-    const double poundPerKg{2.2};
-    const double footPerMeter{0.3048};
-    const double inchesPerfoot{12};
+        const double poundPerKg{2.2};
+        const double footPerMeter{0.3048};
+        const double inchesPerfoot{12};
 
-    double weight{};
-    cout << "请输入您的体重(磅):";
-    cin >> weight;
-    weight /= poundPerKg;
+        double weight{};
+        cout << "请输入您的体重(磅):";
+        cin >> weight;
+        weight /= poundPerKg;
 
-    double feet{};
-    double inches{};
-    double height{};
-    cout << "请输入您的身高为几英尺几英寸(以空格分开输入):";
-    cin >> feet >> inches;
-    height = (feet + inches / inchesPerfoot) * footPerMeter;
+        double feet{};
+        double inches{};
+        double height{};
+        cout << "请输入您的身高为几英尺几英寸(以空格分开输入):";
+        cin >> feet >> inches;
+        height = (feet + inches / inchesPerfoot) * footPerMeter;
 
-    double BMI{};
-    BMI = weight / (height * height);
+        double BMI{};
+        BMI = weight / (height * height);
 
-    cout << "您的BMI指数为" << BMI << "。" << endl;
+        cout << "您的BMI指数为" << BMI << "。" << endl;
+    }
+    ```
 
-    return 0;
-}
-```
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    请输入您的体重(磅):100
+    请输入您的身高为几英尺几英寸(以空格分开输入):12 34
+    您的BMI指数为2.22367。 
+    ```
+
+    ---
 
 5. 第5题
 
-```cpp
-// 第5题
-#include <iostream>
-#include <format>
+    ```cpp
+    // Exer2_05.cpp
+    #include <iostream>
+    #include <format>
 
-int main()
-{
-    using namespace std;
+    int main()
+    {
+        using namespace std;
 
-    const double poundPerKg{2.2};
-    const double footPerMeter{0.3048};
-    const double inchesPerfoot{12};
+        const double poundPerKg{2.2};
+        const double footPerMeter{0.3048};
+        const double inchesPerfoot{12};
 
-    double weight{};
-    cout << "请输入您的体重(磅):";
-    cin >> weight;
-    weight /= poundPerKg;
+        double weight{};
+        cout << "请输入您的体重(磅):";
+        cin >> weight;
+        weight /= poundPerKg;
 
-    double feet{};
-    double inches{};
-    double height{};
-    cout << "请输入您的身高为几英尺几英寸(以空格分开输入):";
-    cin >> feet >> inches;
-    height = (feet + inches / inchesPerfoot) * footPerMeter;
+        double feet{};
+        double inches{};
+        double height{};
+        cout << "请输入您的身高为几英尺几英寸(以空格分开输入):";
+        cin >> feet >> inches;
+        height = (feet + inches / inchesPerfoot) * footPerMeter;
 
-    double BMI{};
-    BMI = weight / (height * height);
+        double BMI{};
+        BMI = weight / (height * height);
 
-    cout << format("您的BMI指数是{:.1f}\n", BMI);
+        cout << format("您的BMI指数是{:.1f}\n", BMI);
+    }
+    ```
 
-    return 0;
-}
-```
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+    请输入您的体重(磅):130
+    请输入您的身高为几英尺几英寸(以空格分开输入):4 5
+    您的BMI指数是32.6  
+    ```
+
+    ---
 
 6. 第6题
 
-```cpp
-// 第6题
-#include <iostream>
-#include <format>
-#include <numbers>
+    ```cpp
+    // Exer2_06.cpp
+    #include <iostream>
+    #include <format>
+    #include <numbers>
 
-int main()
-{
-    using namespace std;
+    int main()
+    {
+        using namespace std;
 
-    const auto horLine{"------------------------------------------------------------"};
+        const auto horLine{"------------------------------------------------------------"};
 
-    cout << format("{:^60}\n", "表2-6 <numbers>模块中的数字常量示例");
-    cout << format("{:^60}\n", horLine);
-    cout << format("{:^19}|{:^19}|{:^20}\n", "常量", "描述", "近似值");
-    cout << format("{:^60}\n", horLine);
-    cout << format("{:<19}|{:<19}|{:.5f}...\n", "std:numbers::c", "自然对数的底", numbers::e);
-    cout << format("{:^60}\n", horLine);
-    cout << format("{:<19}|{:<19}|{:.5f}...\n", "std::numbers::pi", "π", numbers::pi);
-    cout << format("{:^60}\n", horLine);
-    cout << format("{:<19}|{:<19}|{:.5f}...\n", "std:numbers::sqrt2", "2的平方根", numbers::sqrt2);
-    cout << format("{:^60}\n", horLine);
-    cout << format("{:<19}|{:<19}|{:.3f}...\n", "std:numbers::phi", "黄金比例常量φ", numbers::phi);
-    cout << format("{:^60}\n", horLine);
+        cout << format("{:^60}\n", "表2-6 <numbers>模块中的数字常量示例");
+        cout << format("{:^60}\n", horLine);
+        cout << format("{:^19}|{:^19}|{:^20}\n", "常量", "描述", "近似值");
+        cout << format("{:^60}\n", horLine);
+        cout << format("{:<19}|{:<19}|{:.5f}...\n", "std:numbers::c", "自然对数的底", numbers::e);
+        cout << format("{:^60}\n", horLine);
+        cout << format("{:<19}|{:<19}|{:.5f}...\n", "std::numbers::pi", "π", numbers::pi);
+        cout << format("{:^60}\n", horLine);
+        cout << format("{:<19}|{:<19}|{:.5f}...\n", "std:numbers::sqrt2", "2的平方根", numbers::sqrt2);
+        cout << format("{:^60}\n", horLine);
+        cout << format("{:<19}|{:<19}|{:.3f}...\n", "std:numbers::phi", "黄金比例常量φ", numbers::phi);
+        cout << format("{:^60}\n", horLine);
+    }
+    ```
 
-    return 0;
-}
-```
+    上面程序运行结果如下：
+
+    ---
+
+    ```cpp
+                表2-6 <numbers>模块中的数字常量示例
+    ------------------------------------------------------------
+        常量        |       描述        |       近似值
+    ------------------------------------------------------------
+    std:numbers::c     |自然对数的底       |2.71828...
+    ------------------------------------------------------------
+    std::numbers::pi   |π                  |3.14159...
+    ------------------------------------------------------------
+    std:numbers::sqrt2 |2的平方根          |1.41421...
+    ------------------------------------------------------------
+    std:numbers::phi   |黄金比例常量φ      |1.618...
+    ------------------------------------------------------------  
+    ```
+
+    ---
 
 7. 第7题
 
-```cpp
-// 第7题
-#include <iostream>
-#include <format>
-#include <numbers>
-#include <cmath>
+    ```cpp
+    // Exer2_07.cpp
+    #include <iostream>
+    #include <format>
+    #include <numbers>
+    #include <cmath>
 
-int main()
-{
-    using namespace std;
+    int main()
+    {
+        using namespace std;
 
-    // 以下定义常量必须使用constexpr关键字,不能用const,不然会报错.原因是format()要求格式字符串必须为编译时常量.
-    constexpr auto WIDTH60{"{:^60}\n"};
-    const auto HORIZON{"------------------------------------------------------------"};
-    constexpr auto HEADER_ALIGN_CENTER{"{:^19}|{:^19}|{:^20}\n"};
-    constexpr auto DECIMAL_PRECISION_5{"{:<19}|{:<19}|{:.5f}...\n"};
-    constexpr auto DECIMAL_PRECISION_3{"{:<19}|{:<19}|{:.3f}...\n"};
-    constexpr auto SCIENTIFIC_NOTATION{"{:<19}|{:<19}|{:.5E}...\n"};
+        // 以下定义常量必须使用constexpr关键字,不能用const,不然会报错.原因是format()要求格式字符串必须为编译时常量.
+        constexpr auto WIDTH60{"{:^60}\n"};
+        const auto HORIZON{"------------------------------------------------------------"};
+        constexpr auto HEADER_ALIGN_CENTER{"{:^19}|{:^19}|{:^20}\n"};
+        constexpr auto DECIMAL_PRECISION_5{"{:<19}|{:<19}|{:.5f}...\n"};
+        constexpr auto DECIMAL_PRECISION_3{"{:<19}|{:<19}|{:.3f}...\n"};
+        constexpr auto SCIENTIFIC_NOTATION{"{:<19}|{:<19}|{:.5E}...\n"};
 
-    cout << format(WIDTH60, "表2-6 <numbers>模块中的数字常量示例");
-    cout << format(WIDTH60, HORIZON);
-    cout << format(HEADER_ALIGN_CENTER, "常量", "描述", "近似值");
-    cout << format(WIDTH60, HORIZON);
-    cout << format(DECIMAL_PRECISION_5, "std:numbers::c", "自然对数的底", numbers::e);
-    cout << format(WIDTH60, HORIZON);
-    cout << format(DECIMAL_PRECISION_5, "std::numbers::pi", "π", numbers::pi);
-    cout << format(WIDTH60, HORIZON);
-    cout << format(DECIMAL_PRECISION_5, "std:numbers::sqrt2", "2的平方根", numbers::sqrt2);
-    cout << format(WIDTH60, HORIZON);
-    cout << format(DECIMAL_PRECISION_3, "std:numbers::phi", "黄金比例常量φ", numbers::phi);
-    cout << format(WIDTH60, HORIZON);
-    cout << format(SCIENTIFIC_NOTATION, "sin(π/4)", "科学记数法", sin(numbers::pi / 4));
-    cout << format(WIDTH60, HORIZON);
+        cout << format(WIDTH60, "表2-6 <numbers>模块中的数字常量示例");
+        cout << format(WIDTH60, HORIZON);
+        cout << format(HEADER_ALIGN_CENTER, "常量", "描述", "近似值");
+        cout << format(WIDTH60, HORIZON);
+        cout << format(DECIMAL_PRECISION_5, "std:numbers::c", "自然对数的底", numbers::e);
+        cout << format(WIDTH60, HORIZON);
+        cout << format(DECIMAL_PRECISION_5, "std::numbers::pi", "π", numbers::pi);
+        cout << format(WIDTH60, HORIZON);
+        cout << format(DECIMAL_PRECISION_5, "std:numbers::sqrt2", "2的平方根", numbers::sqrt2);
+        cout << format(WIDTH60, HORIZON);
+        cout << format(DECIMAL_PRECISION_3, "std:numbers::phi", "黄金比例常量φ", numbers::phi);
+        cout << format(WIDTH60, HORIZON);
+        cout << format(SCIENTIFIC_NOTATION, "sin(π/4)", "科学记数法", sin(numbers::pi / 4));
+        cout << format(WIDTH60, HORIZON);
+    }
+    ```
 
-    return 0;
-}
-```
+    上面程序运行结果如下：
 
-上面练习第7题程序运行结果如下:  
-<img src=<https://z.wiki/u/kINCSA>>
+    ---
+
+    ```cpp
+                表2-6 <numbers>模块中的数字常量示例
+    ------------------------------------------------------------
+        常量        |       描述        |       近似值
+    ------------------------------------------------------------
+    std:numbers::c     |自然对数的底       |2.71828...
+    ------------------------------------------------------------
+    std::numbers::pi   |π                  |3.14159...
+    ------------------------------------------------------------
+    std:numbers::sqrt2 |2的平方根          |1.41421...
+    ------------------------------------------------------------
+    std:numbers::phi   |黄金比例常量φ      |1.618...
+    ------------------------------------------------------------
+    sin(π/4)           |科学记数法         |7.07107E-01...
+    ------------------------------------------------------------
+    ```
+
+    ---

@@ -1,6 +1,6 @@
 // 第3题
-#include <iostream>
 #include <cmath>
+#include <iostream>
 #include <numbers>
 
 int main()
@@ -32,6 +32,4 @@ int main()
 
     cout << "树的高度是" << heightFeet << "英尺"
          << heightInches << "英寸。" << endl;
-
-    return 0;
 }

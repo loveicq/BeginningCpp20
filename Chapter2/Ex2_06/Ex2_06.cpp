@@ -1,7 +1,7 @@
 // Ex2_06.cpp
 // Formatting numeric values with std::format()
-#include <iostream>
 #include <format>
+#include <iostream>
 #include <numbers>
 using std::cout;
 using std::endl;
@@ -19,6 +19,4 @@ int main()
                    314, 314, 314);
     cout << format("forced sign: {:+},space sign:{: }\n", 314, 314);
     cout << format("all together: {:*<+10.4f},{:+#09x}\n", pi, 314);
-
-    return 0;
 }

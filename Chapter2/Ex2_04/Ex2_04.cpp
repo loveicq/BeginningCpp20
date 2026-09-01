@@ -13,10 +13,10 @@ int main()
     unsigned int inches{};
 
     cout << "Enter a length in yards as a decimal: ";
-    cin >> length;
+    cin >> length; //  注意，只有输入小数，才会有换算的英尺和英寸
 
     yards = static_cast<unsigned int>(length);
-    feet = static_cast<unsigned int>((length - yards) * feet_per_yard);
+    feet  = static_cast<unsigned int>((length - yards) * feet_per_yard);
     // 总英寸数与inches_per_foot取模（除以12取余数）即是英寸数
     inches = static_cast<unsigned int>(length * inches_per_yard) % inches_per_foot;
 
@@ -24,6 +24,4 @@ int main()
          << yards << " yards "
          << feet << " feet "
          << inches << " inches." << endl;
-
-    return 0;
 }

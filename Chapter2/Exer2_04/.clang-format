@@ -1,0 +1,10 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+BreakBeforeBraces: Allman
+AccessModifierOffset: -4
+ColumnLimit: 0
+SpaceBeforeParens: ControlStatements
+AlignConsecutiveAssignments: true
+PointerAlignment: Left
+SpaceAroundOperators:true
+BreakBeforeBinaryOperators: All

@@ -1,6 +1,5 @@
-// 第5题
+// Exer2_04.cpp
 #include <iostream>
-#include <format>
 
 int main()
 {
@@ -25,7 +24,5 @@ int main()
     double BMI{};
     BMI = weight / (height * height);
 
-    cout << format("您的BMI指数是{:.1f}\n", BMI);
-
-    return 0;
+    cout << "您的BMI指数为" << BMI << "。" << endl;
 }

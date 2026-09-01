@@ -1,8 +1,8 @@
-// 第7题
-#include <iostream>
-#include <format>
-#include <numbers>
+// Exer2_07.cpp
 #include <cmath>
+#include <format>
+#include <iostream>
+#include <numbers>
 
 int main()
 {
@@ -30,6 +30,4 @@ int main()
     cout << format(WIDTH60, HORIZON);
     cout << format(SCIENTIFIC_NOTATION, "sin(π/4)", "科学记数法", sin(numbers::pi / 4));
     cout << format(WIDTH60, HORIZON);
-
-    return 0;
 }

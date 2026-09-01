@@ -1,8 +1,8 @@
 // 测试std::format()错误调试的try-catch块
-#include <iostream>
-#include <format>
-#include <numbers>
 #include <cmath>
+#include <format>
+#include <iostream>
+#include <numbers>
 
 int main()
 {
@@ -24,9 +24,9 @@ int main()
 
     try
     {
-        cout << format(" 养 {:.2} 条鱼的池塘半径需要 {:.2f} 英尺。\n", fish_count, pond_radius);
+        cout << format(" 养 {} 条鱼的池塘半径需要 {:.2f} 英尺。\n", fish_count, pond_radius);
     }
-    catch (const format_error &error)
+    catch (const format_error& error)
     {
         cout << error.what() << '\n';
     }

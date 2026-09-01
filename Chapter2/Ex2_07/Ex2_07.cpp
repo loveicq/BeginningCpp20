@@ -1,10 +1,10 @@
 // Ex2_07.cpp
 // Finding maximum and minimum values for data types
-#include <iostream>
+#include <float.h>
 #include <format>
+#include <iostream>
 #include <limits>
 #include <stdio.h>
-#include <float.h>
 using std::cout;
 using std::endl;
 using std::format;
@@ -33,6 +33,4 @@ int main()
                    numeric_limits<long double>::min(), numeric_limits<long double>::max())
          << format("The range for type long double is from {} to {}\n",
                    numeric_limits<long double>::lowest(), numeric_limits<long double>::max());
-
-    return 0;
 }

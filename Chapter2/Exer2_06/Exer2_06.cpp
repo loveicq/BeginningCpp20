@@ -1,6 +1,6 @@
-// 第6题
-#include <iostream>
+// Exer2_06.cpp
 #include <format>
+#include <iostream>
 #include <numbers>
 
 int main()
@@ -21,6 +21,4 @@ int main()
     cout << format("{:^60}\n", horLine);
     cout << format("{:<19}|{:<19}|{:.3f}...\n", "std:numbers::phi", "黄金比例常量φ", numbers::phi);
     cout << format("{:^60}\n", horLine);
-
-    return 0;
 }
