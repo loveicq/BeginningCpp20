@@ -1,0 +1,28 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: false
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterExternBlock: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+AccessModifierOffset: -4
+ColumnLimit: 0
+SpaceBeforeParens: ControlStatements
+AlignConsecutiveAssignments: true
+PointerAlignment: Left
+BreakConstructorInitializers: BeforeColon
+PackConstructorInitializers: Never

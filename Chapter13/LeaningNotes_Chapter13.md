@@ -889,3 +889,90 @@ export bool operator<(const Box& box1, const Box& box2)
         ---
 
 ❗注意：编译器不会对成员函数的左操作数执行转换，如果将operator/()定义为成员函数，上例的表达式4-j将不能编译！
+
+## 13.7 重载一元运算符
+
+如果某个操作很常用，可以引入一个运算符。下例引入一个长度和宽度互换的盒子的一元运算符
+
+- 案例Ex13_08
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <compare>;
+        import <ostream>;
+        import <format>;
+
+        export class Box {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{length},
+                m_width{width},
+                m_height{height}
+            {}
+
+            Box operator~() const
+            {
+                return Box{m_width, m_length, m_height};
+            }
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+            std::partial_ordering operator<=>(const Box& otherBox) const
+            {
+                return volume() <=> otherBox.volume();
+            }
+            std::partial_ordering operator<=>(double otherValue) const
+            {
+                return volume() <=> otherValue;
+            }
+
+            bool operator==(const Box& otherBox) const = default;
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, const Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                box.getLength(), box.getWidth(), box.getHeight());
+
+            return stream;
+        }
+        ```
+
+    - Ex13_08.cpp
+
+        ```cpp
+        // Ex13_08.cpp
+        import <iostream>;
+        import box;
+
+        int main()
+        {
+            Box someBox{1, 2, 3};
+            std::cout << ~someBox << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box(2.0,1.0,3.0) 
+        ```
+
+        ---
+
+- 上面案例重载`~`运算符导致程序可读性差，不如使用普通函数更好，如Box rotate(Box& box)或Box getRotatedBox(Box& box)
