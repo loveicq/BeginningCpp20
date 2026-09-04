@@ -976,3 +976,142 @@ export bool operator<(const Box& box1, const Box& box2)
         ---
 
 - 上面案例重载`~`运算符导致程序可读性差，不如使用普通函数更好，如Box rotate(Box& box)或Box getRotatedBox(Box& box)
+
+## 13.8 重载递增和递减运算符
+
+++和--运算符的前缀和后缀形式通过一个int类型的假参数来区分
+
+- 任意类MyClass重载++运算符的函数声明如下：
+
+```cpp
+class MyClass
+{
+public:
+    MyClass& operator++(); // 重载前置递增运算符
+    const MyClass operator++(int); // 重载后置递增运算符
+    // MyClass 类的其余定义...
+};
+```
+
+- 总是应该使用前缀形式的递增运算符operator++()实现后缀形式的递增运算符operator(int)
+- 案例Ex13_09
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <ostream>;
+        import <format>;
+
+        export class Box {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{length},
+                m_width{width},
+                m_height{height}
+            {}
+
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+            Box& operator++();
+            const Box operator++(int);
+            Box& operator--();
+            const Box operator--(int);
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, const Box& box);
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        // Box.cpp
+        module box;
+
+        import <format>;
+        import <ostream>;
+
+        Box& Box::operator++()
+        {
+            ++m_length;
+            ++m_width;
+            ++m_height;
+
+            return *this;
+        }
+
+        const Box Box::operator++(int)
+        {
+            auto copy(*this);
+            ++(*this);
+
+            return copy;
+        }
+
+        Box& Box::operator--()
+        {
+            --m_length;
+            --m_width;
+            --m_height;
+
+            return *this;
+        }
+
+        const Box Box::operator--(int)
+        {
+            auto copy(*this);
+            --(*this);
+
+            return copy;
+        }
+
+        std::ostream& operator<<(std::ostream& stream, const Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                box.getLength(), box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+    - Ex13_09.cpp
+
+        ```cpp
+        // Ex13_09.cpp
+        import box;
+        import <iostream>;
+
+        int main()
+        {
+            Box theBox{3.0, 1.0, 3.0};
+            std::cout << "Our test Box is " << theBox << std::endl;
+            std::cout << "Postfix increment evaluates to the original object: "
+                    << theBox++ << std::endl;
+            std::cout << "After postfix increment: " << theBox << std::endl;
+            std::cout << "Prefix decrement evaluates to the decremented object: "
+                    << --theBox << std::endl;
+            std::cout << "After prefix decrement: " << theBox << std::endl;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Our test Box is Box(3.0,1.0,3.0)
+        Postfix increment evaluates to the original object: Box(3.0,1.0,3.0)
+        After postfix increment: Box(4.0,2.0,4.0)
+        Prefix decrement evaluates to the decremented object: Box(3.0,1.0,3.0)
+        After prefix decrement: Box(3.0,1.0,3.0)
+        ```
+
+        ---
