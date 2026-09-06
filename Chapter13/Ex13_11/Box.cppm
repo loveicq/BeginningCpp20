@@ -3,6 +3,7 @@ export module box;
 
 import <format>;
 import <ostream>;
+import <algorithm>;
 
 export class Box
 {
@@ -11,7 +12,7 @@ public:
     Box(double length, double width, double height)
         : m_length{length}, m_width{width}, m_height{height} {}
 
-    double volume() const { return m_height * m_length * m_width; }
+    double volume() const { return m_length * m_width * m_height; }
 
     int compare(const Box& box) const
     {
@@ -24,11 +25,19 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const Box& box)
     {
-        return out << std::format("Box({:4.1f},{:4.1f},{:4.1f})", box.m_length, box.m_width, box.m_height);
+        return out << std::format("Box({:4.1f},{:4.1f},{:4.1f})",
+                                  box.m_length, box.m_width, box.m_height);
+    }
+
+    Box operator+(const Box& aBox) const
+    {
+        return Box{std::max(m_length, aBox.m_length),
+                   std::max(m_width, aBox.m_width),
+                   m_height + aBox.m_height};
     }
 
 private:
-    double m_width{1.0};
     double m_length{1.0};
+    double m_width{1.0};
     double m_height{1.0};
 };
