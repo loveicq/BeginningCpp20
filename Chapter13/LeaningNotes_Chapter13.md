@@ -1770,4 +1770,119 @@ public:
         Box(54.5,69.4,59.2) Box(29.1,94.6,71.4) Box(24.7,83.4,27.4)
         ```
 
-        ---
+## 13.10 函数对象
+
+- 函数对象是重载运算符()的类对象，也被称为functor。  
+
+    ```cpp
+    class ComputerVolume
+    {
+    public:
+        double operator()(double x, double y, double z) const {return x * y * z;} // 超过一个参数的成员函数！
+    };
+
+    ComputerVolume computerVolume;
+    double roomVolume{computerVolume(16, 12, 8.5)};
+    ```
+
+- ComputerVolume对象(omputerVolume)代表一个函数，可使用其函数调用运算符进行调用。roomVolume的初始化列表中  
+的值是调用ComputerVolume对象的operator()()函数的结果，等价于computerVolume.operator()(16,12,8.5)。  
+可以在类中定义operator()()的多个重载：  
+
+    ```cpp
+    class ComputerVolume
+    {
+    public:
+        double operator()(double x, double y, double z) const {return x * y * z;}
+        double operator()(const Box& box) const {return box.volume();}
+    };
+
+    Box box{1.0, 2.0,3.0};
+    ComputerVolume computerVolume;
+    std::cout<< "The volume of the box is " << computerVolume(box) << std::endl;
+    ```
+
+- 函数调用运算符必须被重载为成员函数，不能把它们定义为普通函数。函数调用运算符也是唯一不限制参数个数且能够有默认实参的运算符。
+
+## 13.11 重载类型转换
+
+- 转换任意类MyClass的对象的运算符函数的形式如下：
+
+    ```cpp
+    class MyClass
+    {
+    public:
+        operator OtherType() const; //将MyClass类型转换为OtherType类型
+    };
+    ```
+
+- 转换Box类型为double类型
+
+    ```cpp
+    class Box
+    {
+    public:
+        operator double() const {return volume();}
+        // Box 类的其他定义……
+    };
+    Box box {1.0,2.0,3.0};
+    double boxVolume{box}; // 调用double类型转换
+    ```
+
+    - 编译器会插入一个隐式转换，下面的语句可以显式调用该运算符函数：
+
+        ```cpp
+        double total {10.0 + static_cast<double>(box)};
+        ```
+
+    - 在类中把转换运算符函数指定为explicit，就可以避免隐式调用它。
+
+        ```cpp
+        explicit operator double() const {return volume;}
+        ```
+
+        现在编译器不会使用这个成员将Box对象隐式转换为double类型
+
+- 转换运算符必须被重载为成员函数，而且也是仅有的没有把返回类型放到operator关键字前面，  
+而是放到operator关键字后面的运算符
+
+**转换的模糊性**  
+
+假设类Box的构造函数如下声明：
+
+```cpp
+class Box
+{
+public:
+    Box(const Ball& theObject);
+};
+```
+
+与类Ball中的转换运算符有冲突：
+
+```cpp
+class Ball
+{
+public:
+    operator Box() const;
+};
+```
+
+解决的方法是将其中一个成员或两个成员都声明为`explicit`
+
+## 重载赋值运算符
+
+- 编译器会提供一个默认的复制赋值运算符，与其它默认函数一样，默认复制赋值运算符简单地逐个复制类的成员成员变量
+
+    ```cpp
+    class Box
+    {
+    public:
+        Box& operator=(const Box& rightHandSide);
+    };
+    ```
+
+- 赋值运算符是仅有的必须重载为类的成员函数的二元运算符
+
+### 13.12.1 实现复制赋值运算符
+
