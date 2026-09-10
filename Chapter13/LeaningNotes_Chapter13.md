@@ -1889,5 +1889,85 @@ public:
 - 默认赋值运算符对于Box类可以接受，但是对于Message类这种C样式的字符串（char*），在构造函数和析构函数中  
 会涉及new和delete堆内存，则不合适。两个Message对象的(char*) m_text成员变量引用同一个内存地址，delete[]  
 将导致不可控的结果
+- 最容易和最安全的解决方案是始终先检查复制赋值运算符中的左右操作数是否相等
+- 用户定义的每个复制赋值运算符都应该首先检查自我赋值的情况。忘记检查自我赋值，可能会在不小心将对象赋值给自身时发生致命错误
 
-- 
+- 案例Ex13_12
+    - Message.cppm
+
+        ```cpp
+        // Message.cppm
+        module;
+        #include <cstring>
+        export module message;
+
+        export class Message
+        {
+        public:
+            explicit Message(const char* text = "")
+                : m_text{new char[std::strlen(text) + 1]}
+            {
+                std::strcpy(m_text, text);
+            }
+
+            ~Message() { delete[] m_text; }
+
+            Message& operator=(const Message& message);
+
+            // Rule of Three(三法则)：如果需要自定义析构、拷贝构造、拷贝赋值中任意一个，那通常三个都需要！
+
+            const char* getText() const { return m_text; }
+
+        private:
+            char* m_text;
+        };
+        ```
+
+    - Message.cpp
+
+        ```cpp
+        // Message.cpp
+        module;
+        #include <cstring>
+        module message;
+
+        Message& Message::operator=(const Message& message)
+        {
+            if (&message != this) {
+                delete[] m_text;    // 释放 m_text 原来指向的堆内存，防止内存泄漏
+                m_text = new char[std::strlen(message.m_text) + 1]; // 为新内容分配堆内存
+                std::strcpy(m_text, message.m_text);
+            }
+            return *this;
+        }
+        ```
+
+    - Ex13_12.cpp
+
+        ```cpp
+        // Ex13_12.cpp
+        import message;
+        import <iostream>;
+
+        int main()
+        {
+            Message beware{"Careful"};
+            Message warning;
+
+            warning = beware;
+
+            std::cout << "After assignment beware is: " << beware.getText() << std::endl;
+            std::cout << "After assignment warning is: " << warning.getText() << std::endl;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        After assignment beware is: Careful
+        After assignment warning is: Careful 
+        ```
+
+        ---
