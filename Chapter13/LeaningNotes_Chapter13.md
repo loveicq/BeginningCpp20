@@ -1971,3 +1971,91 @@ public:
         ```
 
         ---
+- 编译器自动生成的副本构造函数：`Message(const Message& message) : m_text{message.m_text}{}`  
+，如`Message danger{beware};`这样的语句会逐一复制成员变量，这会导致导致两个对象的成员变量指向同一个指针，析构就会发生未定义行为  
+- 案例Ex13_12A
+    - Message.cppm
+
+        ```cpp
+        // Message.cppm
+        module;
+        #include <cstring>
+
+        export module message;
+
+        export class Message
+        {
+        public:
+            explicit Message(const char* text = "")
+                : m_text{new char[std::strlen(text) + 1]}
+            {
+                std::strcpy(m_text, text);
+            }
+
+            ~Message() { delete[] m_text; }
+
+            Message(const Message& message);    // 副本构造函数
+            Message& operator=(const Message& message);
+
+            const char* getText() const { return m_text; }
+
+        private:
+            char* m_text;
+        };
+        ```
+
+    - Message.cpp
+
+        ```cpp
+        // Message.cpp
+        module;
+        #include <cstring>
+        module message;
+
+        Message::Message(const Message& message)
+            : Message{message.m_text} {} // 委托构造函数，message.m_text数据类型即char*指针
+
+        Message& Message::operator=(const Message& message)
+        {
+            if (&message != this) {
+                delete[] m_text;
+                m_text = new char[std::strlen(message.m_text) + 1];
+                std::strcpy(m_text, message.m_text);
+            }
+            return *this;
+        }
+        ```
+
+    - Ex13_12A.cpp
+
+        ```cpp
+        // Ex13_12A.cpp
+        import message;
+        import <iostream>;
+
+        int main()
+        {
+            Message beware{"Careful"};
+            Message warning;
+
+            warning = beware;
+
+            Message caution{warning};
+
+            std::cout << "After assignment beware is: " << beware.getText() << std::endl;
+            std::cout << "After assignment warning is: " << warning.getText() << std::endl;
+            std::cout << "As a copy of warning, caution is: " << caution.getText() << std::endl;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        After assignment beware is: Careful
+        After assignment warning is: Careful
+        As a copy of warning, caution is: Careful
+        ```
+
+        ---
