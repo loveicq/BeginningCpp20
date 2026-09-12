@@ -2183,3 +2183,31 @@ public:
 **删除复制赋值运算符**  
 
 因各种原因需要不能被复制的对象，可在声明时用delete关键字。为阻止复制，应同时删掉复制赋值运算符与副本构造函数
+
+```cpp
+class Message
+{
+public:
+    explicit Message(const char* text="");
+    ~Message() {delete[] m_text;}
+
+    Message(const Message&) = delete; // 注意=号
+    Message& operator=(const Message&) = delete;
+
+    const char* getText() const {return *m_text;}
+private:
+    const char* m_text;
+};
+```
+
+### 13.12.3 赋值不同类型
+
+类的赋值运算符可以有几个重载版本，实现不同类型的值赋给对象
+
+```cpp
+std::string s{"Happiness is an inside job."};
+...
+s="Don't assign anyone else that much power over your life."; // Assign a const char[]
+```
+
+任何赋值运算符都应该返回对*this的引用
