@@ -2211,3 +2211,199 @@ s="Don't assign anyone else that much power over your life."; // Assign a const 
 ```
 
 任何赋值运算符都应该返回对*this的引用
+
+## 13.13 本章小结
+
+- 在类中可以重载任何运算符，以提供针对该类的功能。重载运算符的目的只应该是让代码更容易读写
+- 重载运算符应该尽可能模拟对应的内置运算符的行为。但有一些常见的例外情况，如标准库滚的<<和>>运算符  
+以及用于连接字符串的+运算符
+- 可以将运算符函数定义为类成员或全局运算符函数。应当尽可能选择实现为成员函数。只有当没有其他方法，  
+或者希望对第一个操作数进行隐式转换时，才实现为全局运算符函数
+- 如果一元运算符被定义为类的成员函数，操作数就是类对象。如果一元运算符被定义为全局运算符函数，  
+操作数就是函数的参数
+- 如果二元运算符被定义为类的成员函数，左操作数就是类对象，右操作数就是函数的参数。如果二元运算符被  
+定义为全局运算符函数，第一个参数指定左操作数，第二个参数指定右操作数
+- 如果重载==和<=>运算符，就可得到!=、<、>、<=和>=运算符。许多情况下，甚至可以让编译器为我们生成代码
+- 实现+=运算符重载的函数可以用在+运算符函数的实现上。所有op=运算符都是这样
+- 要重载递增或递减运算符，需要用两个函数分别提供运算符的前缀和后缀形式。实现后缀运算符的函数有一个  
+int类型的额外参数，它仅用于与前缀函数相区分
+- 要支持自定义的类型转换，可以选择转换运算符，或者结合使用转换构造函数和赋值运算符
+
+## 13.14 练习
+
+1. 第1题
+
+    - Exer13_01.cpp
+
+        ```cpp
+        // Exer13_01.cpp
+        /*************************第13章_练习_第1题************************\
+        在示例Ex13_05中，定义Box类中的一个运算符函数，允许Box对象与一个无符号
+        整数n后乘，得到一个新对象，其高度是原对象的n倍。验证该运算符函数能按预期
+        的方式工作。
+        \*****************************************************************/
+        import <iostream>;
+        import box;
+
+        int main()
+        {
+            Box box{2, 3, 4};
+            std::cout << "Box is " << box << std::endl;
+            unsigned n{3};
+            Box newBox{box * n};
+            std::cout << "After multiplying the height by " << n
+                    << ", the new box is " << newBox << std::endl;
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <compare>;
+        import <ostream>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{std::max(length, width)},
+                m_width{std::min(length, width)},
+                m_height{height} {}
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+            std::partial_ordering operator<=>(const Box& aBox) const;
+            std::partial_ordering operator<=>(double value) const;
+            bool operator==(const Box& aBox) const = default;
+
+            Box operator+(const Box& aBox) const;
+            Box operator*(unsigned n) const;
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, const Box& box);
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        // Box.cpp
+        module box;
+
+        import <format>;
+        import <algorithm>; // For min() and max()
+
+        Box Box::operator+(const Box& aBox) const
+        {
+            return Box{std::max(m_length, aBox.m_length),
+                    std::max(m_width, aBox.m_width),
+                    m_height + aBox.m_height};
+        }
+
+        Box Box::operator*(unsigned n) const
+        {
+            return Box{m_length, m_width, m_height * n};
+        }
+
+        std::partial_ordering Box::operator<=>(const Box& aBox) const
+        {
+            return volume() <=> aBox.volume();
+        }
+
+        std::partial_ordering Box::operator<=>(double value) const
+        {
+            return volume() <=> value;
+        }
+
+        std::ostream& operator<<(std::ostream& stream, const Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                box.getLength(), box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+2. 第2题
+
+    - Exer13_02.cpp
+
+        ```cpp
+        // Exer13_02.cpp
+        /*************************第13章_练习_第2题************************\
+        定义一个运算符函数，允许Box对象与一个无符号整数n前乘，得到与第1题相同的
+        结果。验证该运算符函数能按预期的方式工作。
+        \*****************************************************************/
+        import box;
+        import <iostream>;
+
+        int main()
+        {
+            Box box{2.0, 3.0, 4.0};
+            std::cout << "Box is " << box << std::endl;
+            unsigned n{3};
+            Box newBox{n * box};
+            std::cout << "After multiplying the height by " << n << ", the new box is " 
+                        << newBox << std::endl;
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <ostream>;
+        import <format>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {}
+
+            friend Box operator*(unsigned n, const Box& box);
+            friend std::ostream& operator<<(std::ostream& stream, const Box& aBox);
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export Box operator*(unsigned n, const Box& box)
+        {
+            return Box{box.m_length, box.m_width, n * box.m_height};
+        }
+
+        export std::ostream& operator<<(std::ostream& stream, const Box& aBox)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                aBox.m_length, aBox.m_width, aBox.m_height);
+            return stream;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box is Box(2.0,3.0,4.0)
+        After multiplying the height by 3, the new box is Box(2.0,3.0,12.0)  
+        ```
+
+        ---
