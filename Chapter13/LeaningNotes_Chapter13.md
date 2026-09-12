@@ -2059,3 +2059,127 @@ public:
         ```
 
         ---
+
+- 类特定 swap（class-specific swap），配合 Copy-and-Swap 惯用法，是实现拷贝赋值运算符的最佳实践之一  
+下面的案例演示了 Message 类应该怎么完整地设计（包括 Rule of Five + Copy-and-Swap + ADL swap）
+- 案例Ex13_12B
+    - Message.cppm
+
+        ```cpp
+        // Message.cppm
+        module;
+        #include <cstring>
+        export module message;
+
+        export class Message
+        {
+        public:
+            explicit Message(const char* text = "")
+                : m_text{new char[std::strlen(text) + 1]}
+            {
+                std::strcpy(m_text, text);
+            }
+
+            ~Message() { delete[] m_text; }
+
+            Message(const Message& message);
+            Message& operator=(const Message& message);
+
+            void swap(Message& other) noexcept;
+
+            const char* getText() const { return m_text; }
+
+        private:
+            char* m_text{nullptr};
+        };
+
+        export void swap(Message& one, Message& other) noexcept // 此程序没调用此函数，但是类完整设计的一部分，所以应该加上它
+        {
+            return one.swap(other);
+        }
+        ```
+
+    - Message.cpp
+
+        ```cpp
+        // Message.cpp
+        module message;
+        import <utility>; // For std::swap()
+
+        Message::Message(const Message& message)
+            : Message{message.m_text} {} // 委托构造函数
+
+        Message& Message::operator=(const Message& message)
+        {
+            auto copy{message}; // ① 用拷贝构造做一份副本（深拷贝，分配新内存）
+            swap(copy);         // ② 和自己交换（只交换指针，零内存操作）
+            return *this;
+        } // ③ copy 离开作用域自动析构，带走原来的旧内存
+
+        void Message::swap(Message& other) noexcept
+        {
+            std::swap(m_text, other.m_text); // 只交换指针！不分配/不释放内存
+        }
+        ```
+
+    - Ex13_12B.cpp
+
+        ```cpp
+        // Ex13_12B
+        import message;
+        import <iostream>;
+
+        int main()
+        {
+            Message beware{"Careful"};
+            Message warning;
+
+            warning = beware;
+
+            Message caution{warning};
+
+            std::cout << "After assignment beware is: " << beware.getText() << std::endl;
+            std::cout << "After assignment warning is: " << warning.getText() << std::endl;
+            std::cout << "As a copy of warning, caution is: " << caution.getText() << std::endl;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        After assignment beware is: Careful
+        After assignment warning is: Careful
+        As a copy of warning, caution is: Careful 
+        ```
+
+        ---
+
+### 13.12.2 复制赋值运算符与副本构造函数
+
+- 在两个已有的对象之间赋值，就会调用复制赋值运算符；在新建对象和已有对象之间赋值，就会调用副本构造函数
+
+    ```cpp
+    Message beware {"Careful"};
+    Message warning;
+    warning = beware; // 两个对象都是已有的，调用复制赋值运算符
+    Message otherWarning {warning}; // otherWarning对象是新建的，调用副本构造函数
+    ```
+
+- ♻ 延伸阅读——深拷贝与浅拷贝
+
+    如果没有自定义副本构造函数，在包含裸指针成员变量情况下，会导致浅拷贝
+
+    ```cpp
+    // ❌ 浅拷贝（默认行为，两个对象共享同一块内存）
+    m_text = other.m_text; // 在析构时会重复释放内存，导致崩溃
+
+    // ✅ 深拷贝（每个对象拥有独立的内存）
+    m_text = new char[std::strlen(other.m_text) + 1];
+    std::strcpy(m_text, other.m_text);
+    ```
+
+**删除复制赋值运算符**  
+
+因各种原因需要不能被复制的对象，可在声明时用delete关键字。为阻止复制，应同时删掉复制赋值运算符与副本构造函数
