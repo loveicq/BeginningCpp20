@@ -1,18 +1,31 @@
 // Box.cppm
 export module box;
 
-import <ostream>;
-import <format>;
+import <compare>;   // For std::partial_ordering
+import <ostream>;   // For std::ostream
+import <algorithm>; // For std::max()、std::min()
 
 export class Box
 {
 public:
     Box() = default;
     Box(double length, double width, double height)
-        : m_length{length}, m_width{width}, m_height{height} {}
+        : m_length{std::max(length, width)},
+          m_width{std::min(length, width)},
+          m_height{height} {}
 
-    friend Box operator*(unsigned n, const Box& box);
-    friend std::ostream& operator<<(std::ostream& stream, const Box& aBox);
+    double volume() const { return m_length * m_width * m_height; }
+
+    double getLength() const { return m_length; }
+    double getWidth() const { return m_width; }
+    double getHeight() const { return m_height; }
+
+    std::partial_ordering operator<=>(const Box& aBox) const;
+    std::partial_ordering operator<=>(double value) const;
+    bool operator==(const Box& aBox) const = default;
+
+    Box operator+(const Box& aBox) const;
+    Box operator*(unsigned n) const;
 
 private:
     double m_length{1.0};
@@ -20,14 +33,5 @@ private:
     double m_height{1.0};
 };
 
-export Box operator*(unsigned n, const Box& box)
-{
-    return Box{box.m_length, box.m_width, n * box.m_height};
-}
-
-export std::ostream& operator<<(std::ostream& stream, const Box& aBox)
-{
-    stream << std::format("Box({:.1f},{:.1f},{:.1f})",
-                          aBox.m_length, aBox.m_width, aBox.m_height);
-    return stream;
-}
+export std::ostream& operator<<(std::ostream& stream, const Box& aBox);
+export Box operator*(unsigned n, const Box& aBox);

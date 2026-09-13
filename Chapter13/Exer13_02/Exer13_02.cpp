@@ -10,7 +10,9 @@ int main()
 {
     Box box{2.0, 3.0, 4.0};
     std::cout << "Box is " << box << std::endl;
+
     unsigned n{3};
     Box newBox{n * box};
-    std::cout << "After multiplying the height by " << n << ", the new box is " << newBox << std::endl;
+    std::cout << "After pre-multiplying the height by " << n << " box is: "
+              << newBox << std::endl;
 }
