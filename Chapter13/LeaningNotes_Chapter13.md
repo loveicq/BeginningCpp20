@@ -2592,3 +2592,95 @@ int类型的额外参数，它仅用于与前缀函数相区分
         ```
 
         ---
+
+4. 第4题
+    - Exer13_04.cpp
+
+        ```cpp
+        // Exer13_04.cpp
+        /*************************第13章_练习_第4题************************\
+        如果允许my_box <= 6.0和6.0 <= my_box ，那么为什么不允许my_box = 6.0和
+        6.0 != my_box?需要使用多少个运算符函数来实现这样的重载呢？扩展Ex13_04中
+        的Box类，试着使用最新的运算符
+        \*****************************************************************/
+        import box;
+        import <iostream>;
+
+        int main()
+        {
+            Box box1{1.0, 2.0, 3.0};
+            Box box2{3.0, 2.0, 1.0};
+            Box box3{1.0, 2.0, 3.0};
+
+            std::cout << "box1 and box2 are " << (box1 == box2 ? "" : "not ") << "equal\n";
+            std::cout << "box1 and box3 are " << (box1 != box3 ? "not " : "") << "equal\n";
+            std::cout << "box1 is " << (box1 == 6.0 ? "" : "not ") << "equal to 6.0\n";
+            std::cout << "10.0 is " << (10 != box2 ? "not " : "") << "equal to box2\n";
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <ostream>;
+        import <compare>;
+        import <format>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {}
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+            std::partial_ordering operator<=>(const Box& box) const
+            {
+                return volume() <=> box.volume();
+            }
+            std::partial_ordering operator<=>(double value) const
+            {
+                return volume() <=> value;
+            }
+
+            bool operator==(const Box& box) const = default;
+
+            bool operator==(double value) const
+            {
+                return volume() == value;
+            }
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        std::ostream& operator<<(std::ostream& stream, const Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                box.getLength(), box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        box1 and box2 are not equal
+        box1 and box3 are equal
+        box1 is equal to 6.0
+        10.0 is not equal to box2 
+        ```
+
+        ---
