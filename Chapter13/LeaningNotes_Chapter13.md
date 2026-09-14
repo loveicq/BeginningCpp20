@@ -2407,3 +2407,188 @@ int类型的额外参数，它仅用于与前缀函数相区分
         ```
 
         ---
+
+3. 第3题
+    - Exer13_03.cpp
+
+        ```cpp
+        // Exer13_03.cpp
+        /*************************第13章_练习_第3题************************\
+        查看第2题的答案。如果与我们的参考答案类似，那么应该包含两个二元算术运算符：
+        一个将两个Box对象相加，另一个将Box对象与数字相乘。虽然将Box对象相减的效果
+        不好，但是既然有了运算符用来把Box对象与一个整数相乘，难道不想将其与一个
+        整数相除？而且，创建了每个二元算术运算符op()后，还会希望有对应的复合赋值
+        运算符op=()。确保使用规范模式实现所有需要的运算符。
+        \*****************************************************************/
+        import box;
+        import <iostream>;
+
+        int main()
+        {
+            Box box{2.0, 3.0, 4.0};
+            std::cout << "Box is " << box << std::endl;
+
+            size_t n{3};
+            box *= 3;
+            std::cout << "After multiplying by " << n << " box is " << box << std::endl;
+
+            box /= 3;
+            std::cout << "After dividing by " << n << " , the box is again " << box << std::endl;
+
+            Box newBox{2 * box};
+            std::cout << "Twice " << box << " is " << newBox << std::endl;
+
+            std::cout << "Half that is again " << (ewBox / 2) << std::endl;
+
+            std::cout << "Adding both boxes gives " << (box + newBox) << std::endl;
+
+            box += newBox;
+
+            std::cout << "The same can be obtained by usign += as well: " << box << std::endl;
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <compare>;   // For std::partial_ordering
+        import <ostream>;   // For std::ostream
+        import <algorithm>; // For std::max() and std::min()
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{std::max(length, width)},
+                m_width{std::min(length, width)},
+                m_height{height}
+            {}
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            double getLength() { return m_length; }
+            double getWidth() { return m_width; }
+            double getHeight() { return m_height; }
+
+            std::partial_ordering operator<=>(const Box& aBox) const;
+            std::partial_ordering operator<=>(double value) const;
+            bool operator==(const Box& aBox) const = default;
+
+            Box operator+(const Box& aBox) const;
+            Box operator*(unsigned factor) const;
+            Box operator/(unsigned divisor) const;
+
+            Box& operator+=(const Box& aBox);
+            Box& operator*=(unsigned factor);
+            Box& operator/=(unsigned divisor);
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export Box operator*(unsigned factor, const Box& aBox);
+        export std::ostream& operator<<(std::ostream& stream, const Box& aBox);
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        // Box.cpp
+        module box;
+
+        import <format>;
+
+        std::partial_ordering Box::operator<=>(const Box& aBox) const
+        {
+            return volume() <=> aBox.volume();
+        }
+
+        std::partial_ordering Box::operator<=>(double value) const
+        {
+            return volume() <=> value;
+        }
+
+        Box Box::operator+(const Box& aBox) const
+        {
+            Box copy{*this};
+            copy += aBox;
+            return copy;
+        }
+
+        Box Box::operator*(unsigned factor) const
+        {
+            Box copy{*this};
+            copy *= factor;
+            return copy;
+        }
+
+        Box Box::operator/(unsigned divisor) const
+        {
+            Box copy{*this};
+            copy /= divisor;
+            return copy;
+        }
+
+        Box& Box::operator+=(const Box& aBox)
+        {
+            m_length = std::max(m_length, aBox.m_length);
+            m_width  = std::max(m_width, aBox.m_width);
+            m_height += aBox.m_height;
+            return *this;
+        }
+
+        Box& Box::operator*=(unsigned factor)
+        {
+            m_length *= factor;
+            m_width *= factor;
+            m_height *= factor;
+            return *this;
+        }
+
+        Box& Box::operator/=(unsigned divisor)
+        {
+            m_length /= divisor;
+            m_width /= divisor;
+            m_height /= divisor;
+            return *this;
+        }
+
+        Box operator*(unsigned factor, const Box& aBox)
+        {
+            return aBox * factor;
+        }
+
+        std::ostream& operator<<(std::ostream& stream, const Box& aBox)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                aBox.getLength(), aBox.getWidth(), aBox.getHeight());
+            return stream;
+        }
+
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box(3.0,1.0,4.0) is greater than Box(2.0,1.5,3.0)
+        Box(3.0,1.0,4.0) is greater than Box(1.0,2.0,1.0)
+
+        Box(3.0,1.0,4.0) is not equal to Box(2.0,1.5,3.0)
+        Box(3.0,1.0,4.0) is not equal to Box(1.0,3.0,5.0)
+        Box(3.0,1.0,4.0) is not equal to Box(1.0,2.0,1.0)
+        Box(3.0,1.0,4.0) is not equal to Box(2.0,3.0,2.0)
+
+        6 is less than or equal to Box(2.0,1.5,3.0)
+        6 is less than or equal to Box(1.0,3.0,5.0)
+        6 is less than or equal to Box(2.0,3.0,2.0)
+        ```
+
+        ---
