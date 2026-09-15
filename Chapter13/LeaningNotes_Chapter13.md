@@ -2684,3 +2684,110 @@ int类型的额外参数，它仅用于与前缀函数相区分
         ```
 
         ---
+
+5. 第5题
+    Exer13_05.cpp
+
+        ```cpp
+        // Exer13_05.cpp
+        /*************************第13章_练习_第5题************************\
+        创建必要的运算符，允许Box对象用在if语句中，例如：
+            if(my_box)...
+            if(!my_other_box)...
+        如果Box对象的体积不为0，则计算结果为true；如果体积为0，则计算结果为false。
+        创建一个小的测试程序，显示运算符能够按照预期的方式工作。
+        \*****************************************************************/
+        import box;
+        import <iostream>;
+
+        void testBox(const Box& box)
+        {
+            std::cout << "The box's volume is " << box.volume() << ".\n";
+            if (box)
+                std::cout << "This volume is non-zero.";
+            if (!box)
+                std::cout << "This volume is zero.";
+            std::cout << std::endl;
+        }
+
+        int main()
+        {
+            Box box1{2.0, 3.0, 4.0};
+            std::cout << "box1 is " << box1 << std::endl;
+            testBox(box1);
+
+            std::cout << std::endl;
+
+            Box box2{0, 0, 0};
+            std::cout << "box2 is " << box2 << std::endl;
+            testBox(box2);
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <ostream>;
+        import <format>;
+        import <compare>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {}
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+            std::partial_ordering operator<=>(const Box& box) const
+            {
+                return volume() <=> box.volume();
+            }
+            std::partial_ordering operator<=>(double value) const
+            {
+                return volume() <=> value;
+            }
+
+            bool operator==(const Box& box) const = default;
+
+            bool operator!() const { return volume() == 0; }
+
+            operator bool() const { return volume() != 0; }
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, const Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                box.getLength(), box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        box1 is Box(2.0,3.0,4.0)
+        The box's volume is 24.
+        This volume is non-zero.
+
+        box2 is Box(0.0,0.0,0.0)
+        The box's volume is 0.
+        This volume is zero.
+        ```
+
+        ---

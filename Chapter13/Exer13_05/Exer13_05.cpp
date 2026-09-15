@@ -6,3 +6,28 @@
 如果Box对象的体积不为0，则计算结果为true；如果体积为0，则计算结果为false。
 创建一个小的测试程序，显示运算符能够按照预期的方式工作。
 \*****************************************************************/
+import box;
+import <iostream>;
+
+void testBox(const Box& box)
+{
+    std::cout << "The box's volume is " << box.volume() << ".\n";
+    if (box)
+        std::cout << "This volume is non-zero.";
+    if (!box)
+        std::cout << "This volume is zero.";
+    std::cout << std::endl;
+}
+
+int main()
+{
+    Box box1{2.0, 3.0, 4.0};
+    std::cout << "box1 is " << box1 << std::endl;
+    testBox(box1);
+
+    std::cout << std::endl;
+
+    Box box2{0, 0, 0};
+    std::cout << "box2 is " << box2 << std::endl;
+    testBox(box2);
+}
