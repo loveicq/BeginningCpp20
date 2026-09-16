@@ -1,16 +1,16 @@
 // Box.cppm
 export module box;
 
-import <ostream>;
-import <format>;
 import <compare>;
+import <format>;
+import <ostream>;
 
 export class Box
 {
 public:
     Box() = default;
     Box(double length, double width, double height)
-        : m_length{length}, m_width{width}, m_height{height} {}
+        : m_length{length}, m_width{width}, m_height{1.0} {}
 
     double volume() const { return m_length * m_width * m_height; }
 
@@ -26,12 +26,9 @@ public:
     {
         return volume() <=> value;
     }
-
     bool operator==(const Box& box) const = default;
 
-    bool operator!() const { return volume() == 0; } // 一元运算符重载，唯一的操作数是 *this，不需要额外参数
-
-    operator bool() const { return volume() != 0; } // 类型转换运算符，被转换的对象就是 *this，语法规定不写参数，operator 后面跟着返回类型
+    explicit operator bool() const { return volume() != 0; }
 
 private:
     double m_length{1.0};

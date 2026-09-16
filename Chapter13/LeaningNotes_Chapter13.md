@@ -2703,9 +2703,9 @@ int类型的额外参数，它仅用于与前缀函数相区分
         void testBox(const Box& box)
         {
             std::cout << "The box's volume is " << box.volume() << ".\n";
-            if (box)
+            if (box) // 等于if (box.operator bool())
                 std::cout << "This volume is non-zero.";
-            if (!box)
+            if (!box) // 等于if (box.operator!())
                 std::cout << "This volume is zero.";
             std::cout << std::endl;
         }
@@ -2758,9 +2758,10 @@ int类型的额外参数，它仅用于与前缀函数相区分
 
             bool operator==(const Box& box) const = default;
 
-            bool operator!() const { return volume() == 0; }
+            bool operator!() const { return volume() == 0; } // 一元运算符重载，唯一的操作数是 *this，不需要额外参数
 
-            operator bool() const { return volume() != 0; }
+            operator bool() const { return volume() != 0; } // 类型转换运算符，被转换的对象就是 *this，
+            //语法规定不写参数，operator 后面跟着返回类型
 
         private:
             double m_length{1.0};
@@ -2786,6 +2787,116 @@ int类型的额外参数，它仅用于与前缀函数相区分
         This volume is non-zero.
 
         box2 is Box(0.0,0.0,0.0)
+        The box's volume is 0.
+        This volume is zero.
+        ```
+
+        ---
+
+6. 第6题
+    - Exer13_06.cpp
+
+        ```cpp
+        // Exer13_06.cpp
+        /*************************第13章_练习_第6题************************\
+        练习题5的参考答案中使用了两个运算符：一个类型转换运算符和一个一元运算符！
+        这不是故意为之，请相信我们。在编写该练习时，我们仍然相信那是正确的解决
+        方案。但事实证明，只需要使用这两个运算符中的一个即可。而且，在习惯用法中，
+        会将这个运算符声明为explicit，以避免在不期望转换的地方隐式转换为bool
+        类型，不过这一点不太明显。幸亏在if语句中或运算符！之后，即使转换运算符被
+        标记为explicit，也会隐式转换为bool类型。对练习题5中的解决方案进行简化，
+        使对bool类型的转换按照预期的方式进行。
+        \*****************************************************************/
+        import box;
+        import <iostream>;
+
+        void testBox(const Box& box);
+
+        int main()
+        {
+            Box box1{2.0, 3.0, 4.0};
+            std::cout << "box1 is " << box1 << std::endl;
+            testBox(box1);
+
+            std::cout << std::endl;
+
+            Box box2{0, 0, 0};
+            std::cout << "box2 is " << box2 << std::endl;
+            testBox(box2);
+
+            bool b2{static_cast<bool>(box2)};
+        }
+
+        void testBox(const Box& box)
+        {
+            std::cout << "The box's volume is " << box.volume() << ".\n";
+            if (box)
+                std::cout << "This volume is non-zero.";
+            if (!box)
+                std::cout << "This volume is zero.";
+            std::cout << std::endl;
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <compare>;
+        import <format>;
+        import <ostream>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{1.0} {}
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+            std::partial_ordering operator<=>(const Box& box) const
+            {
+                return volume() <=> box.volume();
+            }
+            std::partial_ordering operator<=>(double value) const
+            {
+                return volume() <=> value;
+            }
+            bool operator==(const Box& box) const = default;
+
+            explicit operator bool() const { return volume() != 0; }
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, const Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                box.getLength(), box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        box1 is Box(2.0,3.0,1.0)
+        The box's volume is 6.
+        This volume is non-zero.
+
+        box2 is Box(0.0,0.0,1.0)
         The box's volume is 0.
         This volume is zero.
         ```

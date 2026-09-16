@@ -12,9 +12,9 @@ import <iostream>;
 void testBox(const Box& box)
 {
     std::cout << "The box's volume is " << box.volume() << ".\n";
-    if (box)
+    if (box) // 等于if (box.operator bool())
         std::cout << "This volume is non-zero.";
-    if (!box)
+    if (!box) // 等于if (box.operator!())
         std::cout << "This volume is zero.";
     std::cout << std::endl;
 }

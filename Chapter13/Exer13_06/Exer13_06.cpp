@@ -1,4 +1,4 @@
-// Exer13_06.cpp
+﻿// Exer13_06.cpp
 /*************************第13章_练习_第6题************************\
 练习题5的参考答案中使用了两个运算符：一个类型转换运算符和一个一元运算符！
 这不是故意为之，请相信我们。在编写该练习时，我们仍然相信那是正确的解决
@@ -8,3 +8,32 @@
 标记为explicit，也会隐式转换为bool类型。对练习题5中的解决方案进行简化，
 使对bool类型的转换按照预期的方式进行。
 \*****************************************************************/
+import box;
+import <iostream>;
+
+void testBox(const Box& box);
+
+int main()
+{
+    Box box1{2.0, 3.0, 4.0};
+    std::cout << "box1 is " << box1 << std::endl;
+    testBox(box1);
+
+    std::cout << std::endl;
+
+    Box box2{0, 0, 0};
+    std::cout << "box2 is " << box2 << std::endl;
+    testBox(box2);
+
+    bool b2{static_cast<bool>(box2)};
+}
+
+void testBox(const Box& box)
+{
+    std::cout << "The box's volume is " << box.volume() << ".\n";
+    if (box)
+        std::cout << "This volume is non-zero.";
+    if (!box)
+        std::cout << "This volume is zero.";
+    std::cout << std::endl;
+}
