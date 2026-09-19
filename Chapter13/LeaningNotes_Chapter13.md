@@ -2902,3 +2902,283 @@ int类型的额外参数，它仅用于与前缀函数相区分
         ```
 
         ---
+
+7. 第7题
+    - Exer13_07.cpp
+
+        ```cpp
+        // Exer13_07.cpp
+        /*************************第13章_练习_第7题************************\
+        实现一个类Rational，使其代表有理数。有理数可表达为两个整数的商或小数n/d，
+        其中n为整数分子，d为非0的正整数分母。不过，不必担心需要强制分母为非0。那
+        并不是本练习的目的。创建一个运算符，允许将有理数流输出到std::cout。除此
+        之外，可以自由选择添加多少个以及添加什么运算符。可以创建运算符来支持两个
+        有理数以及一个有理数和一个整数的乘法、加法、减法、除法和比较操作。可以
+        创建运算符来求反、递增或递减有理数。还可以将有理数转换为float或double
+        类型。对于Rational类，可以定义的运算符有许多。参考代码中的Rational类
+        支持超过20种不同的运算符，其中许多运算符对多种类型进行了重载。也许读者
+        可以为Rational类想出更多合理的运算符。不要忘记创建一个程序测试运算符是否
+        能够正确工作。
+        \*****************************************************************/
+        import rational;
+        import <iostream>;
+
+        int main()
+        {
+            Rational x{3, 4};
+            Rational y{1, 2};
+
+            std::cout << "x = " << x << std::endl;
+            std::cout << "y = " << y << std::endl;
+
+            std::cout << "x = " << static_cast<float>(x) << std::endl;
+            std::cout << "y = " << static_cast<double>(y) << std::endl;
+
+            std::cout << "-x = " << -x << std::endl;
+
+            std::cout << "x + y = " << x + y << std::endl;
+            std::cout << "x - y = " << x - y << std::endl;
+            std::cout << "x * y = " << x * y << std::endl;
+            std::cout << "x / y = " << x / y << std::endl;
+
+            std::cout << "x + 2 = " << x + 2 << std::endl;
+            std::cout << "3 - y = " << 3 - y << std::endl;
+            std::cout << "x * 4 = " << x * 4 << std::endl;
+            std::cout << "5 / y = " << 5 / y << std::endl;
+
+            std::cout << std::boolalpha; // 输入“true” 和 “false” 代替 1  和 0
+            std::cout << "x < y = " << (x < y) << std::endl;
+            std::cout << "x > y = " << (x > y) << std::endl;
+            std::cout << "x == y = " << (x == y) << std::endl;
+            std::cout << "x != y = " << (x != y) << std::endl;
+            std::cout << "x >= y = " << (x >= y) << std::endl;
+            std::cout << "x <= y = " << (x <= y) << std::endl;
+
+            std::cout << "x < 1 = " << (x < 1) << std::endl;
+            std::cout << "2 > y = " << (2 > y) << std::endl;
+            std::cout << "x == 3 = " << (x == 3) << std::endl;
+            std::cout << "4 != y = " << (4 != y) << std::endl;
+            std::cout << "x >= 5 = " << (x >= 5) << std::endl;
+            std::cout << "6 <= y = " << (6 <= y) << std::endl;
+
+            std::cout << "x < 1.0 = " << (x < 1.0) << std::endl;
+            std::cout << "2 > y = " << (2.0 > y) << std::endl;
+            std::cout << "2 == 0.75 = " << (x == 0.75) << std::endl;
+            std::cout << "1.5 != y = " << (1.5 != y) << std::endl;
+            std::cout << "x >= 5 = " << (x >= 5.0) << std::endl;
+            std::cout << "6 >= y = " << (6.0 <= y) << std::endl;
+
+            x += Rational(1, 4);
+            std::cout << "x += 1/4 --> x = " << x << std::endl;
+            x *= 2;
+            std::cout << "x *= 2 --> x = " << x << std::endl;
+
+            y += 1;
+            std::cout << "y += 1 --> y = " << y << std::endl;
+
+            std::cout << "y++ = " << y++ << std::endl;
+            std::cout << "y = " << y << std::endl;
+            std::cout << "--y = " << --y << std::endl;
+        }
+        ```
+
+    - Rational.cppm
+
+        ```cpp
+        // Rational.cppm
+        export module rational;
+        import <iostream>;
+
+        export class Rational
+        {
+        public:
+            Rational(int numerator = 0, int denominator = 1)
+                : m_numerator{numerator}, m_denominator{denominator} {}
+
+            int getNumerator() const { return m_numerator; }
+            int getDenominator() const { return m_denominator; }
+
+            void setNumerator(int numerator) { m_numerator = numerator; }
+            void setDenominator(int denominator) { m_denominator = denominator; }
+
+            // a/b  =>  小数 = a / b
+            explicit operator double() const { return static_cast<double>(m_numerator)
+                 / m_denominator; }
+            explicit operator float() const { return static_cast<float>(m_numerator)
+                 / m_denominator; }
+
+            // a/b <=> c/d  通分后分母相同，比较分子大小：a*d <=> c*b
+            auto operator<=>(const Rational& other) const
+            {
+                return m_numerator * other.m_denominator <=> other.m_numerator * m_denominator;
+            }
+
+            auto operator<=>(double value) const
+            {
+                return static_cast<double>(*this) <=> value;
+            }
+
+            bool operator==(const Rational& other) const
+            {
+                return m_numerator * other.m_denominator == other.m_numerator * m_denominator;
+            }
+
+            bool operator==(double value) const
+            {
+                return static_cast<double>(*this) == value;
+            }
+
+            // -(a/b) = (-a)/b
+            Rational operator-() const { return Rational{-m_numerator, m_denominator}; }
+
+            // bool(a/b) = (a != 0)
+            explicit operator bool() const { return m_numerator != 0; }
+
+            // a     c     a*d + c*b
+            // —— + —— = ———————————
+            // b     d        b*d
+            Rational& operator+=(const Rational& other)
+            {
+                m_numerator   = m_numerator * other.m_denominator + other.m_numerator * m_denominator;
+                m_denominator = m_denominator * other.m_denominator;
+                return *this;
+            }
+
+            // a     c     a*d - c*b
+            // —— - —— = ———————————
+            // b     d        b*d
+            Rational& operator-=(const Rational& other)
+            {
+                m_numerator   = m_numerator * other.m_denominator - other.m_numerator * m_denominator;
+                m_denominator = m_denominator * other.m_denominator;
+                return *this;
+            }
+
+            // a     c     a*c
+            // —— * —— = ——————
+            // b     d     b*d
+            Rational& operator*=(const Rational& other)
+            {
+                m_numerator *= other.m_numerator;
+                m_denominator *= other.m_denominator;
+                return *this;
+            }
+
+            // a     c     a*d
+            // —— / —— = ———————   除以分数 = 乘以倒数
+            // b     d     b*c
+            Rational& operator/=(const Rational& other)
+            {
+                m_numerator *= other.m_denominator;
+                m_denominator *= other.m_numerator;
+                return *this;
+            }
+
+            // ++(a/b) = a/b + 1 = (a + b) / b
+            Rational& operator++()
+            {
+                m_numerator += m_denominator;
+                return *this;
+            }
+
+            // (a/b)++  返回原值 a/b，自身变为 (a + b) / b
+            const Rational operator++(int)
+            {
+                auto copy(*this);
+                ++(*this);
+                return copy;
+            }
+
+            // --(a/b) = a/b - 1 = (a - b) / b
+            Rational& operator--()
+            {
+                m_numerator -= m_denominator;
+                return *this;
+            }
+
+            const Rational operator--(int)
+            {
+                auto copy(*this);
+                --(*this);
+                return copy;
+            }
+
+        private:
+            int m_numerator, m_denominator;
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, const Rational& r)
+        {
+            return stream << r.getNumerator() << '/' << r.getDenominator();
+        }
+
+        export Rational operator+(const Rational& one, const Rational& other)
+        {
+            auto copy{one};
+            return copy += other;
+        }
+
+        export Rational operator-(const Rational& one, const Rational& other)
+        {
+            auto copy{one};
+            return copy -= other;
+        }
+
+        export Rational operator*(const Rational& one, const Rational& other)
+        {
+            auto copy{one};
+            return copy *= other;
+        }
+
+        export Rational operator/(const Rational& one, const Rational& other)
+        {
+            auto copy{one};
+            return copy /= other;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        x = 3/4
+        y = 1/2
+        x = 0.75
+        y = 0.5
+        -x = -3/4
+        x + y = 10/8
+        x - y = 2/8
+        x * y = 3/8
+        x / y = 6/4
+        x + 2 = 11/4
+        3 - y = 5/2
+        x * 4 = 12/4
+        5 / y = 10/1
+        x < y = false
+        x > y = true
+        x == y = false
+        x != y = true
+        x >= y = true
+        x <= y = false
+        x < 1 = true
+        2 > y = true
+        x == 3 = false
+        4 != y = true
+        x >= 5 = false
+        6 <= y = false
+        x < 1.0 = true
+        2 > y = true
+        2 == 0.75 = true
+        1.5 != y = true
+        x >= 5 = false
+        6 >= y = false
+        x += 1/4 --> x = 16/16
+        x *= 2 --> x = 32/16
+        y += 1 --> y = 3/2
+        y++ = 3/2
+        y = 5/2
+        --y = 3/2
+        ```
+
+        ---

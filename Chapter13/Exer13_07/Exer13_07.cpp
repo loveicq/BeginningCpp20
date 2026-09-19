@@ -1,4 +1,4 @@
-// Exer13_07.cpp
+﻿// Exer13_07.cpp
 /*************************第13章_练习_第7题************************\
 实现一个类Rational，使其代表有理数。有理数可表达为两个整数的商或小数n/d，
 其中n为整数分子，d为非0的正整数分母。不过，不必担心需要强制分母为非0。那
@@ -11,3 +11,63 @@
 可以为Rational类想出更多合理的运算符。不要忘记创建一个程序测试运算符是否
 能够正确工作。
 \*****************************************************************/
+import rational;
+import <iostream>;
+
+int main()
+{
+    Rational x{3, 4};
+    Rational y{1, 2};
+
+    std::cout << "x = " << x << std::endl;
+    std::cout << "y = " << y << std::endl;
+
+    std::cout << "x = " << static_cast<float>(x) << std::endl;
+    std::cout << "y = " << static_cast<double>(y) << std::endl;
+
+    std::cout << "-x = " << -x << std::endl;
+
+    std::cout << "x + y = " << x + y << std::endl;
+    std::cout << "x - y = " << x - y << std::endl;
+    std::cout << "x * y = " << x * y << std::endl;
+    std::cout << "x / y = " << x / y << std::endl;
+
+    std::cout << "x + 2 = " << x + 2 << std::endl;
+    std::cout << "3 - y = " << 3 - y << std::endl;
+    std::cout << "x * 4 = " << x * 4 << std::endl;
+    std::cout << "5 / y = " << 5 / y << std::endl;
+
+    std::cout << std::boolalpha; // 输入“true” 和 “false” 代替 1  和 0
+    std::cout << "x < y = " << (x < y) << std::endl;
+    std::cout << "x > y = " << (x > y) << std::endl;
+    std::cout << "x == y = " << (x == y) << std::endl;
+    std::cout << "x != y = " << (x != y) << std::endl;
+    std::cout << "x >= y = " << (x >= y) << std::endl;
+    std::cout << "x <= y = " << (x <= y) << std::endl;
+
+    std::cout << "x < 1 = " << (x < 1) << std::endl;
+    std::cout << "2 > y = " << (2 > y) << std::endl;
+    std::cout << "x == 3 = " << (x == 3) << std::endl;
+    std::cout << "4 != y = " << (4 != y) << std::endl;
+    std::cout << "x >= 5 = " << (x >= 5) << std::endl;
+    std::cout << "6 <= y = " << (6 <= y) << std::endl;
+
+    std::cout << "x < 1.0 = " << (x < 1.0) << std::endl;
+    std::cout << "2 > y = " << (2.0 > y) << std::endl;
+    std::cout << "2 == 0.75 = " << (x == 0.75) << std::endl;
+    std::cout << "1.5 != y = " << (1.5 != y) << std::endl;
+    std::cout << "x >= 5 = " << (x >= 5.0) << std::endl;
+    std::cout << "6 >= y = " << (6.0 <= y) << std::endl;
+
+    x += Rational(1, 4);
+    std::cout << "x += 1/4 --> x = " << x << std::endl;
+    x *= 2;
+    std::cout << "x *= 2 --> x = " << x << std::endl;
+
+    y += 1;
+    std::cout << "y += 1 --> y = " << y << std::endl;
+
+    std::cout << "y++ = " << y++ << std::endl;
+    std::cout << "y = " << y << std::endl;
+    std::cout << "--y = " << --y << std::endl;
+}
