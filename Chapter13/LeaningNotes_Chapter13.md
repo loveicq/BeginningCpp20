@@ -3182,3 +3182,189 @@ int类型的额外参数，它仅用于与前缀函数相区分
         ```
 
         ---
+
+8. 第8题
+    - Exer13_08.cpp
+
+        ```cpp
+        // Exer13_08.cpp
+        /*************************第13章_练习_第8题************************\
+        创建自己的伪随机数生成器函数对象，生成0和100之间的整数值，用该函数对象
+        替换Ex13_06中的createUniformPseudoRandomIntGenerator()函数。当然，
+        为了实现合适的伪随机性，仍然应该使用std::random_device函数对象为这个
+        生成器提供种子值。提示：第12章中给出了一个有关生成伪随机数的简单数学公式。
+        \*****************************************************************/
+        import <iostream>;
+        import <format>;
+        import <vector>;
+        import <random>;
+        import <functional>;
+        import box;
+        import PRNG;
+
+        int main()
+        {
+            const double limit{99};
+
+            std::random_device seeder;
+            auto random{PseudoRandomNumberGenerator{static_cast<int>(seeder())}};
+
+            const size_t boxCount{20};
+            std::vector<Box> boxes;
+
+            for (size_t i{}; i < boxCount; ++i)
+                boxes.push_back(Box{static_cast<double>(random()), 
+                    static_cast<double>(random()), static_cast<double>(random())});
+
+            size_t first{};
+            size_t second{1};
+            double minVolume{(boxes[first] + boxes[second]).volume()};
+
+            for (size_t i{}; i < boxCount - 1; ++i) {
+                for (size_t j{i + 1}; j < boxCount; j++) {
+                    if (boxes[i] + boxes[j] < minVolume) {
+                        first     = i;
+                        second    = j;
+                        minVolume = (boxes[i] + boxes[j]).volume();
+                    }
+                }
+            }
+
+            std::cout << "The two boxes that sum to the smallest volume are "
+                    << boxes[first] << " and " << boxes[second] << '\n';
+            std::cout << std::format("The volume of the first box is {:.1f}\n",
+                                    boxes[first].volume());
+            std::cout << std::format("The volume of the second box is {:.1f}\n",
+                                    boxes[second].volume());
+            std::cout << "The sum of these boxes is " << (boxes[first] + boxes[second]) 
+                << '\n';
+            std::cout << std::format("The volume of the sum is {:.1f}", minVolume) << std::endl;
+
+            Box sum{0, 0, 0};
+            for (const auto& box : boxes)
+                sum += box;
+
+            std::cout << "The sum of " << boxCount << " random boxes is " << sum << std::endl;
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <compare>;
+        import <ostream>;
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{std::max(length, width)},
+                m_width{std::min(length, width)},
+                m_height{height} {}
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+            std::partial_ordering operator<=>(const Box& box) const;
+            std::partial_ordering operator<=>(double value) const;
+            bool operator==(const Box& box) const = default;
+
+            Box& operator+=(const Box& box);
+            Box operator+(const Box& box) const;
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, const Box& box);
+        ```
+
+    - Box.cpp
+
+        ```cpp
+        // Box.cpp
+        module box;
+
+        import <format>;
+
+        std::partial_ordering Box::operator<=>(const Box& box) const
+        {
+            return volume() <=> box.volume();
+        }
+
+        std::partial_ordering Box::operator<=>(double value) const
+        {
+            return volume() <=> value;
+        }
+
+        Box& Box::operator+=(const Box& box)
+        {
+            m_length = std::max(m_length, box.m_length);
+            m_width  = std::max(m_width, box.m_width);
+            m_height += box.m_height;
+            return *this;
+        }
+
+        Box Box::operator+(const Box& box) const
+        {
+            Box copy{*this};
+            copy += box;
+            return copy;
+        }
+
+        std::ostream& operator<<(std::ostream& stream, const Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})", box.getLength(), 
+                        box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+    - PRNG.cppm
+
+        ```cpp
+        // PRNG.cppm
+        export module PRNG;
+
+        import <cstdint>;
+
+        export class PseudoRandomNumberGenerator
+        {
+        public:
+            PseudoRandomNumberGenerator(int n = 0) 
+            : m_n{static_cast<uint64_t>(n % 100 + 100) % 100} {}
+
+            int operator()()
+            {
+                m_n = (m_n * 41 + 7) % 100;
+                return static_cast<int>(m_n);
+            }
+
+        private:
+            uint64_t m_n;
+        };
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        The two boxes that sum to the smallest volume are Box(17.0,10.0,4.0) and Box(22.0,15.0,9.0)
+        The volume of the first box is 680.0
+        The volume of the second box is 2970.0
+        The sum of these boxes is Box(22.0,15.0,13.0)
+        The volume of the sum is 4290.0
+        The sum of 20 random boxes is Box(95.0,68.0,950.0)
+        ```
+
+        ---
