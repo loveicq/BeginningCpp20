@@ -3368,3 +3368,316 @@ int类型的额外参数，它仅用于与前缀函数相区分
         ```
 
         ---
+
+9. 第9题
+    - Exer13_09.cpp
+
+        ```cpp
+        // Exer13_09.cpp
+        /*************************第13章_练习_第9题************************\
+        再看看示例Ex13_11中的Truckload类。是不是少了一个运算符？该类有两个原指针，
+        分别是m_head和m_tail。默认赋值运算符会如何处理这两个原指针？显然，处理
+        结果不会是我们想要的，所以Truckload类急需一个自定义的赋值运算符。为
+        Truckload类添加一个赋值运算符，并修改main()函数来练习新编写的赋值运算符。
+        \*****************************************************************/
+        import truckload;
+        import <iostream>;
+        import <memory>;
+        import <random>;
+        import <functional>; // For std::bind()
+
+        auto createUniformPseudoRandomNumberGenerator(double max)
+        {
+            std::random_device seeder;
+            std::default_random_engine generator{seeder()};
+            std::uniform_real_distribution distribution{1.0, max};
+            return std::bind(distribution, generator);
+        }
+
+        int main()
+        {
+            const double limit{99.0};
+            auto random{createUniformPseudoRandomNumberGenerator(limit)};
+
+            Truckload load;
+            const size_t boxCount{20};
+
+            for (size_t i{}; i < boxCount; ++i)
+                load.addBox(std::make_shared<Box>(random(), random(), random()));
+
+            std::cout << "The boxes in the Truckload are:\n";
+            std::cout << load << std::endl;
+
+            Truckload copied;
+            copied = load;
+
+            std::cout << "The boxes in the copied Truckload are:\n";
+            std::cout << copied;
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <ostream>;
+        import <format>;
+        import <algorithm>; // For the std::min()/max()
+
+        export class Box
+        {
+        public:
+            Box() = default;
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {}
+
+            double volume() const { return m_length * m_width * m_height; }
+
+            int compare(const Box& box) const
+            {
+                if (volume() < box.volume())
+                    return -1;
+                if (volume() == box.volume())
+                    return 0;
+                return +1;
+            }
+
+            friend std::ostream& operator<<(std::ostream& out, const Box& box)
+            {
+                return out << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                            box.m_length, box.m_width, box.m_height);
+            }
+
+            Box operator+(const Box& box) const
+            {
+                return Box{std::max(m_length, box.m_length),
+                        std::max(m_width, box.m_width),
+                        m_height + box.m_height};
+            }
+
+        private:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        ```
+
+    - Truckload.cppm
+
+        ```cpp
+        // Truckload.cppm
+        export module truckload;
+
+        import box;
+
+        import <memory>;
+        import <vector>;
+        import <ostream>;
+
+        using SharedBox = std::shared_ptr<Box>;
+
+        export class Truckload
+        {
+        public:
+            Truckload() = default;
+            Truckload(SharedBox box);
+            Truckload(const std::vector<SharedBox>& boxes);
+            Truckload(const Truckload& src);
+
+            Truckload& operator=(const Truckload& other);
+
+            ~Truckload();
+
+            class Iterator;
+
+            Iterator getIterator() const;
+
+            void addBox(SharedBox box);
+            bool removeBox(SharedBox box);
+
+            SharedBox& operator[](size_t index) const;
+
+        private:
+            class Package;
+
+            Package* m_head{};
+            Package* m_tail{};
+
+            static inline SharedBox nullBox{};
+        };
+
+        class Truckload::Iterator
+        {
+        public:
+            SharedBox getFirstBox();
+            SharedBox getNextBox();
+
+        private:
+            Package* m_head;
+            Package* m_current;
+
+            friend class Truckload;
+            explicit Iterator(Package* head) : m_head{head}, m_current{nullptr} {}
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, const Truckload& load);
+        ```
+
+    - Truckload.cpp
+
+        ```cpp
+        // Truckload.cpp
+        module truckload;
+
+        import <iostream>;
+
+        class Truckload::Package
+        {
+        public:
+            SharedBox m_box;
+            Package* m_next;
+
+            Package(SharedBox box) : m_box{box}, m_next{nullptr} {}
+            ~Package() { delete m_next; }
+        };
+
+        Truckload::Truckload(SharedBox box)
+        {
+            m_head = m_tail = new Package{box};
+        }
+
+        Truckload::Truckload(const std::vector<SharedBox>& boxes)
+        {
+            for (const auto& box : boxes)
+                addBox(box);
+        }
+
+        Truckload::Truckload(const Truckload& src)
+        {
+            for (Package* package{src.m_head}; package; package = package->m_next)
+                addBox(package->m_box);
+        }
+
+        Truckload& Truckload::operator=(const Truckload& other)
+        {
+            if (&other != this) {
+                delete m_head;
+                m_head = m_tail = nullptr;
+
+                for (Package* package{other.m_head}; package; package = package->m_next)
+                    addBox(package->m_box);
+            }
+
+            return *this;
+        }
+
+        Truckload::~Truckload()
+        {
+            delete m_head;
+        }
+
+        Truckload::Iterator Truckload::getIterator() const { return Iterator{m_head}; }
+
+        SharedBox Truckload::Iterator::getFirstBox()
+        {
+            m_current = m_head;
+            return m_current ? m_current->m_box : nullptr;
+        }
+
+        SharedBox Truckload::Iterator::getNextBox()
+        {
+            if (!m_current)
+                return getFirstBox();
+
+            m_current = m_current->m_next;
+
+            return m_current ? m_current->m_box : nullptr;
+        }
+
+        void Truckload::addBox(SharedBox box)
+        {
+            auto package{new Package{box}};
+
+            if (m_tail)
+                m_tail->m_next = package;
+            else
+                m_head = package;
+
+            m_tail = package;
+        }
+
+        bool Truckload::removeBox(SharedBox boxToRemove)
+        {
+            Package* previous{nullptr};
+            Package* current{m_head};
+            while (current) {
+                if (current->m_box == boxToRemove) {
+                    if (previous)
+                        previous->m_next = current->m_next;
+                    if (current == m_head)
+                        m_head = current->m_next;
+                    if (current == m_tail)
+                        m_tail = previous;
+
+                    current->m_next = nullptr;
+                    delete current;
+
+                    return true;
+                }
+
+                previous = current;
+                current  = current->m_next;
+            }
+
+            return false;
+        }
+
+        SharedBox& Truckload::operator[](size_t index) const
+        {
+            size_t count{};
+            for (Package* package{m_head}; package; package = package->m_next) {
+                if (count++ == index)
+                    return package->m_box;
+            }
+            return nullBox;
+        }
+
+        std::ostream& operator<<(std::ostream& stream, const Truckload& load)
+        {
+            size_t count{};
+            auto iterator{load.getIterator()};
+            for (auto box{iterator.getFirstBox()}; box; box = iterator.getNextBox()) {
+                std::cout << *box << ' ';
+                if (!(++count % 4))
+                    std::cout << std::endl;
+            }
+            if (count % 4)
+                std::cout << std::endl;
+            return stream;
+        }
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        The boxes in the Truckload are:
+        Box(55.0,98.6,71.2) Box(35.6,58.0,64.3) Box(73.5,94.3,30.4) Box(65.0,9.8,87.1)
+        Box(49.8,65.5,78.8) Box(34.8,97.9,18.3) Box(10.2,18.9,97.2) Box(19.5,84.6,92.7)
+        Box(67.0,12.4,36.4) Box(81.0,1.1,46.0) Box(56.8,89.7,15.8) Box(39.8,17.7,74.3)
+        Box(44.2,87.1,34.1) Box(56.4,3.1,86.8) Box(39.6,68.9,2.5) Box(32.1,65.4,67.9)
+        Box(53.8,67.9,19.1) Box(22.4,88.3,47.6) Box(61.4,90.3,93.6) Box(46.9,56.5,57.5)
+
+        The boxes in the copied Truckload are:
+        Box(55.0,98.6,71.2) Box(35.6,58.0,64.3) Box(73.5,94.3,30.4) Box(65.0,9.8,87.1) 
+        Box(49.8,65.5,78.8) Box(34.8,97.9,18.3) Box(10.2,18.9,97.2) Box(19.5,84.6,92.7) 
+        Box(67.0,12.4,36.4) Box(81.0,1.1,46.0) Box(56.8,89.7,15.8) Box(39.8,17.7,74.3) 
+        Box(44.2,87.1,34.1) Box(56.4,3.1,86.8) Box(39.6,68.9,2.5) Box(32.1,65.4,67.9) 
+        Box(53.8,67.9,19.1) Box(22.4,88.3,47.6) Box(61.4,90.3,93.6) Box(46.9,56.5,57.5) 
+        ```
+
+        ---
