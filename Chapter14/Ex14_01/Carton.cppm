@@ -1,0 +1,15 @@
+export module carton;
+
+import <string>;
+import <string_view>;
+import box;
+
+export class Carton : public Box
+{
+public:
+    explicit Carton(std::string_view material = "Cardboard")
+        : m_material{material} {}
+
+private:
+    std::string m_material;
+};
