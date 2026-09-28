@@ -1035,3 +1035,111 @@
             ```
 
             以上程序运行结果如下：编译失败，原因见注释
+
+### 14.5.3 继承构造函数
+
+- 可以在派生类中添加using声明，从直接基类中继承构造函数。继承的构造函数在派生类中被隐式定义，其效果等价于：初始化列表中调用基类对应的构造函数、函数体内没有显式语句的构造函数。
+- using声明可以放在类内部的任何位置，不影响继承构造函数的访问修饰符
+- 案例Ex14_05
+    - Ex14_05.cpp
+
+        ```cpp
+        // Ex14_05.cpp
+        import carton;
+        import <iostream>;
+
+        int main() {
+            Carton cart;
+            Carton cube{4.0};
+            Carton copy{cube}; // 编译器隐式生成的副本构造函数，没有输出语句
+            Carton carton{1.0, 2.0, 3.0};
+            Carton cerealCarton(50.0, 30.0, 20.0, "Chipboard");
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <ostream>;
+        import <format>;
+        import <iostream>;
+
+        export class Box
+        {
+        public:
+            Box() { std::cout << "Box() called.\n"; }
+
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {
+                std::cout << "Box(double,double,double) called.\n";
+            }
+
+            explicit Box(double side) : Box{side, side, side} {
+                /*单参数！记得加explicit
+                委托构造函数的用法*/
+                std::cout << "Box(double) called.\n";
+            }
+
+            double volume() const { return m_length * m_width * m_height; }
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+        protected:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, const Box& box) {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                box.getLength(), box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+    - Carton.cppm
+
+        ```cpp
+        // Carton.cppm
+        export module carton;
+
+        import box;
+        import <string>;
+        import <string_view>;
+        import <iostream>;
+
+        export class Carton : public Box
+        {
+            using Box::Box;
+
+        public:
+            Carton() = default;
+
+            Carton(double length, double width, double height, std::string_view mat)
+                : Box{length, width, height}, m_material{mat} { //此处指定基类构造函数
+                std::cout << "Carton(double,double,double,string_view) called.\n";
+            }
+
+        private:
+            std::string m_material{"Cardboard"};
+        };
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box() called. 
+        Box(double,double,double) called. 
+        Box(double) called. 
+        Box(double,double,double) called.
+        Box(double,double,double) called.
+        Carton(double,double,double,string_view) called.
+        ```
+
+        ---
