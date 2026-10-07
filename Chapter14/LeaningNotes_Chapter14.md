@@ -1291,4 +1291,4 @@
         ---
 
 - 派生类的析构函数先调用，再调用基类析构函数  
-![UML 类图](../Images/image14_6.drawio.svg)
+![UML 类图](../Images/image14_6.drawio.png)
