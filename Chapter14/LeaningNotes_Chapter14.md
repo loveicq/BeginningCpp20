@@ -1264,7 +1264,8 @@
                 std::cout << "Carton copy structor" << std::endl;
             }
 
-            ~Carton() { std::cout << "Carton destructor.Material = " << m_material << std::endl; }
+            ~Carton() { std::cout << "Carton destructor.Material = " 
+                                << m_material << std::endl; }
 
         private:
             std::string m_material{"Cardboard"};
@@ -1291,4 +1292,132 @@
         ---
 
 - 派生类的析构函数先调用，再调用基类析构函数  
-![UML 类图](../Images/image14_6.drawio.png)
+![图14-6 派生类对象的析构函数的调用顺序](../Images/image14_6.drawio.png)
+
+## 14.7 重复的成员变量名
+
+如果基类和派生类有同名的成员变量，要在派生类的成员函数中访问基类成员变量，必须使用基类名限定成员名，示例代码如下：
+
+```cpp
+int Derived::total() const
+{
+    return m_value + Base::m_value;
+}
+```
+
+## 14.8 重复的成员函数名
+
+- 第一种情况：基类函数和派生类函数名称相同，但签名不同。派生类的成员函数会隐藏继承的同名函数，必须使用using声明，
+引入基类的函数，才能在派生类同时使用这两个同名的函数。根据参数类型不同调用不同的函数。
+
+    ```cpp
+    class Base
+    {
+    public:
+        void doThat(int arg);
+        ...
+    };
+
+    class Derived: public Base
+    {
+    public:
+        void doThat(double arg);
+        using Base::doThat; // 将基类同名函数引入派生类作用域
+        ...
+    };
+
+    // 使用两个同名函数
+    Derived object; // 声明类对象
+    object.doThat(2); // 参数为int，调用基类成员函数
+    object.doThat(2.5); // 参数为double，调用派生类成员函数
+    ```
+
+- 第二种情况：两个函数的签名相同。使用类名作为基类函数的限定符，就可以区分继承函数和派生类函数
+
+    ```cpp
+    Derived object;
+    object.Bass::doThat(3); // 调用基类函数
+    ```
+
+## 14.9 多重继承
+
+- 单一继承：只有一个直接基类
+
+    ```cpp
+    class A { /* ... */ };                // A 是 C 的间接基类
+    class B : public A { /* ... */ };     // B 是 C 的直接基类
+    class C : public B { /* ... */ };
+    ```
+
+    ```cpp
+        A
+        |
+        B
+        |
+        C
+    ```
+
+- 多重继承：派生类有多个直接基类
+
+    ```cpp
+    class A { /* ... */ };
+    class B { /* ... */ };
+    class C : public A, public B { };  // C 直接继承 A 和 B
+    ```
+
+    ```cpp
+        A       B
+         \     /
+          \   /
+            C
+    ```
+
+- 两者结合：菱形继承（钻石问题）
+
+    ```cpp
+    class A { public:int data; };    // 顶层基类（间接基类）
+    class B : public A { };          // B 是 C 的直接基类
+    class C : public A { };          // C 是 D 的直接基类
+    class D : public B, public C { };// D 多重继承 B 和 C
+    ```
+
+    ```cpp
+        A         ← 间接基类（爷爷）
+       / \
+      /   \
+     B     C      ← 直接基类（父母）
+      \   /
+       \ /
+        D         ← 派生类
+    ```
+
+    - 问题：D 中有两份 A 的 data（B 带一份，C 带一份），访问时必须用作用域限定
+
+        ```cpp
+        D d;
+        d.B::data = 1;  // 通过 B 路径访问
+        d.C::data = 2;  // 通过 C 路径访问
+        ```
+
+    - 解决：用关键字`virtual`虚继承
+
+        ```cpp
+        class B : virtual public A { };
+        class C : virtual public A { };
+        class D : public B, public C { };
+        ```
+
+### 14.9.1 多个基类
+
+在类的头部，每个基类都在冒号后指定，用逗号隔开。每个基类都有自己的访问修饰符，省略修饰符就是默认`private`
+
+```cpp
+class CerealPack : public Carton, public FoodContainer
+{
+    ...
+};
+```
+
+![图14-8 多重继承的例子](..\Images\image14_8.drawio.png)
+
+### 14.9.2 继承成员的模糊性
