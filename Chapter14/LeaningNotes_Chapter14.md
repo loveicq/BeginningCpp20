@@ -1418,6 +1418,6 @@ class CerealPack : public Carton, public FoodContainer
 };
 ```
 
-![图14-8 多重继承的例子](..\Images\image14_8.drawio.png)
+![图14-8 多重继承的例子](../Images/image14_8.drawio.png)
 
 ### 14.9.2 继承成员的模糊性
