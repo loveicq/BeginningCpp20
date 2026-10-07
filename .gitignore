@@ -3,7 +3,7 @@
 .github
 gcm.cache/
 bin/
-images/
+# images/
 mindmap/
 #others/
 logs/
