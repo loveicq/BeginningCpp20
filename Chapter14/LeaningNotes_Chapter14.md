@@ -1421,3 +1421,726 @@ class CerealPack : public Carton, public FoodContainer
 ![图14-8 多重继承的例子](../Images/image14_8.drawio.png)
 
 ### 14.9.2 继承成员的模糊性
+
+类继承成员（函数或变量）如果存在同名的情况，会导致模糊性问题。解决的方法有以下几种：
+
+- 重新编写类，这是最理想的方案
+- 限定函数名，详见案例Ex14_07
+    - Ex14_07.app
+
+        ```cpp
+        // Ex14_07.cpp
+        import <iostream>;
+        import cereal;
+
+        int main()
+        {
+            CerealPack cornflakes{8.0, 3.0, 10.0, "Cornflakes"};
+
+            std::cout << "cornflakes volume is " << cornflakes.Carton::volume() << std::endl
+                            // 通过::限定volume为Carton类函数，如果为cornflakes.volume()会报错
+                    << "cornflakes weight is " << cornflakes.FoodContainer::getWeight() 
+                            // 通过::限定getWeight为FoodContainer类函数，如果为cornflakes.getWeight()会报错
+                    << std::endl;
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <iostream>;
+        import <ostream>;
+        import <format>;
+
+        export class Box
+        {
+        public:
+            Box()
+            {
+                std::cout << "Box() called.\n";
+            }
+
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height}
+            {
+                std::cout << "Box(double,double,double) called.\n";
+            }
+
+            explicit Box(double side) : Box{side, side, side}
+            {
+                std::cout << "Box(double) called.\n";
+            }
+
+            double volume() const { return m_length * m_width * m_height; }
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+        protected:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                box.getLength(), box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+    - Carton.cppm
+
+        ```cpp
+        // Carton.cppm
+        export module carton;
+
+        import box;
+        import <iostream>;
+
+        export class Carton : public Box
+        {
+        public:
+            Carton()
+            {
+                std::cout << "Carton() called.\n";
+            }
+
+            explicit Carton(std::string_view material) : m_material{material}
+            {
+                std::cout << "Carton(string_view) called.\n";
+            }
+
+            Carton(double length, double width, double height, std::string_view material)
+                : Box{length, width, height}, m_material{material} // 指定基类构造函数
+            {
+                std::cout << "Carton(double,double,double,string_view) called.\n";
+            }
+
+            Carton(double length, double width, double height, std::string_view material, 
+                    double density, double thickness)
+                : Carton{length, width, height, material}
+            {
+                m_thickness = thickness;
+                m_density   = density;
+                std::cout << "Carton(double,double,double,string_view,double,double) called.\n";
+            }
+
+            Carton(const Carton& carton) : Box{carton}, m_material{carton.m_material}, 
+                    m_thickness{carton.m_thickness}, m_density{carton.m_density}
+            {
+                std::cout << "Carton copy constructor" << std::endl;
+            }
+
+            ~Carton()
+            {
+                std::cout << "Carton destructor.Material = " << m_material << std::endl;
+            }
+
+            double getWeight() const
+            {
+                return 2.0 * (m_length * m_width + m_width * m_height 
+                                + m_height * m_length) * m_thickness * m_density;
+            }
+
+        private:
+            std::string m_material{"Cardboard"}; // 材料
+            double m_thickness{0.125};           // 厚度
+            double m_density{0.2};               // 密度
+        };
+        ```
+
+    - FoodContainer.cppm
+
+        ```cpp
+        // FoodContainer.cppm
+        export module food;
+
+        import <string>;
+        import <string_view>;
+        import <iostream>;
+
+        export class FoodContainer
+        {
+        public:
+            FoodContainer()
+            {
+                std::cout << "FoodContainer() called.\n";
+            }
+
+            FoodContainer(std::string_view name) : name{name}
+            {
+                std::cout << "FoodContainer(string_view) called.\n";
+            }
+
+            FoodContainer(std::string_view name, double density, double volume)
+                : name{name}, density{density}, volume{volume}
+            {
+                std::cout << "FoodContainer(string_view,double,double) called.\n";
+            }
+
+            ~FoodContainer()
+            {
+                std::cout << "FoodContainer destructor" << std::endl;
+            }
+
+            double getWeight() const
+            {
+                return volume * density;
+            }
+
+        protected:
+            std::string name{"cereal"};
+            double volume{};
+            double density{0.03};
+        };
+        ```
+
+    - CerealPack.cppm
+
+        ```cpp
+        // CerealPack.cppm
+        export module cereal;
+
+        import <iostream>;
+        import carton;
+        import food;
+
+        export class CerealPack : public Carton, public FoodContainer
+        {
+        public:
+            CerealPack(double length, double width, double height, std::string_view cerealType)
+                : Carton{length, width, height, "Chipboard"}, FoodContainer{cerealType}
+            {
+                std::cout << "CerealPack constructor" << std::endl;
+                FoodContainer::volume = 0.9 * Carton::volume();
+            }
+
+            ~CerealPack()
+            {
+                std::cout << "CerealPack destructor" << std::endl;
+            }
+        };
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box(double,double,double) called.
+        Carton(double,double,double,string_view) called.
+        FoodContainer(string_view) called.
+        CerealPack constructor
+        cornflakes volume is 240
+        cornflakes weight is 6.48
+        CerealPack destructor
+        FoodContainer destructor
+        Carton destructor.Material = Chipboard   
+        ```
+
+        ---
+
+- 添加一个强制转换，转换为其中一个基类的引用（转换为引用而不是类类型本身，避免创建新对象），详见案例Ex14_07A
+    - Ex14_07A.cpp
+
+        ```cpp
+        // Ex14_07A.cpp
+        import <iostream>;
+        import cereal;
+
+        int main()
+        {
+            CerealPack cornflakes{8.0, 3.0, 10.0, "Cornflakes"};
+
+            std::cout << "cornflakes volume is " 
+                        << static_cast<Carton&>(cornflakes).volume()  // 强制转换为类引用
+                        << std::endl
+                        << "cornflakes weight is " 
+                        << static_cast<FoodContainer&>(cornflakes).getWeight()  // 强制转换为类引用
+                        << std::endl;
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <iostream>;
+        import <ostream>;
+        import <format>;
+
+        export class Box
+        {
+        public:
+            Box()
+            {
+                std::cout << "Box() called.\n";
+            }
+
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height}
+            {
+                std::cout << "Box(double,double,double) called.\n";
+            }
+
+            explicit Box(double side) : Box{side, side, side}
+            {
+                std::cout << "Box(double) called.\n";
+            }
+
+            double volume() const { return m_length * m_width * m_height; }
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+        protected:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                box.getLength(), box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+    - Carton.cppm
+
+        ```cpp
+        // Carton.cppm
+        export module carton;
+
+        import box;
+        import <iostream>;
+
+        export class Carton : public Box
+        {
+        public:
+            Carton()
+            {
+                std::cout << "Carton() called.\n";
+            }
+
+            explicit Carton(std::string_view material) : m_material{material}
+            {
+                std::cout << "Carton(string_view) called.\n";
+            }
+
+            Carton(double length, double width, double height, std::string_view material)
+                : Box{length, width, height}, m_material{material} // 指定基类构造函数
+            {
+                std::cout << "Carton(double,double,double,string_view) called.\n";
+            }
+
+            Carton(double length, double width, double height, std::string_view material, 
+                    double density, double thickness)
+                : Carton{length, width, height, material}
+            {
+                m_thickness = thickness;
+                m_density   = density;
+                std::cout << "Carton(double,double,double,string_view,double,double) called.\n";
+            }
+
+            Carton(const Carton& carton) : Box{carton}, m_material{carton.m_material},
+                     m_thickness{carton.m_thickness}, m_density{carton.m_density}
+            {
+                std::cout << "Carton copy constructor" << std::endl;
+            }
+
+            ~Carton()
+            {
+                std::cout << "Carton destructor.Material = " << m_material << std::endl;
+            }
+
+            double getWeight() const
+            {
+                return 2.0 * (m_length * m_width + m_width * m_height +
+                                 m_height * m_length) * m_thickness * m_density;
+            }
+
+        private:
+            std::string m_material{"Cardboard"}; // 材料
+            double m_thickness{0.125};           // 厚度
+            double m_density{0.2};               // 密度
+        };
+        ```
+
+    - FoodContainer.cppm
+
+        ```cpp
+        // FoodContainer.cppm
+        export module food;
+
+        import <string>;
+        import <string_view>;
+        import <iostream>;
+
+        export class FoodContainer
+        {
+        public:
+            FoodContainer()
+            {
+                std::cout << "FoodContainer() called.\n";
+            }
+
+            FoodContainer(std::string_view name) : name{name}
+            {
+                std::cout << "FoodContainer(string_view) called.\n";
+            }
+
+            FoodContainer(std::string_view name, double density, double volume)
+                : name{name}, density{density}, volume{volume}
+            {
+                std::cout << "FoodContainer(string_view,double,double) called.\n";
+            }
+
+            ~FoodContainer()
+            {
+                std::cout << "FoodContainer destructor" << std::endl;
+            }
+
+            double getWeight() const
+            {
+                return volume * density;
+            }
+
+        protected:
+            std::string name{"cereal"};
+            double volume{};
+            double density{0.03};
+        };
+        ```
+
+    - CerealPack.cppm
+
+        ```cpp
+        // CerealPack.cppm
+        export module cereal;
+
+        import <iostream>;
+        import carton;
+        import food;
+
+        export class CerealPack : public Carton, public FoodContainer
+        {
+        public:
+            CerealPack(double length, double width, double height, std::string_view cerealType)
+                : Carton{length, width, height, "Chipboard"}, FoodContainer{cerealType}
+            {
+                std::cout << "CerealPack constructor" << std::endl;
+                FoodContainer::volume = 0.9 * Carton::volume();
+            }
+
+            ~CerealPack()
+            {
+                std::cout << "CerealPack destructor" << std::endl;
+            }
+        };
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box(double,double,double) called.
+        Carton(double,double,double,string_view) called.
+        FoodContainer(string_view) called. 
+        CerealPack constructor
+        cornflakes volume is 240 
+        cornflakes weight is 6.48
+        CerealPack destructor
+        FoodContainer destructor
+        Carton destructor.Material = Chipboard 
+        ```
+
+        ---
+
+- 通过using关键字明确规定。详见案例Ex14_07B
+    - Ex14_07B.cpp
+
+        ```cpp
+        // Ex14_07B.cpp
+        import <iostream>;
+        import cereal;
+
+        int main()
+        {
+            CerealPack cornflakes{8.0, 3.0, 10.0, "Cornflakes"};
+
+            std::cout << "cornflakes volume is " << cornflakes.volume() << std::endl
+                    << "cornflakes weight is " << cornflakes.getWeight() << std::endl;
+        }
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module box;
+
+        import <iostream>;
+        import <ostream>;
+        import <format>;
+
+        export class Box
+        {
+        public:
+            Box()
+            {
+                std::cout << "Box() called.\n";
+            }
+
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height}
+            {
+                std::cout << "Box(double,double,double) called.\n";
+            }
+
+            explicit Box(double side) : Box{side, side, side}
+            {
+                std::cout << "Box(double) called.\n";
+            }
+
+            double volume() const { return m_length * m_width * m_height; }
+            double getLength() const { return m_length; }
+            double getWidth() const { return m_width; }
+            double getHeight() const { return m_height; }
+
+        protected:
+            double m_length{1.0};
+            double m_width{1.0};
+            double m_height{1.0};
+        };
+
+        export std::ostream& operator<<(std::ostream& stream, Box& box)
+        {
+            stream << std::format("Box({:.1f},{:.1f},{:.1f})",
+                                box.getLength(), box.getWidth(), box.getHeight());
+            return stream;
+        }
+        ```
+
+    - Carton.cppm
+
+        ```cpp
+        // Carton.cppm
+        export module carton;
+
+        import box;
+        import <iostream>;
+
+        export class Carton : public Box
+        {
+        public:
+            Carton()
+            {
+                std::cout << "Carton() called.\n";
+            }
+
+            explicit Carton(std::string_view material) : m_material{material}
+            {
+                std::cout << "Carton(string_view) called.\n";
+            }
+
+            Carton(double length, double width, double height, std::string_view material)
+                : Box{length, width, height}, m_material{material} // 指定基类构造函数
+            {
+                std::cout << "Carton(double,double,double,string_view) called.\n";
+            }
+
+            Carton(double length, double width, double height, std::string_view material,
+                     double density, double thickness)
+                : Carton{length, width, height, material}
+            {
+                m_thickness = thickness;
+                m_density   = density;
+                std::cout << "Carton(double,double,double,string_view,double,double) called.\n";
+            }
+
+            Carton(const Carton& carton) : Box{carton}, m_material{carton.m_material}, 
+                    m_thickness{carton.m_thickness}, m_density{carton.m_density}
+            {
+                std::cout << "Carton copy constructor" << std::endl;
+            }
+
+            ~Carton()
+            {
+                std::cout << "Carton destructor.Material = " << m_material << std::endl;
+            }
+
+            double getWeight() const
+            {
+                return 2.0 * (m_length * m_width + m_width * m_height + 
+                                m_height * m_length) * m_thickness * m_density;
+            }
+
+        private:
+            std::string m_material{"Cardboard"}; // 材料
+            double m_thickness{0.125};           // 厚度
+            double m_density{0.2};               // 密度
+        };
+        ```
+
+    - FoodContainer.cppm
+
+        ```cpp
+        // FoodContainer.cppm
+        export module food;
+
+        import <string>;
+        import <string_view>;
+        import <iostream>;
+
+        export class FoodContainer
+        {
+        public:
+            FoodContainer()
+            {
+                std::cout << "FoodContainer() called.\n";
+            }
+
+            FoodContainer(std::string_view name) : name{name}
+            {
+                std::cout << "FoodContainer(string_view) called.\n";
+            }
+
+            FoodContainer(std::string_view name, double density, double volume)
+                : name{name}, density{density}, volume{volume}
+            {
+                std::cout << "FoodContainer(string_view,double,double) called.\n";
+            }
+
+            ~FoodContainer()
+            {
+                std::cout << "FoodContainer destructor" << std::endl;
+            }
+
+            double getWeight() const
+            {
+                return volume * density;
+            }
+
+        protected:
+            std::string name{"cereal"};
+            double volume{};
+            double density{0.03};
+        };
+        ```
+
+    - CerealPack.cppm
+
+        ```cpp
+        // CerealPack.cppm
+        export module cereal;
+
+        import <iostream>;
+        import carton;
+        import food;
+
+        export class CerealPack : public Carton, public FoodContainer
+        {
+        public:
+            CerealPack(double length, double width, double height, std::string_view cerealType)
+                : Carton{length, width, height, "Chipboard"}, FoodContainer{cerealType}
+            {
+                std::cout << "CerealPack constructor" << std::endl;
+                FoodContainer::volume = 0.9 * Carton::volume();
+            }
+
+            ~CerealPack()
+            {
+                std::cout << "CerealPack destructor" << std::endl;
+            }
+
+            using Carton::volume;
+            using FoodContainer::getWeight;
+        };
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box(double,double,double) called.
+        Carton(double,double,double,string_view) called.
+        FoodContainer(string_view) called.
+        CerealPack constructor
+        cornflakes volume is 240
+        cornflakes weight is 6.48
+        CerealPack destructor
+        FoodContainer destructor
+        Carton destructor.Material = Chipboard   
+        ```
+
+        ---
+
+### 14.9.3 重复继承
+
+- 重复继承就是上面提到的菱形继承（钻石问题）  
+
+    ![图14-9    派生类中的重复基类](../Images/image14_9.drawio.png)
+
+- 应避免基类的重复，解决办法为虚基类
+
+### 14.9.4 虚基类
+
+　　使用关键字`virtual`把类声明为虚基类，会继承基类的其它成员，但仅继承重复基类（直接基类或间接基类）的一个实例。如此，在派生类中引用成员时，就不需要限定成员名。
+
+```cpp
+export class FoodContainer : public virtual Common
+{
+    ...
+};
+
+export class Box : public virtual Common
+{
+    ...
+};
+```
+
+## 14.10 在相关的类类型之间转换
+
+- 类层次结构中向上的转换（即向基类方向的转换）只要没有模糊的成分，就是合法和自动的
+
+    ```cpp
+    Carton carton{40,50,60,"Corrugated fiberboard"};
+
+    Box box{carton};    // 使用副本构造函数
+
+    Box box;
+    box = carton;       // 使用复制赋值
+    ```
+
+- 对象切片：类向上转换，丢失了派生类特有的成员，称为对象切片。一般应提防发生这种情况
+- 如果出现模糊性，在转换时应强制转换为某个基类的引用
+
+    ```cpp
+    Common common{cornflakes};  // 报错，编译器不能确定cornflakes应转换为Carton的Common子对象，还是应转换为FoodContainer的Common子对象
+    Common common{static_cast<Carton&>(cornflakes)};    // 正确，强制转换为某个基类的引用
+    ```
+
+- 在类层次结构中，对象不能自动实现向下的转换。因为基类对象不包含派生类对象的特有成员
+
+## 14.11 本章小结
+
+- 类可以派生自一个或多个基类，此时派生类在其所有的基类中继承成员
+- 单一继承就是从一个基类中派生新类。多重继承就是从两个或多个基类中派生新类
+- 访问派生类的继承成员由两个因素控制：基类中成员的访问修饰符和派生类声明中基类的访问修饰符
+- 派生类的构造函数负责初始化类的所有成员，这通常包括调用基类的构造函数来初始化所有继承的成员
+- 创建派生类对象一般需要按顺序（从最一般的基类开始到最特殊的直接基类）调用所有直接和间接基类的构造函数，之后执行派生类的构造函数
+- 派生类的构造函数可以（并且常常应该）在初始化列表中显式调用直接基类的构造函数。如果不显式调用，就会调用基类的默认构造函数。例如，派生类的副本构造函数总是应该调用所有直接基类的副本构造函数
+- 在派生类中声明的成员名如果与继承的成员名相同，就会隐藏继承的成员。为了访问被隐藏的成员，可以使用作用域解析运算符和类名来限定成员名
+- 不只可以将using用于类型别名，还可将其用于继承构造函数（总是具有与基类中相同的访问修饰符）、修改其他继承成员的访问修饰符，以及继承被具有相同名称但是签名不同的派生类函数隐藏的函数
+- 如果派生类有两个或多个直接基类，就会包含同一个类的两个或多个继承子对象。此时，把重复的类声明为虚基类，就可以避免出现重复

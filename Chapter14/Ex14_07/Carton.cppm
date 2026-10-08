@@ -1,4 +1,5 @@
-﻿export module carton;
+﻿// Carton.cppm
+export module carton;
 
 import box;
 import <iostream>;
