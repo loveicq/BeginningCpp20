@@ -1,4 +1,4 @@
-# 第14章 继承
+﻿# 第14章 继承
 
 ## 14.1 类和面向对象编程
 
@@ -2144,3 +2144,445 @@ export class Box : public virtual Common
 - 在派生类中声明的成员名如果与继承的成员名相同，就会隐藏继承的成员。为了访问被隐藏的成员，可以使用作用域解析运算符和类名来限定成员名
 - 不只可以将using用于类型别名，还可将其用于继承构造函数（总是具有与基类中相同的访问修饰符）、修改其他继承成员的访问修饰符，以及继承被具有相同名称但是签名不同的派生类函数隐藏的函数
 - 如果派生类有两个或多个直接基类，就会包含同一个类的两个或多个继承子对象。此时，把重复的类声明为虚基类，就可以避免出现重
+
+## 14.12 练习
+
+1. 第1题
+    - Exer14_01.cpp
+
+        ```cpp
+        // Exer14_01.cpp
+        /*************************第14章_练习_第1题************************\
+        定义一个基类Animal，它包含两个私有成员变量：一个是string成员m_name，存储
+        动物的名称（例如“Fido”或“Yogi”）；另一个是整数成员m_weight，存储动物的
+        重量（单位是磅）。该类还包含一个公共成员函数who()，它可以显示一条信息，
+        给出Animal对象的名称和重量。把Animal用作公共基类，派生两个类：Lion和
+        Aardvark。再编写一个main()函数，创建Lion和Aardvark对象（“Leo”，400磅；
+        “Algernon”，50磅）。为派生类对象调用who()成员，说明who()成员在两个派生类
+        中是继承得来的。
+        \*****************************************************************/
+        import animals;
+
+        int main()
+        {
+            Lion myLion{"Leo", 400};
+            Aardvark myAardvark{"Algernon", 50};
+            myLion.who();
+            myAardvark.who();
+        }
+        ```
+
+    - Animals.cppm
+
+        ```cpp
+        // Animals.appm
+        export module animals;
+
+        import <iostream>;
+        import <string>;
+        import <string_view>;
+
+        export class Animal
+        {
+        public:
+            Animal(std::string_view name, int weight)
+                : m_name{name}, m_weight{weight} {}
+
+            void who() const
+            {
+                std::cout << "My name is " << m_name << " and I weight " 
+                            << m_weight << " lbs." << std::endl;
+            }
+
+        private:
+            std::string m_name;
+            int m_weight;
+        };
+
+        export class Lion : public Animal
+        {
+        public:
+            Lion(std::string_view name, int weight) : Animal{name, weight} {}
+        };
+
+        export class Aardvark : public Animal
+        {
+        public:
+            using Animal::Animal;
+        };
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        My name is Leo and I weight 400 lbs.
+        My name is Algernon and I weight 50 lbs.
+        ```
+
+        ---
+
+2. 第2题
+    - Exer14_02.cpp
+
+        ```cpp
+        // Exer14_02.cpp
+        /*************************第14章_练习_第2题************************\
+        在Animal类中，把who()函数的访问修饰符改为protected，但类的其它内容不变。
+        现在修改派生类，使原来的main()函数仍能工作。
+        \*****************************************************************/
+        import animals;
+
+        int main()
+        {
+            Lion myLion{"Leo", 400};
+            Aardvark myAardvark{"Algernon", 50};
+            myLion.who();
+            myAardvark.who();
+        }
+        ```
+
+    - Animals.cppm
+
+        ```cpp
+        // Animals.cppm
+        export module animals;
+
+        import <iostream>;
+        import <string_view>;
+        import <string>;
+
+        export class Animal
+        {
+        public:
+            Animal(std::string_view name, int weight)
+                : m_name{name}, m_weight{weight} {}
+
+        protected:
+            void who() const
+            {
+                std::cout << "My name is " << m_name << ", and I weight " << m_weight
+                         << " lbs." << std::endl;
+            }
+
+        private:
+            std::string m_name;
+            int m_weight;
+        };
+
+        export class Lion : public Animal
+        {
+        public:
+            Lion(std::string_view name, int weight)
+                : Animal{name, weight} {}
+            void who() const { return Animal::who(); }
+            /*
+            书中此函数未加const，是瑕疵，否则在调用时"const Lion myLion{"Leo", 400};"
+            会编译失败！const 对象只能调用 const 成员函数
+            */
+        };
+
+        export class Aardvark : public Animal
+        {
+        public:
+            using Animal::Animal;
+            using Animal::who; 
+            /*
+            注意此处不能加小括号()，因为using声明的作用是引入一个名字到当前作用域，
+            而不是调用函数。
+            */
+        };
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        My name is Leo, and I weight 400 lbs.
+        My name is Algernon, and I weight 50 lbs. 
+        ```
+
+        ---
+
+3. 第3题
+    - Exer14_03.cpp
+
+        ```cpp
+        // Exer14_03.cpp
+        /*************************第14章_练习_第3题************************\
+        在上一题中，把基类成员who()的访问修饰符改为public，但把who()函数实现为
+        每个派生类的成员，且在输出消息中显示类名。现在修改main()函数，为每个派生
+        类对象调用who()的基类版本和派生类版本。
+        \*****************************************************************/
+        import animals;
+        import <iostream>;
+
+        int main()
+        {
+            Lion myLion{"Leo", 400};
+            Aardvark myAardvark{"Algernon", 50};
+
+            std::cout << "Calling derived versions of who():\n";
+            myLion.who();
+            myAardvark.who();
+
+            std::cout << "\nCalling base versions of who():\n";
+            myLion.Animal::who();
+            myAardvark.Animal::who();
+            // static_cast<Animal&>(myAardvark).who();
+        }
+        ```
+
+    - Animals.cppm
+
+        ```cpp
+        // Animals.cppm
+        export module animals;
+
+        import <iostream>;
+        import <string>;
+        import <string_view>;
+
+        export class Animal
+        {
+        public:
+            Animal(std::string_view name, int weight)
+                : m_name{name}, m_weight{weight} {}
+
+            void who() const
+            {
+                std::cout << "My name is " << m_name << " and I weight " 
+                            << m_weight << " lbs." << std::endl;
+            }
+
+        private:
+            std::string m_name;
+            int m_weight;
+        };
+
+        export class Lion : public Animal
+        {
+        public:
+            Lion(std::string_view name, int weight)
+                : Animal{name, weight} {}
+
+            void who() const
+            {
+                std::cout << "Rrroarrrr... I am a lion. " << std::endl;
+                Animal::who();
+            }
+        };
+
+        export class Aardvark : public Animal
+        {
+        public:
+            using Animal::Animal;
+
+            void who() const
+            {
+                Animal::who();
+                std::cout << "Oh. And I'm an aardvark. " << std::endl;
+            }
+        };
+        ```
+
+        上面程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Calling derived versions of who():
+        Rrroarrrr... I am a lion. 
+        My name is Leo and I weight 400 lbs.
+        My name is Algernon and I weight 50 lbs.
+        Oh. And I'm an aardvark. 
+
+        Calling base versions of who():
+        My name is Leo and I weight 400 lbs.
+        My name is Algernon and I weight 50 lbs.
+        ```
+
+        ---
+
+4. 第4题
+    - Exer14_04.cpp
+
+        ```cpp
+        // Exer14_04.cpp
+        /*************************第14章_练习_第4题************************\
+        定义一个Person类，它包含的成员变量分别用于存储年龄、姓名和性别。从Person
+        类派生一个类Empliyee，在新类中添加一个成员变量，存储个人的编号。再从
+        Employee类派生一个类Executive。每个派生类都应定义一个成员函数who()，
+        以显示相关的信息。仔细思考并实现合适的数据隐藏和访问修饰符。在这个程序中，
+        由于考虑到隐私，不应该公开个人的细节，但对象的who()成员输出的信息除外。
+        每个类可显式决定可以公开的信息（姓名和类型是可以接受的，如“Fred Smith is
+        an Employee”）。另外，不允许个人修改姓名或性别，但允许有生日。编写一个
+        main()函数，生成两个向量：一个向量包含5个Executive对象，另一个向量包含
+        5个普通的Employee对象，然后显示它们的信息。另外，调用从Employee类继承的
+        成员函数，显示Executive对象的信息。
+        \*****************************************************************/
+        import <iostream>;
+        import <vector>;
+        import person;
+
+        int main()
+        {
+            std::vector<Employee> employees{
+                Employee{21, "Randy Marathon", Gender::male, 34567},
+                Employee{32, "Anna Pothecary", Gender::female, 34578},
+                Employee{46, "Peter Out", Gender::male, 34589},
+                Employee{37, "Sheila Rangeit", Gender::female, 34598},
+                Employee{65, "Jack Ittin", Gender::male, 34667}};
+
+            for (const auto& employee : employees)
+                employee.who();
+
+            std::cout << std::endl;
+
+            std::vector<Executive> executives{
+                {44, "Irwin Pootlemeyer", Gender::other, 35567},
+                {32, "Alexa Workwell", Gender::female, 35578},
+                {42, "Steve Stove", Gender::male, 35589},
+                {33, "Sue Neenuf", Gender::female, 35598},
+                {29, "Melanie Clair", Gender::female, 35667},
+            };
+
+            for (const auto& executive : executives)
+            {
+                executive.who();
+                executive.Employee::who();
+            }
+        }
+        ```
+
+    - Person.cppm
+
+        ```cpp
+        // Person.cppm
+        export module person;
+        import <string>;
+        import <string_view>;
+
+        export enum class Gender { male,
+                                female,
+                                other };
+
+        export class Person
+        {
+        public:
+            Person() = default;
+            Person(size_t age, std::string_view name, Gender gender);
+
+            void who() const;
+            void haveBirthday();
+
+        protected:
+            size_t getAge() const { return m_age; }
+            const std::string& getName() const { return m_name; } // 因为是&引用，前面的const是防止修改返回值（成员变量m_name）
+            Gender getGender() const { return m_gender; }
+
+            std::string_view getGenderString() const;
+
+        private:
+            std::string m_name;
+            size_t m_age{};
+            Gender m_gender{Gender::female};
+        };
+
+        export class Employee : public Person
+        {
+        public:
+            Employee() = default;
+            Employee(size_t age, std::string_view name, Gender gender, long num)
+                : Person{age, name, gender}, m_personnelNumber{num} {}
+
+            void who() const;
+
+        protected:
+            long getPersonnelNumber() { return m_personnelNumber; }
+
+        private:
+            long m_personnelNumber{};
+        };
+
+        export class Executive : public Employee
+        {
+        public:
+            using Employee::Employee;
+
+            void who() const;
+        };
+        ```
+
+    - Person.cpp
+
+        ```cpp
+        // Person.cpp
+
+        module person;
+        import <iostream>;
+
+        Person::Person(size_t age, std::string_view name, Gender gender)
+            : m_age{age}, m_name{name}, m_gender{gender} {}
+
+        void Person::who() const
+        {
+            std::cout << "\nThis is " << m_name << " who is " << m_age 
+                        << " years old." << std::endl;
+        }
+
+        void Person::haveBirthday()
+        {
+            ++m_age;
+        }
+
+        std::string_view Person::getGenderString() const
+        {
+            switch (m_gender)
+            {
+            case Gender::male  : return "a male";
+            case Gender::female: return "a female";
+            case Gender::other : return "an other-gendered";
+            }
+
+            return {};
+        }
+
+        void Employee::who() const
+        {
+            std::cout << getName() << " is " << getGenderString() << " employee aged " 
+                        << getAge() << "." << std::endl;
+        }
+
+        void Executive::who() const
+        {
+            std::cout << getName() << " is " << getGenderString() << " executive." << std::endl;
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Randy Marathon is a male employee aged 21.
+        Anna Pothecary is a female employee aged 32.
+        Peter Out is a male employee aged 46.
+        Sheila Rangeit is a female employee aged 37.
+        Jack Ittin is a male employee aged 65.
+                                                                                          
+        Irwin Pootlemeyer is an other-gendered executive.
+        Irwin Pootlemeyer is an other-gendered employee aged 44.
+        Alexa Workwell is a female executive.
+        Alexa Workwell is a female employee aged 32.
+        Steve Stove is a male executive.
+        Steve Stove is a male employee aged 42.
+        Sue Neenuf is a female executive.
+        Sue Neenuf is a female employee aged 33.
+        Melanie Clair is a female executive.
+        Melanie Clair is a female employee aged 29.
+        ```
+
+        ---
