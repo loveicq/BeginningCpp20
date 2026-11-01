@@ -1,4 +1,4 @@
-// Ex15_01.cpp 派生类中继承函数的行为
+﻿// Ex15_01.cpp 派生类中继承函数的行为
 import boxes;
 
 int main()
