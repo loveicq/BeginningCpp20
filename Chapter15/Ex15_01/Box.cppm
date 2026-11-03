@@ -14,7 +14,7 @@ public:
         std::cout << "Box usable volume is " << volume() << std::endl;
     }
 
-    double volume() const { return m_length * m_width * m_height; }
+    virtual double volume() const { return m_length * m_width * m_height; }
 
 protected:
     double m_length, m_width, m_height;
