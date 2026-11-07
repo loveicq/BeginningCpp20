@@ -148,3 +148,153 @@
 - 使用对象调用虚函数总是进行静态解析，只有通过指针或引用调用虚函数才会进行动态解析
 - 如果成员函数的定义在类定义的外部，就不能在函数定义中添加关键字virtual，这会产生错误
 - 案例Ex15_02
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module boxes:box;
+
+        import <iostream>;
+
+        export class Box
+        {
+        public:
+            Box() : Box{1.0, 1.0, 1.0} {}
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {}
+
+            void showVolume() const
+            {
+                std::cout << "Box usable volume is " << volume() << std::endl;
+            }
+
+            virtual double volume() const
+            {
+                return m_length * m_width * m_height;
+            }
+
+        protected:
+            double m_length, m_width, m_height;
+        };
+        ```
+
+    - Carton.cppm
+
+        ```cpp
+        // Carton.cppm
+        export module boxes:carton;
+        import <algorithm>;
+        import <string>;
+        import <string_view>;
+        import :box;
+
+        export class Carton : public Box
+        {
+        public:
+            Carton(double length, double width, double height, std::string_view mat = "carboard")
+                : Box{length, width, height}, m_material{mat} {}
+
+            double volume() const
+            {
+                const double volume{(m_length - 0.5) * (m_width - 0.5) * (m_height - 0.5)};
+                return std::max(volume, 0.0);
+            }
+
+        private:
+            std::string m_material;
+        };
+        ```
+
+    - ToughPack.cppm
+
+        ```cpp
+        // ToughPack.cppm
+        export module boxes:tough_pack;
+        import :box;
+
+        export class ToughPack : public Box
+        {
+        public:
+            using Box::Box;
+            double volume() const { return 0.85 * m_length * m_width * m_height; }
+        };
+        ```
+
+    - Boxes.cppm
+
+        ```cpp
+        // Boxes.cppm
+        export module boxes;
+
+        export import :box;
+        export import :carton;
+        export import :tough_pack;
+        ```
+
+    - Ex15_02.cppm
+
+        ```cpp
+        // Ex15_02.cpp
+        import <iostream>;
+        import boxes;
+
+        int main()
+        {
+            Box box{20.0, 30.0, 40.0};
+            ToughPack hardcase{20.0, 30.0, 40.0};
+            Carton carton{20.0, 30.0, 40.0, "Plastic"};
+
+            box.showVolume();
+            hardcase.showVolume();
+            carton.showVolume();
+
+            Box* base{&box};
+            std::cout << "\nbox volume through base pointer is " << base->volume() << std::endl;
+            base->showVolume();
+
+            base = &hardcase;
+            std::cout << "hardcase volume through base pointer is " << base->volume() << std::endl;
+            base->showVolume();
+
+            base = &carton;
+            std::cout << "carton volume through base pointer is " << base->volume() << std::endl;
+            base->showVolume();
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box usable volume is 24000 
+        Box usable volume is 20400 
+        Box usable volume is 22722.4 
+                                                                                          
+        box volume through base pointer is 24000 
+        Box usable volume is 24000 
+        hardcase volume through base pointer is 20400 
+        Box usable volume is 20400
+        carton volume through base pointer is 22722.4
+        Box usable volume is 22722.4
+        ```
+
+        ---
+
+- **1.使用虚函数时的要求**
+    - 对于虚函数，在任意派生类和基类中的定义都必须有相同的签名，包括const，也包括返回类型
+    - 虚函数不能是模板函数
+    - 不能对静态成员函数使用关键字virtual
+- **2.使用`override`限定符**
+    - volume()与Volume()不同，不是多态；volume() const与volume()也不同，也不是多态
+    - 使用override限定符可以验证基类是否用相同的签名声明了一个虚成员（成员函数）
+    - 应总是在虚函数重写（派生类的虚函数）的声明中添加override限定符
+- **3.使用`final`限定符**
+    - 在函数签名中使用final限定符可以禁止在派生类中重写此函数
+    - final与override在先后顺序不论，但必须在函数签名的最后
+    - 也可以将类指定为final，禁止将此类用作基类继续派生子类
+    - final与override都不是关键字，可以用作变量名、函数名或类名等，但最好不要如此
+- **4.虚函数和类层次结构**
+    任何基类都可以声明虚函数，如下图所示：  
+    ![图15-3 类层次结构中的虚函数](../Images/image15_3.drawio.png)
+- **5.访问修饰符和虚函数**
