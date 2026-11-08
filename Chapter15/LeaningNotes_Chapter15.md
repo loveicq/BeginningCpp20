@@ -298,3 +298,152 @@
     任何基类都可以声明虚函数，如下图所示：  
     ![图15-3 类层次结构中的虚函数](../Images/image15_3.drawio.png)
 - **5.访问修饰符和虚函数**
+    - 派生类中虚函数的访问修饰符可以不同于基类中的访问修饰符。在基类中虚函数声明在private部分，也可以通过多态调用
+    - 案例Ex15_03
+        - Box.cppm
+
+            ```cpp
+            // Box.cppm
+            export module boxes:box;
+
+            import <iostream>;
+
+            export class Box
+            {
+            public:
+                Box() : Box{1.0, 1.0, 1.0} {}
+                Box(double length, double width, double height)
+                    : m_length{length}, m_width{width}, m_height{height} {}
+
+                void showVolume() const
+                {
+                    std::cout << "Box usable volume is " << volume() << std::endl;
+                }
+
+                virtual double volume() const
+                {
+                    return m_length * m_height * m_width;
+                }
+
+            protected:
+                double m_length, m_width, m_height;
+            };
+            ```
+
+        - Carton.cppm
+
+            ```cpp
+            // Carton.cppm
+            export module boxes:carton;
+
+            import <string_view>;
+            import <string>;
+            import <algorithm>;
+            import :box;
+
+            export class Carton : public Box
+            {
+            public:
+                Carton(double length, double width, double height, 
+                        std::string_view mat = "carboard")
+                    : Box{length, width, height}, m_material{mat} {}
+
+                double volume() const override
+                {
+                    const double inner_volume{(m_length - 0.5) * (m_width - 0.5) 
+                                                * (m_height - 0.5)};
+                    return std::max(inner_volume, 0.0);
+                }
+
+            private:
+                std::string m_material;
+            };
+            ```
+
+        - ToughPack.cppm
+
+            ```cpp
+            // ToughPack.cppm
+            export module boxes:tough_pack;
+
+            import <iostream>;
+            import :box;
+
+            export class ToughPack : public Box
+            {
+            public:
+                using Box::Box;
+
+            private:
+                double volume() const override
+                {
+                    return 0.85 * m_length * m_width * m_height;
+                }
+            };
+            ```
+
+        - Boxes.cppm
+
+            ```cpp
+            // Boxes.cppm
+            export module boxes;
+
+            export import :box;
+            export import :carton;
+            export import :tough_pack;
+            ```
+
+        - Ex15_03.cpp
+
+            ```cpp
+            // Ex15_03.cpp
+            import boxes;
+            import <iostream>;
+
+            int main()
+            {
+                Box box{20.0, 30.0, 40.0};
+                ToughPack hardcase{20.0, 30.0, 40.0};
+                Carton carton{20.0, 30.0, 40.0, "Plastic"};
+
+                box.showVolume();
+                hardcase.showVolume();
+                carton.showVolume();
+
+                // std::cout << "\nhardcase volume is " << hardcase.volume() << std::endl;
+
+                Box* base{&box};
+                std::cout << "\nbox volume through base pointer is " << base->volume() 
+                            << std::endl;
+                base->showVolume();
+
+                base = &hardcase;
+                std::cout << "hardcase volume through base pointer is " << base->volume() 
+                            << std::endl;
+                base->showVolume();
+
+                base = &carton;
+                std::cout << "carton volume through base pointer is " << base->volume() 
+                            << std::endl;
+                base->showVolume();
+            }
+            ```
+
+            以上程序运行结果如下：
+
+            ---
+
+            ```cpp
+            Box usable volume is 24000
+            Box usable volume is 20400
+            Box usable volume is 22722.4
+
+            box volume through base pointer is 24000
+            Box usable volume is 24000
+            hardcase volume through base pointer is 20400
+            Box usable volume is 20400
+            carton volume through base pointer is 22722.4
+            Box usable volume is 22722.4
+            ```
+
+            ---
