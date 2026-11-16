@@ -447,3 +447,286 @@
             ```
 
             ---
+
+### 15.1.4 虚函数中的默认实参值
+
+- 如果虚函数在基类的声明中带有默认实参值，则通过基类指针调用该函数时，就总是从函数的基类版本中接收默认实参值。而该函数在派生类版本中的默认实参值不起作用
+- 案例Ex15_04
+    - Boxes.cppm
+
+        ```cpp
+        // Boxes.cppm
+        export module boxes;
+
+        export import :box;
+        export import :carton;
+        export import :tough_pack;
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module boxes:box;
+
+        import <iostream>;
+
+        export class Box
+        {
+        public:
+            Box() : Box{1.0, 1.0, 1.0} {};
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {}
+
+            void showVolume() const
+            {
+                std::cout << "Box usable volume is " << volume() << std::endl;
+            }
+
+            virtual double volume(int i = 5) const
+            {
+                std::cout << "(Box argument i = " << i << ") ";
+                return m_length * m_width * m_height;
+            }
+
+        protected:
+            double m_length, m_width, m_height;
+        };
+        ```
+
+    - Carton.cppm
+
+        ```cpp
+        // Carton.cppm
+        export module boxes:carton;
+
+        import :box;
+        import <string>;
+        import <string_view>;
+        import <iostream>;
+
+        export class Carton : public Box
+        {
+        public:
+            Carton(double length, double width, double height, std::string_view mat = "cardboard")
+                : Box{length, width, height}, m_material{mat} {}
+
+            double volume(int i=50) const override
+            {
+                std::cout << "(Carton argument i = " << i << ") ";
+                const double inner_volume{(m_length - 0.5) * (m_width - 0.5)
+                             * (m_height - 0.5)};
+                return inner_volume > 0.0 ? inner_volume : 0.0;
+            }
+
+        private:
+            std::string m_material;
+        };
+        ```
+
+    - ToughPack.cppm
+
+        ```cpp
+        // ToughPack.cppm
+        export module boxes:tough_pack;
+
+        import :box;
+        import <iostream>;
+
+        export class ToughPack : public Box
+        {
+        public:
+            using Box::Box;
+
+            double volume(int i = 500) const override
+            {
+                std::cout << "(ToughPack argument i = " << i << ") ";
+                return 0.85 * m_length * m_width * m_height;
+            }
+        };
+        ```
+
+    - Ex15_04.cppm
+
+        ```cpp
+        // Ex15_04.cppm
+        import boxes;
+        import <iostream>;
+
+        int main()
+        {
+            Box box{20.0, 30.0, 40.0};
+            Carton carton{20.0, 30.0, 40.0, "Plastic"};
+            ToughPack hardcase{20.0, 30.0, 40.0};
+
+            box.showVolume();
+            carton.showVolume();
+            hardcase.showVolume();
+
+            std::cout << "\nhardcase volume is " << hardcase.volume() << std::endl;
+
+            Box* base{&box};
+            std::cout << "\nbox volume through base pointer is " << base->volume() << std::endl;
+            base->showVolume();
+
+            base = &carton;
+            std::cout << "carton volume through base pointer is " << base->volume() << std::endl;
+            base->showVolume();
+
+            base = &hardcase;
+            std::cout << "hardcase volume through base pointer is " << base->volume() << std::endl;
+            base->showVolume();
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box usable volume is (Box argument i = 5) 24000 
+        Box usable volume is (Carton argument i = 5) 22722.4 
+        Box usable volume is (ToughPack argument i = 5) 20400 
+                                                                         
+        hardcase volume is (ToughPack argument i = 500) 20400
+                                                                          
+        box volume through base pointer is (Box argument i = 5) 24000 
+        Box usable volume is (Box argument i = 5) 24000 
+        carton volume through base pointer is (Carton argument i = 5) 22722.4 
+        Box usable volume is (Carton argument i = 5) 22722.4 
+        hardcase volume through base pointer is (ToughPack argument i = 5) 20400 
+        Box usable volume is (ToughPack argument i = 5) 20400  
+        ```
+
+        ---
+
+    - 使用派生类对象直接调用成员函数是静态解析的，如上例的`hardcase.volume()`就是静态解析（i = 500）
+
+### 15.1.5通过引用调用虚函数
+
+- 在函数体中，可以使用引用参数调用基类的虚函数，获得多态性
+- 案例Ex15_05
+    - Boxes.cppm
+
+        ```cpp
+        // Boxes.cppm
+        export module boxes;
+
+        export import :box; // 一定不能忘记冒号！！！
+        export import :carton;
+        export import :tough_pack;
+        ```
+
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module boxes:box;
+
+        import <iostream>;
+
+        export class Box
+        {
+        public:
+            Box() : Box{1.0, 1.0, 1.0} {}
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {}
+
+            void showVolume() const
+            {
+                std::cout << "Box usable volume is " << volume() << std::endl;
+            }
+
+            virtual double volume() const
+            {
+                return m_length * m_width * m_height;
+            }
+
+        protected:
+            double m_length, m_width, m_height;
+        };
+        ```
+
+    - Carton.cppm
+
+        ```cpp
+        // Carton.cppm
+        export module boxes:carton;
+
+        import :box;
+        import <algorithm>;
+        import <string>;
+        import <string_view>;
+
+        export class Carton : public Box
+        {
+        public:
+            Carton(double length, double width, double height, std::string_view mat = "cardboard")
+                : Box{length, width, height}, m_material{mat} {}
+
+            double volume() const override
+            {
+                const double volume{(m_length - 0.5) * (m_width - 0.5) * (m_height - 0.5)};
+                return std::max(volume, 0.0);
+            }
+
+        private:
+            std::string m_material;
+        };
+        ```
+
+    - ToughPack.cppm
+
+        ```cpp
+        // ToughPack.cppm
+        export module boxes:tough_pack;
+
+        import :box;
+
+        export class ToughPack : public Box
+        {
+        public:
+            using Box::Box;
+
+            double volume() const override
+            {
+                return 0.85 * m_length * m_width * m_height;
+            }
+        };
+        ```
+
+    - Ex15_05.cpp
+
+        ```cpp
+        // Ex15_05.cpp
+        import <iostream>;
+        import boxes;
+
+        void showVolume(const Box& box) // 如果去掉引用&，则输出结果均为24000
+        {
+            std::cout << "Box usable volume is " << box.volume() << std::endl;
+        }
+
+        int main()
+        {
+            Box box{20.0, 30.0, 40.0};
+            ToughPack hardcase{20.0, 30.0, 40.0};
+            Carton carton{20.0, 30.0, 40.0, "Plastic"};
+
+            showVolume(box);
+            showVolume(hardcase);
+            showVolume(carton);
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box usable volume is 24000 
+        Box usable volume is 20400
+        Box usable volume is 22722.4
+        ```
+
+        ---
