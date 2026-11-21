@@ -730,3 +730,318 @@
         ```
 
         ---
+
+### 15.1.6 多态集合
+
+- 当操作多态或异构对象集合时，多态性就特别值得关注。集合的例子包括C风格数组、std::array<>和std::vector<>模板等
+- 案例Ex15_06
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module boxes:box;
+
+        import <iostream>;
+
+        export class Box
+        {
+        public:
+            Box() : Box{1.0, 1.0, 1.0} {}
+            Box(double length, double width, double height)
+                : m_length{length}, m_width{width}, m_height{height} {}
+
+            void showVolume() const
+            {
+                std::cout << "Box usable volume is " << volume() << std::endl;
+            }
+
+            virtual double volume() const
+            {
+                return m_length * m_height * m_width;
+            }
+
+        protected:
+            double m_length, m_width, m_height;
+        };
+        ```
+
+    - Carton.cppm
+
+        ```cpp
+        // Carton.cppm
+        export module boxes:carton;
+
+        import :box;
+        import <string>;
+        import <string_view>;
+        import <algorithm>;
+
+        export class Carton : public Box
+        {
+        public:
+            Carton(double length, double width, double height, std::string_view mat = "cardboard")
+                : Box{length, width, height}, m_material{mat} {}
+
+            double volume() const override
+            {
+                const double volume{(m_length - 0.5) * (m_width - 0.5) * (m_height - 0.5)};
+                return std::max(volume, 0.0);
+            }
+
+        private:
+            std::string m_material;
+        };
+        ```
+
+    - ToughPack.cppm
+
+        ```cpp
+        // ToughPack.cppm
+        export module boxes:tough_pack;
+
+        import :box;
+
+        export class ToughPack : public Box
+        {
+        public:
+            using Box::Box;
+
+        protected:
+            double volume() const override
+            {
+                return 0.85 * m_length * m_width * m_height;
+            }
+        };
+        ```
+
+    - Boxes.cppm
+
+        ```cpp
+        // Boxes.cppm
+        export module boxes;
+
+        export import :box;
+        export import :carton;
+        export import :tough_pack;
+        ```
+
+    - Ex15_06.cpp
+
+        ```cpp
+        // Ex15_06.cpp
+        import <iostream>;
+        import boxes;
+        import <memory>;
+        import <vector>;
+
+        int main()
+        {
+            std::vector<Box> boxes;
+            boxes.push_back(Box{20.0, 30.0, 40.0});
+            boxes.push_back(Carton{20.0, 30.0, 40.0, "plastic"});//对象切片
+            boxes.push_back(ToughPack{20.0, 30.0, 40.0});//对象切片
+
+            for (const auto& box : boxes)
+                box.showVolume();//第一部分：非指针或引用，不是多态
+
+            std::cout << std::endl;
+
+            std::vector<std::unique_ptr<Box>> polymorphicBoxes;
+            polymorphicBoxes.push_back(std::make_unique<Box>(20.0, 30.0, 40.0));
+            polymorphicBoxes.push_back(std::make_unique<Carton>(20.0, 30.0, 40.0));
+            polymorphicBoxes.push_back(std::make_unique<ToughPack>(20.0, 30.0, 40.0));
+
+            for (const auto& box : polymorphicBoxes)
+                box->showVolume();//第二部分：指针调用，是多态
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box usable volume is 24000 
+        Box usable volume is 24000 
+        Box usable volume is 24000 
+                                
+        Box usable volume is 24000 
+        Box usable volume is 22722.4 
+        Box usable volume is 20400   
+        ```
+
+        ---
+
+- 如果将派生类对象按值添加到基类对象的vector<>中，就会发生对象切片，如上面案例的第一部分
+- 要获得内存安全的多态对象集合，可以在标准容器中存储标准智能指针，如上面案例的第二部分
+
+### 15.1.7 通过指针释放对象
+
+- 案例Ex15_07
+    - Box.cppm
+
+        ```cpp
+        // Box.cppm
+        export module boxes:box;
+
+        import <iostream>;
+
+        export class Box
+        {
+        public:
+            Box() : Box{1.0, 1.0, 1.0} {}
+            Box(double l, double w, double h) : m_length{l}, m_width{w}, m_height{h} {}
+
+            ~Box()
+            {
+                std::cout << "Box destructor called" << std::endl;
+            }
+
+            void showVolume() const
+            {
+                std::cout << "Box usable volume is " << volume() << std::endl;
+            }
+
+            virtual double volume() const
+            {
+                return m_length * m_width * m_height;
+            }
+
+        protected:
+            double m_length, m_width, m_height;
+        };
+        ```
+
+    - Carton.cppm
+
+        ```cpp
+        // Carton.cppm
+        export module boxes:carton;
+
+        import <iostream>;
+        import <string>;
+        import <string_view>;
+        import <algorithm>;
+        import :box;
+
+        export class Carton : public Box
+        {
+        public:
+            Carton(double length, double width, double height, std::string_view mat = "cardboard")
+                : Box{length, width, height}, m_material{mat} {}
+
+            ~Carton()
+            {
+                std::cout << "Carton destructor called" << std::endl;
+            }
+
+            double volume() const override
+            {
+                const double volume{(m_length - 0.5) * (m_width - 0.5) * (m_height - 0.5)};
+                return std::max(volume, 0.0);
+            }
+
+        private:
+            std::string m_material;
+        };
+        ```
+
+    - ToughPack.cppm
+
+        ```cpp
+        // ToughPack.cppm
+        export module boxes:tough_pack;
+
+        import :box;
+        import <iostream>;
+
+        export class ToughPack : public Box
+        {
+        public:
+            using Box::Box;
+
+            ~ToughPack()
+            {
+                std::cout << "ToughPack destructor called" << std::endl;
+            }
+
+            double volume() const override
+            {
+                return 0.85 * m_length * m_width * m_height;
+            }
+        };
+        ```
+
+    - Boxes.cppm
+
+        ```cpp
+        //Boxes.cppm
+        export module boxes;
+
+        export import :box;
+        export import :carton;
+        export import :tough_pack;
+        ```
+
+    - Ex15_07.cpp
+
+        ```cpp
+        // Ex15_07.cpp
+        import boxes;
+        import <iostream>;
+        import <memory>;
+        import <vector>;
+
+        int main()
+        {
+            std::vector<Box> boxes;
+            boxes.push_back(Box{20.0, 30.0, 40.0});
+            boxes.push_back(Carton{20.0, 30.0, 40.0});
+            boxes.push_back(ToughPack{20.0, 30.0, 40.0});
+
+            for (const auto& box : boxes)
+                box.showVolume();
+
+            std::cout << std::endl;
+
+            std::vector<std::unique_ptr<Box>> polymorphicBoxes;
+            polymorphicBoxes.push_back(std::make_unique<Box>(20.0, 30.0, 40.0));
+            polymorphicBoxes.push_back(std::make_unique<Carton>(20.0, 30.0, 40.0, "plastic"));
+            polymorphicBoxes.push_back(std::make_unique<ToughPack>(20.0, 30.0, 40.0));
+
+            for (const auto& box : polymorphicBoxes)
+                box->showVolume();
+        }
+        ```
+
+        以上程序运行结果如下：
+
+        ---
+
+        ```cpp
+        Box destructor called 
+        Box destructor called 
+        Carton destructor called  
+        Box destructor called 
+        Box destructor called 
+        Box destructor called 
+        ToughPack destructor called 
+        Box destructor called 
+        Box usable volume is 24000 
+        Box usable volume is 24000 
+        Box usable volume is 24000 
+
+        Box usable volume is 24000
+        Box usable volume is 22722.4
+        Box usable volume is 20400
+        Box destructor called
+        Box destructor called
+        Box destructor called
+        Box destructor called
+        Box destructor called
+        Box destructor called
+        ```
+
+        ---
+
+- 派生类的析构函数是静态解析而不是动态解析的，如上例的最后面六个对象都调用了基类析构函数
